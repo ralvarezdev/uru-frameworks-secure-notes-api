@@ -103,6 +103,25 @@ type UserAccessToken struct {
 	RevokedAt          *time.Time       `json:"revoked_at,omitempty"`
 }
 
+// UserTOTP is the PostgreSQL model for the user TOTP
+type UserTOTP struct {
+	gorm.Model
+	UserID     uint       `json:"user_id"`
+	User       User       `gorm:"foreignKey:UserID"`
+	Secret     string     `json:"secret"`
+	VerifiedAt *time.Time `json:"verified_at,omitempty"`
+	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
+}
+
+// UserTOTPRecoveryCode is the PostgreSQL model for the user TOTP recovery code
+type UserTOTPRecoveryCode struct {
+	gorm.Model
+	UserTOTPID uint       `json:"user_totp_id"`
+	UserTOTP   UserTOTP   `gorm:"foreignKey:UserTOTPID"`
+	Code       string     `json:"code"`
+	UsedAt     *time.Time `json:"used_at,omitempty"`
+}
+
 // NoteTag is the PostgreSQL model for the note tag
 type NoteTag struct {
 	gorm.Model
