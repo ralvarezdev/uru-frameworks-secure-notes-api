@@ -80,6 +80,18 @@ type UserPhoneNumberVerification struct {
 	RevokedAt         *time.Time      `json:"revoked_at,omitempty"`
 }
 
+// UserFailedLogInAttempt is the PostgreSQL model for the user failed login attempt
+type UserFailedLogInAttempt struct {
+	gorm.Model
+	UserID      uint       `json:"user_id"`
+	User        User       `gorm:"foreignKey:UserID"`
+	IPv4Address string     `json:"ipv4_address"`
+	BadPassword *bool      `json:"bad_password,omitempty"`
+	Bad2FACode  *bool      `json:"bad_2fa_code,omitempty"`
+	AttemptedAt time.Time  `json:"attempted_at"`
+	RevokedAt   *time.Time `json:"revoked_at,omitempty"`
+}
+
 // UserRefreshToken is the PostgreSQL model for the user refresh token
 type UserRefreshToken struct {
 	gorm.Model
