@@ -1,4 +1,4 @@
-package model
+package postgresql
 
 import (
 	"gorm.io/gorm"
@@ -40,6 +40,7 @@ type UserResetPassword struct {
 	User       User       `gorm:"foreignKey:UserID"`
 	ResetToken string     `json:"reset_token"`
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
+	ExpiresAt  time.Time  `json:"expires_at"`
 }
 
 // UserEmail is the PostgreSQL model for the user email
@@ -57,6 +58,7 @@ type UserEmailVerification struct {
 	UserEmailID       uint       `json:"user_email_id"`
 	UserEmail         UserEmail  `gorm:"foreignKey:UserEmailID"`
 	VerificationToken string     `json:"verification_token"`
+	ExpiresAt         time.Time  `json:"expires_at"`
 	VerifiedAt        *time.Time `json:"verified_at,omitempty"`
 	RevokedAt         *time.Time `json:"revoked_at,omitempty"`
 }
@@ -76,6 +78,7 @@ type UserPhoneNumberVerification struct {
 	UserPhoneNumberID uint            `json:"user_phone_number_id"`
 	UserPhoneNumber   UserPhoneNumber `gorm:"foreignKey:UserPhoneNumberID"`
 	VerificationCode  string          `json:"verification_code"`
+	ExpiresAt         time.Time       `json:"expires_at"`
 	VerifiedAt        *time.Time      `json:"verified_at,omitempty"`
 	RevokedAt         *time.Time      `json:"revoked_at,omitempty"`
 }
@@ -83,13 +86,23 @@ type UserPhoneNumberVerification struct {
 // UserFailedLogInAttempt is the PostgreSQL model for the user failed login attempt
 type UserFailedLogInAttempt struct {
 	gorm.Model
-	UserID      uint       `json:"user_id"`
-	User        User       `gorm:"foreignKey:UserID"`
-	IPv4Address string     `json:"ipv4_address"`
-	BadPassword *bool      `json:"bad_password,omitempty"`
-	Bad2FACode  *bool      `json:"bad_2fa_code,omitempty"`
-	AttemptedAt time.Time  `json:"attempted_at"`
-	RevokedAt   *time.Time `json:"revoked_at,omitempty"`
+	UserID          uint           `json:"user_id"`
+	User            User           `gorm:"foreignKey:UserID"`
+	UserTokenSeedID *uint          `json:"user_token_seed_id,omitempty"`
+	UserTokenSeed   *UserTokenSeed `gorm:"foreignKey:UserTokenSeedID"`
+	IPv4Address     string         `json:"ipv4_address"`
+	BadPassword     *bool          `json:"bad_password,omitempty"`
+	Bad2FACode      *bool          `json:"bad_2fa_code,omitempty"`
+	AttemptedAt     time.Time      `json:"attempted_at"`
+}
+
+// UserTokenSeed is the PostgreSQL model for the user token seed
+type UserTokenSeed struct {
+	gorm.Model
+	UserID    uint       `json:"user_id"`
+	User      User       `gorm:"foreignKey:UserID"`
+	TokenSeed string     `json:"token_seed"`
+	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
 
 // UserRefreshToken is the PostgreSQL model for the user refresh token
@@ -101,6 +114,8 @@ type UserRefreshToken struct {
 	IPv4Address          string            `json:"ipv4_address"`
 	ParentRefreshTokenID *uint             `json:"parent_refresh_token_id,omitempty"`
 	ParentRefreshToken   *UserRefreshToken `gorm:"foreignKey:ParentRefreshTokenID"`
+	UserTokenSeedID      *uint             `json:"user_token_seed_id,omitempty"`
+	UserTokenSeed        *UserTokenSeed    `gorm:"foreignKey:UserTokenSeedID"`
 	RevokedAt            *time.Time        `json:"revoked_at,omitempty"`
 }
 
@@ -142,11 +157,12 @@ type NoteTag struct {
 	Name   string `json:"name" gorm:"uniqueIndex:idx_user_note_tag"`
 }
 
-// Note is the PostgreSQL model for the note
+// Note is the PostgreSQL model for the user note
 type Note struct {
 	gorm.Model
 	UserID   uint      `json:"user_id"`
 	User     User      `gorm:"foreignKey:UserID"`
+	IsPinned *bool     `json:"is_pinned,omitempty"`
 	Title    string    `json:"title"`
 	Color    *string   `json:"color,omitempty"`
 	NoteTags []NoteTag `gorm:"many2many:notes_tags;"`

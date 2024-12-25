@@ -39,28 +39,45 @@ type BasicWasDeletedResponse struct {
 
 // NoteTag is the response DTO for the note tag
 type NoteTag struct {
-	NoteTagID string     `json:"note_tag_id"`
 	Name      string     `json:"name"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
+// NoteTagWithID is the response DTO for the note tag with ID
+type NoteTagWithID struct {
+	NoteTagID string `json:"note_tag_id"`
+	NoteTag
+}
+
 // Note is the response DTO for the note
 type Note struct {
-	NoteID    string     `json:"note_id"`
 	Title     string     `json:"title"`
 	NoteTags  []string   `json:"note_tags"`
+	IsPinned  *bool      `json:"is_pinned,omitempty"`
 	Color     *string    `json:"color,omitempty"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
+// NoteWithID is the response DTO for the note with ID
+type NoteWithID struct {
+	NoteID string `json:"note_id"`
+	Note
+}
+
 // NoteVersion is the response DTO for the note version
 type NoteVersion struct {
-	NoteVersionID    string     `json:"note_version_id"`
+	NoteID           uint       `json:"note_id"`
 	EncryptedContent string     `json:"encrypted_content"`
 	CreatedAt        time.Time  `json:"created_at"`
 	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+}
+
+// NoteVersionWithID is the response DTO for the note version with ID
+type NoteVersionWithID struct {
+	NoteVersionID string `json:"note_version_id"`
+	NoteVersion
 }
 
 // SignUpRequest is the request DTO to sign up
@@ -88,13 +105,25 @@ type GetMyProfileResponse struct {
 
 // LogInRequest is the request DTO to log in
 type LogInRequest struct {
-	Username string  `json:"username"`
-	Password string  `json:"password"`
-	TOTPCode *string `json:"totp_code,omitempty"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // LogInResponse is the response DTO to log in
 type LogInResponse struct {
+	Message      string  `json:"message"`
+	TokenSeed    *string `json:"token_seed,omitempty"`
+	Is2FAEnabled bool    `json:"is_2fa_enabled"`
+}
+
+// GenerateRefreshTokenRequest is the request DTO to generate refresh token
+type GenerateRefreshTokenRequest struct {
+	TokenSeed string  `json:"token_seed"`
+	TOTPCode  *string `json:"totp_code,omitempty"`
+}
+
+// GenerateRefreshTokenResponse is the response DTO to generate refresh token
+type GenerateRefreshTokenResponse struct {
 	Message      string  `json:"message"`
 	RefreshToken *string `json:"refresh_token,omitempty"`
 	AccessToken  *string `json:"access_token,omitempty"`
@@ -212,13 +241,13 @@ type GetNoteTagRequest struct {
 // GetNoteTagResponse is the response DTO to get a note tag
 type GetNoteTagResponse struct {
 	Message string  `json:"message"`
-	Name    *string `json:"name,omitempty"`
+	NoteTag NoteTag `json:"note_tag"`
 }
 
 // ListNoteTagsResponse is the response DTO to list note tags
 type ListNoteTagsResponse struct {
-	Message  string    `json:"message"`
-	NoteTags []NoteTag `json:"note_tags"`
+	Message  string          `json:"message"`
+	NoteTags []NoteTagWithID `json:"note_tags"`
 }
 
 // CreateNoteRequest is the request DTO to create a note
@@ -231,6 +260,7 @@ type CreateNoteRequest struct {
 // UpdateNoteRequest is the request DTO to update a note
 type UpdateNoteRequest struct {
 	NoteID     uint     `json:"note_id"`
+	IsPinned   *bool    `json:"is_pinned,omitempty"`
 	Title      *string  `json:"title,omitempty"`
 	NoteTagsID []string `json:"note_tags_id,omitempty"`
 	Color      *string  `json:"color,omitempty"`
@@ -248,16 +278,14 @@ type GetNoteRequest struct {
 
 // GetNoteResponse is the response DTO to get a note
 type GetNoteResponse struct {
-	Message    string   `json:"message"`
-	Title      string   `json:"title"`
-	NoteTagsID []string `json:"note_tags_id"`
-	Color      *string  `json:"color,omitempty"`
+	Message string `json:"message"`
+	Note    Note   `json:"note"`
 }
 
 // ListNotesResponse is the response DTO to list notes
 type ListNotesResponse struct {
-	Message string `json:"message"`
-	Notes   []Note `json:"notes"`
+	Message string       `json:"message"`
+	Notes   []NoteWithID `json:"notes"`
 }
 
 // CreateNoteVersionRequest is the request DTO to create a note version
@@ -284,8 +312,8 @@ type GetNoteVersionRequest struct {
 
 // GetNoteVersionResponse is the response DTO to get a note version
 type GetNoteVersionResponse struct {
-	Message          string `json:"message"`
-	EncryptedContent string `json:"encrypted_content"`
+	Message     string      `json:"message"`
+	NoteVersion NoteVersion `json:"note_version"`
 }
 
 // ListNoteVersionsResponse is the response DTO to list note versions
@@ -294,8 +322,8 @@ type ListNoteVersionsResponse struct {
 	NoteVersionsID []string `json:"note_versions_id"`
 }
 
-// ListLast5FullNoteVersionsResponse is the response DTO to list last 5 note versions with their content
-type ListLast5FullNoteVersionsResponse struct {
-	Message      string        `json:"message"`
-	NoteVersions []NoteVersion `json:"note_versions"`
+// ListLastNoteVersionsWithContentResponse is the response DTO to list last note versions with their content
+type ListLastNoteVersionsWithContentResponse struct {
+	Message      string              `json:"message"`
+	NoteVersions []NoteVersionWithID `json:"note_versions"`
 }
