@@ -102,6 +102,7 @@ type UserTokenSeed struct {
 	UserID    uint       `json:"user_id"`
 	User      User       `gorm:"foreignKey:UserID"`
 	TokenSeed string     `json:"token_seed"`
+	ExpiresAt time.Time  `json:"expires_at"`
 	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
 
@@ -116,6 +117,7 @@ type UserRefreshToken struct {
 	ParentRefreshToken   *UserRefreshToken `gorm:"foreignKey:ParentRefreshTokenID"`
 	UserTokenSeedID      *uint             `json:"user_token_seed_id,omitempty"`
 	UserTokenSeed        *UserTokenSeed    `gorm:"foreignKey:UserTokenSeedID"`
+	ExpiresAt            time.Time         `json:"expires_at"`
 	RevokedAt            *time.Time        `json:"revoked_at,omitempty"`
 }
 
@@ -127,6 +129,7 @@ type UserAccessToken struct {
 	UserRefreshTokenID uint             `json:"user_refresh_token_id"`
 	UserRefreshToken   UserRefreshToken `gorm:"foreignKey:UserRefreshTokenID"`
 	IssuedAt           time.Time        `json:"issued_at"`
+	ExpiresAt          time.Time        `json:"expires_at"`
 	RevokedAt          *time.Time       `json:"revoked_at,omitempty"`
 }
 
@@ -136,6 +139,7 @@ type UserTOTP struct {
 	UserID     uint       `json:"user_id"`
 	User       User       `gorm:"foreignKey:UserID"`
 	Secret     string     `json:"secret"`
+	ExpiresAt  time.Time  `json:"expires_at"`
 	VerifiedAt *time.Time `json:"verified_at,omitempty"`
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 }
@@ -146,7 +150,7 @@ type UserTOTPRecoveryCode struct {
 	UserTOTPID uint       `json:"user_totp_id"`
 	UserTOTP   UserTOTP   `gorm:"foreignKey:UserTOTPID"`
 	Code       string     `json:"code"`
-	UsedAt     *time.Time `json:"used_at,omitempty"`
+	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 }
 
 // NoteTag is the PostgreSQL model for the note tag

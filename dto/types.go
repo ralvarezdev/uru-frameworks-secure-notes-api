@@ -80,6 +80,20 @@ type NoteVersionWithID struct {
 	NoteVersion
 }
 
+// UserRefreshToken is the response DTO for the user refresh token
+type UserRefreshToken struct {
+	IssuedAt    time.Time  `json:"issued_at"`
+	ExpiresAt   time.Time  `json:"expires_at"`
+	RevokedAt   *time.Time `json:"revoked_at,omitempty"`
+	IPv4Address string     `json:"ipv4_address"`
+}
+
+// UserRefreshTokenWithID is the response DTO for the user refresh token with ID
+type UserRefreshTokenWithID struct {
+	UserRefreshTokenID string `json:"user_refresh_token_id"`
+	UserRefreshToken
+}
+
 // SignUpRequest is the request DTO to sign up
 type SignUpRequest struct {
 	FirstName string `json:"first_name"`
@@ -326,4 +340,31 @@ type ListNoteVersionsResponse struct {
 type ListLastNoteVersionsWithContentResponse struct {
 	Message      string              `json:"message"`
 	NoteVersions []NoteVersionWithID `json:"note_versions"`
+}
+
+// DeleteUserRequest is the request DTO to delete a user
+type DeleteUserRequest struct {
+	Password string `json:"password"`
+}
+
+// GetUserRefreshTokenRequest is the request DTO to get a user refresh token that has not been revoked or expired
+type GetUserRefreshTokenRequest struct {
+	UserRefreshTokenID string `json:"user_refresh_token_id"`
+}
+
+// GetUserRefreshTokenResponse is the response DTO to get a user refresh token that has not been revoked or expired
+type GetUserRefreshTokenResponse struct {
+	Message          string            `json:"message"`
+	UserRefreshToken *UserRefreshToken `json:"user_refresh_token,omitempty"`
+}
+
+// ListUserRefreshTokensResponse is the response DTO to list user refresh tokens that have not been revoked or expired
+type ListUserRefreshTokensResponse struct {
+	Message           string                   `json:"message"`
+	UserRefreshTokens []UserRefreshTokenWithID `json:"user_refresh_tokens"`
+}
+
+// RevokeUserRefreshTokenRequest is the request DTO to revoke a user refresh token
+type RevokeUserRefreshTokenRequest struct {
+	UserRefreshTokenID string `json:"user_refresh_token_id"`
 }
