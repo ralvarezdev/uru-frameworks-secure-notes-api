@@ -94,6 +94,31 @@ type UserRefreshTokenWithID struct {
 	UserRefreshToken
 }
 
+// LoadedNote is the request DTO for the sync note
+type LoadedNote struct {
+	NoteID               uint   `json:"note_id"`
+	LoadedNoteVersionsID []uint `json:"loaded_note_versions_id"`
+}
+
+// SyncNoteVersion is the response DTO for the sync note version
+type SyncNoteVersion struct {
+	NoteVersionID    uint       `json:"note_version_id"`
+	EncryptedContent string     `json:"encrypted_content"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+}
+
+// SyncNote is the response DTO for the sync note
+type SyncNote struct {
+	Title            *string           `json:"title,omitempty"`
+	NoteTags         []string          `json:"note_tags"`
+	IsPinned         *bool             `json:"is_pinned,omitempty"`
+	Color            *string           `json:"color,omitempty"`
+	CreatedAt        *time.Time        `json:"created_at,omitempty"`
+	UpdatedAt        *time.Time        `json:"updated_at,omitempty"`
+	SyncNoteVersions []SyncNoteVersion `json:"sync_note_versions"`
+}
+
 // SignUpRequest is the request DTO to sign up
 type SignUpRequest struct {
 	FirstName string `json:"first_name"`
@@ -367,4 +392,27 @@ type ListUserRefreshTokensResponse struct {
 // RevokeUserRefreshTokenRequest is the request DTO to revoke a user refresh token
 type RevokeUserRefreshTokenRequest struct {
 	UserRefreshTokenID string `json:"user_refresh_token_id"`
+}
+
+// SyncNotesRequest is the request DTO to sync notes
+type SyncNotesRequest struct {
+	LoadedNotes []LoadedNote `json:"loaded_notes"`
+}
+
+// SyncNotesResponse is the response DTO to sync notes
+type SyncNotesResponse struct {
+	Message   string     `json:"message"`
+	SyncNotes []SyncNote `json:"sync_notes"`
+}
+
+// SyncNoteVersionsRequest is the request DTO to sync note versions
+type SyncNoteVersionsRequest struct {
+	NoteID               uint   `json:"note_id"`
+	LoadedNoteVersionsID []uint `json:"loaded_note_versions_id"`
+}
+
+// SyncNoteVersionsResponse is the response DTO to sync note versions
+type SyncNoteVersionsResponse struct {
+	Message          string            `json:"message"`
+	SyncNoteVersions []SyncNoteVersion `json:"sync_note_versions"`
 }
