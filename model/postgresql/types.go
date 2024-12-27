@@ -20,8 +20,8 @@ type UserUsername struct {
 	gorm.Model
 	UserID    uint       `json:"user_id"`
 	User      User       `gorm:"foreignKey:UserID"`
-	Username  string     `json:"username" gorm:"index:idx_user_username,unique,where:changed_at IS NULL"`
-	ChangedAt *time.Time `json:"changed_at,omitempty"`
+	Username  string     `json:"username" gorm:"uniqueIndex:idx_user_username,where:revoked_at IS NULL"`
+	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
 
 // UserHashedPassword is the PostgreSQL model for the user hashed password
@@ -30,7 +30,7 @@ type UserHashedPassword struct {
 	UserID         uint       `json:"user_id"`
 	User           User       `gorm:"foreignKey:UserID"`
 	HashedPassword string     `json:"hashed_password"`
-	ChangedAt      *time.Time `json:"changed_at,omitempty"`
+	RevokedAt      *time.Time `json:"revoked_at,omitempty"`
 }
 
 // UserResetPassword is the PostgreSQL model for the user password reset
@@ -38,7 +38,7 @@ type UserResetPassword struct {
 	gorm.Model
 	UserID     uint       `json:"user_id"`
 	User       User       `gorm:"foreignKey:UserID"`
-	ResetToken string     `json:"reset_token"`
+	ResetToken string     `json:"reset_token" gorm:"uniqueIndex"`
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 	ExpiresAt  time.Time  `json:"expires_at"`
 }
@@ -46,10 +46,12 @@ type UserResetPassword struct {
 // UserEmail is the PostgreSQL model for the user email
 type UserEmail struct {
 	gorm.Model
-	UserID    uint       `json:"user_id"`
-	User      User       `gorm:"foreignKey:UserID"`
-	Email     string     `json:"email"`
-	RevokedAt *time.Time `json:"revoked_at,omitempty"`
+	UserID         uint                   `json:"user_id" gorm:"uniqueIndex:idx_user_email,where:revoked_at IS NULL"`
+	User           User                   `gorm:"foreignKey:UserID"`
+	VerificationID *uint                  `json:"verification_id,omitempty" gorm:"uniqueIndex:idx_verification_id,where:verification_id IS NOT NULL"`
+	Verification   *UserEmailVerification `gorm:"foreignKey:VerificationID"`
+	Email          string                 `json:"email" gorm:"uniqueIndex:idx_user_email,where:revoked_at IS NULL"`
+	RevokedAt      *time.Time             `json:"revoked_at,omitempty"`
 }
 
 // UserEmailVerification is the PostgreSQL model for the user email verification
@@ -66,10 +68,12 @@ type UserEmailVerification struct {
 // UserPhoneNumber is the PostgreSQL model for the user phone number
 type UserPhoneNumber struct {
 	gorm.Model
-	UserID      uint       `json:"user_id"`
-	User        User       `gorm:"foreignKey:UserID"`
-	PhoneNumber string     `json:"phone_number"`
-	RevokedAt   *time.Time `json:"revoked_at,omitempty"`
+	UserID         uint                         `json:"user_id" gorm:"uniqueIndex:idx_user_phone_number,where:revoked_at IS NULL"`
+	User           User                         `gorm:"foreignKey:UserID"`
+	VerificationID *uint                        `json:"verification_id,omitempty" gorm:"uniqueIndex:idx_verification_id,where:verification_id IS NOT NULL"`
+	Verification   *UserPhoneNumberVerification `gorm:"foreignKey:VerificationID"`
+	PhoneNumber    string                       `json:"phone_number" gorm:"uniqueIndex:idx_user_phone_number,where:revoked_at IS NULL"`
+	RevokedAt      *time.Time                   `json:"revoked_at,omitempty"`
 }
 
 // UserPhoneNumberVerification is the PostgreSQL model for the user phone number verification
@@ -101,7 +105,7 @@ type UserTokenSeed struct {
 	gorm.Model
 	UserID    uint       `json:"user_id"`
 	User      User       `gorm:"foreignKey:UserID"`
-	TokenSeed string     `json:"token_seed"`
+	TokenSeed string     `json:"token_seed" gorm:"uniqueIndex"`
 	ExpiresAt time.Time  `json:"expires_at"`
 	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
@@ -111,12 +115,11 @@ type UserRefreshToken struct {
 	gorm.Model
 	UserID               uint              `json:"user_id"`
 	User                 User              `gorm:"foreignKey:UserID"`
-	IssuedAt             time.Time         `json:"issued_at"`
-	IPv4Address          string            `json:"ipv4_address"`
-	ParentRefreshTokenID *uint             `json:"parent_refresh_token_id,omitempty"`
+	ParentRefreshTokenID *uint             `json:"parent_refresh_token_id,omitempty" gorm:"uniqueIndex:idx_parent_refresh_token,where:parent_refresh_token_id IS NOT NULL"`
 	ParentRefreshToken   *UserRefreshToken `gorm:"foreignKey:ParentRefreshTokenID"`
-	UserTokenSeedID      *uint             `json:"user_token_seed_id,omitempty"`
+	UserTokenSeedID      *uint             `json:"user_token_seed_id,omitempty" gorm:"uniqueIndex:idx_user_token_seed,where:user_token_seed_id IS NOT NULL"`
 	UserTokenSeed        *UserTokenSeed    `gorm:"foreignKey:UserTokenSeedID"`
+	IPv4Address          string            `json:"ipv4_address"`
 	ExpiresAt            time.Time         `json:"expires_at"`
 	RevokedAt            *time.Time        `json:"revoked_at,omitempty"`
 }
@@ -126,9 +129,8 @@ type UserAccessToken struct {
 	gorm.Model
 	UserID             uint             `json:"user_id"`
 	User               User             `gorm:"foreignKey:UserID"`
-	UserRefreshTokenID uint             `json:"user_refresh_token_id"`
+	UserRefreshTokenID uint             `json:"user_refresh_token_id" gorm:"uniqueIndex"`
 	UserRefreshToken   UserRefreshToken `gorm:"foreignKey:UserRefreshTokenID"`
-	IssuedAt           time.Time        `json:"issued_at"`
 	ExpiresAt          time.Time        `json:"expires_at"`
 	RevokedAt          *time.Time       `json:"revoked_at,omitempty"`
 }
@@ -138,7 +140,7 @@ type UserTOTP struct {
 	gorm.Model
 	UserID     uint       `json:"user_id"`
 	User       User       `gorm:"foreignKey:UserID"`
-	Secret     string     `json:"secret"`
+	Secret     string     `json:"secret" gorm:"uniqueIndex"`
 	ExpiresAt  time.Time  `json:"expires_at"`
 	VerifiedAt *time.Time `json:"verified_at,omitempty"`
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
@@ -147,9 +149,9 @@ type UserTOTP struct {
 // UserTOTPRecoveryCode is the PostgreSQL model for the user TOTP recovery code
 type UserTOTPRecoveryCode struct {
 	gorm.Model
-	UserTOTPID uint       `json:"user_totp_id"`
+	UserTOTPID uint       `json:"user_totp_id" gorm:"uniqueIndex:idx_user_totp_code"`
 	UserTOTP   UserTOTP   `gorm:"foreignKey:UserTOTPID"`
-	Code       string     `json:"code"`
+	Code       string     `json:"code" gorm:"uniqueIndex:idx_user_totp_code"`
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 }
 
