@@ -30,10 +30,10 @@ var (
 		),
 	)
 
-	// PostgreSQL is the logger for the PostgreSQL client
-	PosgreSQL, _ = godatabases.NewLogger(
+	// Postgres is the logger for the Postgres client
+	Postgres, _ = godatabases.NewLogger(
 		gologger.NewDefaultLogger(
-			"POSTGRESQL",
+			"POSTGRES",
 			nil,
 		),
 	)

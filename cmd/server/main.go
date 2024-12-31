@@ -8,17 +8,20 @@ import (
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	goloaderenv "github.com/ralvarezdev/go-loader/env"
 	goloaderlistener "github.com/ralvarezdev/go-loader/http/listener"
-	goloadertls "github.com/ralvarezdev/go-loader/http/tls"
 	gonethttpjson "github.com/ralvarezdev/go-net/http/json"
+	gonethttpjwtvalidator "github.com/ralvarezdev/go-net/http/jwt/validator"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
 	govalidatorvalidations "github.com/ralvarezdev/go-validator/structs/mapper/validations"
 	internalapiv1 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/api/v1"
-	internalpostgresql "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgresql"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
-	internaljwtvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/validator"
+	internalapiv1jwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internallistener "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/listener"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"net/http"
 	"time"
@@ -29,15 +32,15 @@ func init() {
 	// Declare flags and parse them
 	goflagsmode.SetFlag()
 	flag.Parse()
-	internallogger.Flag.ModeFlagSet(goflagsmode.Flag)
+	internallogger.Flag.ModeFlagSet(goflagsmode.Mode)
 
 	// Check if the environment is production
-	if goflagsmode.Flag != nil && goflagsmode.Flag.IsProd() {
+	if goflagsmode.Mode != nil && goflagsmode.Mode.IsProd() {
 		return
 	}
 
 	if err := godotenv.Load(); err != nil {
-		panic(goloaderenv.FailedToLoadEnvironmentVariablesError)
+		panic(goloaderenv.ErrFailedToLoadEnvironmentVariables)
 	}
 }
 
@@ -52,20 +55,20 @@ func main() {
 	}
 	internallogger.Environment.EnvironmentVariableLoaded(internallistener.PortKey)
 
-	// Get the PostgreSQL URI
-	postgresqlDbUri, err := goloaderenv.LoadVariable(internalpostgresql.UriKey)
+	// Get the Postgres URI
+	postgresqlDbUri, err := goloaderenv.LoadVariable(internalpostgres.UriKey)
 	if err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(internalpostgresql.UriKey)
+	internallogger.Environment.EnvironmentVariableLoaded(internalpostgres.UriKey)
 
-	// Get the required PostgreSQL database name
-	postgresqlDbName, err := goloaderenv.LoadVariable(internalpostgresql.DbNameKey)
+	// Get the required Postgres database name
+	postgresqlDbName, err := goloaderenv.LoadVariable(internalpostgres.DbNameKey)
 	if err != nil {
 
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(internalpostgresql.DbNameKey)
+	internallogger.Environment.EnvironmentVariableLoaded(internalpostgres.DbNameKey)
 
 	// Get the JWT keys
 	var jwtKeys = make(map[string]string)
@@ -73,7 +76,7 @@ func main() {
 		internaljwt.PublicKey,
 		internaljwt.PrivateKey,
 	} {
-		jwtKey, err := commonenv.LoadVariable(key)
+		jwtKey, err := goloaderenv.LoadVariable(key)
 		if err != nil {
 			panic(err)
 		}
@@ -87,7 +90,7 @@ func main() {
 		internaljwt.AccessToken:  internaljwt.AccessTokenDuration,
 		internaljwt.RefreshToken: internaljwt.RefreshTokenDuration,
 	} {
-		jwtTokenDuration, err := commonenv.LoadVariable(value)
+		jwtTokenDuration, err := goloaderenv.LoadVariable(value)
 		if err != nil {
 			panic(err)
 		}
@@ -101,10 +104,10 @@ func main() {
 		jwtTokensDuration[key] = parsedJwtTokenDuration
 	}
 
-	// Create the PostgreSQL DSN
-	postgresqlDsn := postgresqlDbUri + "/" + postgresqlDbName + "?sslmode=required"
+	// Create the Postgres DSN
+	postgresqlDsn := postgresqlDbUri + "/" + postgresqlDbName + "?sslmode=require"
 
-	// Connect to PostgreSQL with GORM
+	// Connect to Postgres with GORM
 	postgresqlDb, err := gorm.Open(postgres.Open(postgresqlDsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -115,23 +118,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	internallogger.PostgreSQL.ConnectedToDatabase()
+	internallogger.Postgres.ConnectedToDatabase()
 
-	// Load transport credentials
-	var transportCredentials credentials.TransportCredentials
-
-	if goflagsmode.Flag != nil && goflagsmode.Flag.IsDev() {
-		transportCredentials = insecure.NewCredentials()
-	} else {
-		// Load system certificates
-		transportCredentials, err = goloadertls.LoadSystemCredentials()
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// Create the PostgreSQL database service
-	postgresqlService, err := internalpostgresql.NewService(
+	// Create the Postgres database service
+	postgresService, err := internalpostgres.NewService(
 		postgresqlDb,
 		postgresqlConn,
 	)
@@ -139,25 +129,21 @@ func main() {
 		panic(err)
 	}
 	defer func() {
-		if err = postgresqlService.Close(); err != nil {
+		if err = postgresService.Close(); err != nil {
 			panic(err)
 		}
 	}()
 
-	// Create token validator
-	tokenValidator, err := internaljwtvalidator.NewDefaultTokenValidator(
-		postgresqlService,
-		nil,
+	// Create the JWT claims validator
+	jwtClaimsValidator, _ := internalapiv1jwtclaims.NewDefaultValidator(
+		postgresService, nil,
 	)
-	if err != nil {
-		panic(err)
-	}
 
-	// Create JWT validator with ED25519 public key
+	// Create the JWT validator with ED25519 public key
 	jwtValidator, err := gojwtvalidator.NewEd25519Validator(
 		[]byte(jwtKeys[internaljwt.PublicKey]),
-		tokenValidator,
-		goflagsmode.Flag,
+		jwtClaimsValidator,
+		goflagsmode.Mode,
 	)
 	if err != nil {
 		panic(err)
@@ -169,27 +155,38 @@ func main() {
 		panic(err)
 	}
 
+	// Create the API V1 service
+	apiV1Service, _ := internalapiv1.NewService(
+		jwtIssuer,
+		postgresService,
+	)
+
 	// Create the JSON encoder and decoder
-	jsonEncoder := gonethttpjson.NewDefaultEcoder()
-	jsonDecoder := gonethttpjson.NewDefaultDecoder()
+	jsonEncoder := gonethttpjson.NewDefaultEncoder(goflagsmode.Mode)
+	jsonDecoder := gonethttpjson.NewDefaultDecoder(goflagsmode.Mode)
+
+	// Create the response handler
+	responseHandler, _ := gonethttpresponse.NewDefaultHandler(
+		goflagsmode.Mode,
+		jsonEncoder,
+	)
+
+	// Create the JWT validator handler
+	jwtValidatorErrorHandler, _ := gonethttpjwtvalidator.NewDefaultErrorHandler(jsonEncoder)
 
 	// Create API authenticator middleware
-	authMiddleware, err := gonethttpmiddlewareauth.NewMiddleware(
+	authenticator, _ := gonethttpmiddlewareauth.NewMiddleware(
 		jwtValidator,
+		responseHandler,
+		jwtValidatorErrorHandler,
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	// Create the API V1 service
-	apiV1Service := internalapiv1.NewService(
-		jwtIssuer,
-		postgresqlService,
-	)
-
 	// Create the mapper validations validator
 	validationsValidator := govalidatorvalidations.NewDefaultValidator(
-		goflagsmode.Flag,
+		goflagsmode.Mode,
 	)
 
 	// Create the mapper validations generator
@@ -199,53 +196,59 @@ func main() {
 	validatorService, err := govalidatorservice.NewDefaultService(
 		validationsGenerator,
 		validationsValidator,
-		goflagsmode.Flag,
+		goflagsmode.Mode,
 	)
 	if err != nil {
 		panic(err)
 	}
 
 	// Create the API V1 validator
-	apiV1Validator, err := internalapiv1.NewValidator(
+	apiV1Validator := internalapiv1.NewValidator(
 		apiV1Service,
 		validatorService,
+	)
+
+	// Create the base router
+	baseRouter := gonethttproute.NewRouter()
+
+	// Create the API router
+	apiRouter, _ := gonethttproute.NewRouterGroup(
+		baseRouter,
+		"/api",
+	)
+
+	// Create the API V1 router group
+	apiV1Router, _ := gonethttproute.NewRouterGroup(
+		apiRouter,
+		"/v1",
+	)
+
+	// Create the API V1 controller
+	apiV1Controller, err := internalapiv1.NewController(
+		apiV1Router,
+		apiV1Service,
+		apiV1Validator,
+		responseHandler,
+		authenticator,
+		jsonEncoder,
+		jsonDecoder,
+		internallogger.ApiV1,
+		internallogger.JwtValidator,
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	// Create the base router
-	baseRouter := gonethttproute.NewRouter(
-		http.NewServeMux(),
-	)
-
-	// Create the API router
-	apiRouter := gonethttproute.NewRouterGroup(
-		"/api",
-		baseRouter,
-	)
-
-	// Create the API V1 router group
-	apiV1Router := gonethttproute.NewRouterGroup(
-		"/v1",
-		apiRouter,
-	)
-
-	// Create and initialize the API V1 controller
-	apiV1Controller := internalapiv1.NewController(
-		apiV1Router,
-		apiV1Service,
-		apiV1Validator,
-		authMiddleware,
-		jsonEncoder,
-		jsonDecoder,
-	)
+	// Register the API V1 controller routes
 	apiV1Controller.RegisterRoutes()
 	apiV1Controller.RegisterRouteGroups()
 
 	// Serve the API server
 	internallogger.Listener.ServerStarted(port.Port)
-	if err = http.ListenAndServe(":"+port.Port, baseRouter); err != nil {
-		panic(goloaderlistener.FailedToServeError)
+	if err = http.ListenAndServe(
+		":"+port.Port,
+		baseRouter.Handler(),
+	); err != nil {
+		panic(goloaderlistener.ErrFailedToServe)
 	}
 }

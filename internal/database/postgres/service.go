@@ -1,20 +1,20 @@
-package postgresql
+package postgres
 
 import (
 	"database/sql"
-	modelpg "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgresql/model"
+	modelpg "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres/model"
 	"gorm.io/gorm"
 )
 
 type (
-	// Service is the PostgreSQL service struct
+	// Service is the Postgres service struct
 	Service struct {
 		database   *gorm.DB
 		connection *sql.DB
 	}
 )
 
-// NewService creates a new PostgreSQL service
+// NewService creates a new Postgres service
 func NewService(database *gorm.DB, connection *sql.DB) (*Service, error) {
 	// Check if the database or the connection is nil
 	if database == nil {
@@ -53,23 +53,13 @@ func NewService(database *gorm.DB, connection *sql.DB) (*Service, error) {
 	}, nil
 }
 
-// Database returns the PostgreSQL database
+// Database returns the Postgres database
 func (s *Service) Database() *gorm.DB {
 	return s.database
 }
 
-// Close closes the PostgreSQL service
+// Close closes the Postgres service
 func (s *Service) Close() error {
 	// Close the connection
 	return s.connection.Close()
-}
-
-// IsAccessTokenValid checks if the access token is valid
-func (s *Service) IsAccessTokenValid(jwtId string) (bool, error) {
-	return false, nil
-}
-
-// IsRefreshTokenValid checks if the refresh token is valid
-func (s *Service) IsRefreshTokenValid(jwtId string) (bool, error) {
-	return false, nil
 }

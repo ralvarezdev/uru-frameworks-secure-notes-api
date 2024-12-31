@@ -7,18 +7,18 @@ import (
 type (
 	// Validator is the structure for API V1 validator
 	Validator struct {
-		service          Service
-		validatorService govalidatorservice.Service
+		service *Service
+		govalidatorservice.Service
 	}
 )
 
 // NewValidator creates a new API V1 validator
 func NewValidator(
-	service Service,
+	service *Service,
 	validatorService govalidatorservice.Service,
 ) *Validator {
 	return &Validator{
-		service:          service,
-		validatorService: validatorService,
+		service: service,
+		Service: validatorService,
 	}
 }

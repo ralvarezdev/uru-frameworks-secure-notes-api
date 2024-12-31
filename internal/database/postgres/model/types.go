@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// User is the PostgreSQL model for the user
+// User is the Postgres model for the user
 type User struct {
 	gorm.Model
 	FirstName string     `json:"first_name"`
@@ -15,7 +15,7 @@ type User struct {
 	Birthdate *time.Time `json:"birthdate,omitempty"`
 }
 
-// UserUsername is the PostgreSQL model for the user username
+// UserUsername is the Postgres model for the user username
 type UserUsername struct {
 	gorm.Model
 	UserID    uint       `json:"user_id"`
@@ -24,7 +24,7 @@ type UserUsername struct {
 	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
 
-// UserHashedPassword is the PostgreSQL model for the user hashed password
+// UserHashedPassword is the Postgres model for the user hashed password
 type UserHashedPassword struct {
 	gorm.Model
 	UserID         uint       `json:"user_id"`
@@ -33,7 +33,7 @@ type UserHashedPassword struct {
 	RevokedAt      *time.Time `json:"revoked_at,omitempty"`
 }
 
-// UserResetPassword is the PostgreSQL model for the user password reset
+// UserResetPassword is the Postgres model for the user password reset
 type UserResetPassword struct {
 	gorm.Model
 	UserID     uint       `json:"user_id"`
@@ -43,7 +43,7 @@ type UserResetPassword struct {
 	ExpiresAt  time.Time  `json:"expires_at"`
 }
 
-// UserEmail is the PostgreSQL model for the user email
+// UserEmail is the Postgres model for the user email
 type UserEmail struct {
 	gorm.Model
 	UserID         uint                   `json:"user_id" gorm:"uniqueIndex:idx_user_email,where:revoked_at IS NULL"`
@@ -54,7 +54,7 @@ type UserEmail struct {
 	RevokedAt      *time.Time             `json:"revoked_at,omitempty"`
 }
 
-// UserEmailVerification is the PostgreSQL model for the user email verification
+// UserEmailVerification is the Postgres model for the user email verification
 type UserEmailVerification struct {
 	gorm.Model
 	UserEmailID       uint       `json:"user_email_id"`
@@ -65,7 +65,7 @@ type UserEmailVerification struct {
 	RevokedAt         *time.Time `json:"revoked_at,omitempty"`
 }
 
-// UserPhoneNumber is the PostgreSQL model for the user phone number
+// UserPhoneNumber is the Postgres model for the user phone number
 type UserPhoneNumber struct {
 	gorm.Model
 	UserID         uint                         `json:"user_id" gorm:"uniqueIndex:idx_user_phone_number,where:revoked_at IS NULL"`
@@ -76,7 +76,7 @@ type UserPhoneNumber struct {
 	RevokedAt      *time.Time                   `json:"revoked_at,omitempty"`
 }
 
-// UserPhoneNumberVerification is the PostgreSQL model for the user phone number verification
+// UserPhoneNumberVerification is the Postgres model for the user phone number verification
 type UserPhoneNumberVerification struct {
 	gorm.Model
 	UserPhoneNumberID uint            `json:"user_phone_number_id"`
@@ -87,7 +87,7 @@ type UserPhoneNumberVerification struct {
 	RevokedAt         *time.Time      `json:"revoked_at,omitempty"`
 }
 
-// UserFailedLogInAttempt is the PostgreSQL model for the user failed login attempt
+// UserFailedLogInAttempt is the Postgres model for the user failed login attempt
 type UserFailedLogInAttempt struct {
 	gorm.Model
 	UserID          uint           `json:"user_id"`
@@ -100,7 +100,7 @@ type UserFailedLogInAttempt struct {
 	AttemptedAt     time.Time      `json:"attempted_at"`
 }
 
-// UserTokenSeed is the PostgreSQL model for the user token seed
+// UserTokenSeed is the Postgres model for the user token seed
 type UserTokenSeed struct {
 	gorm.Model
 	UserID    uint       `json:"user_id"`
@@ -110,7 +110,7 @@ type UserTokenSeed struct {
 	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
 
-// UserRefreshToken is the PostgreSQL model for the user refresh token
+// UserRefreshToken is the Postgres model for the user refresh token
 type UserRefreshToken struct {
 	gorm.Model
 	UserID               uint              `json:"user_id"`
@@ -124,7 +124,7 @@ type UserRefreshToken struct {
 	RevokedAt            *time.Time        `json:"revoked_at,omitempty"`
 }
 
-// UserAccessToken is the PostgreSQL model for the user access token
+// UserAccessToken is the Postgres model for the user access token
 type UserAccessToken struct {
 	gorm.Model
 	UserID             uint             `json:"user_id"`
@@ -135,7 +135,7 @@ type UserAccessToken struct {
 	RevokedAt          *time.Time       `json:"revoked_at,omitempty"`
 }
 
-// UserTOTP is the PostgreSQL model for the user TOTP
+// UserTOTP is the Postgres model for the user TOTP
 type UserTOTP struct {
 	gorm.Model
 	UserID     uint       `json:"user_id"`
@@ -146,7 +146,7 @@ type UserTOTP struct {
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 }
 
-// UserTOTPRecoveryCode is the PostgreSQL model for the user TOTP recovery code
+// UserTOTPRecoveryCode is the Postgres model for the user TOTP recovery code
 type UserTOTPRecoveryCode struct {
 	gorm.Model
 	UserTOTPID uint       `json:"user_totp_id" gorm:"uniqueIndex:idx_user_totp_code"`
@@ -155,7 +155,7 @@ type UserTOTPRecoveryCode struct {
 	RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 }
 
-// NoteTag is the PostgreSQL model for the note tag
+// NoteTag is the Postgres model for the note tag
 type NoteTag struct {
 	gorm.Model
 	UserID uint   `json:"user_id" gorm:"uniqueIndex:idx_user_note_tag"`
@@ -163,7 +163,7 @@ type NoteTag struct {
 	Name   string `json:"name" gorm:"uniqueIndex:idx_user_note_tag"`
 }
 
-// Note is the PostgreSQL model for the user note
+// Note is the Postgres model for the user note
 type Note struct {
 	gorm.Model
 	UserID   uint      `json:"user_id"`
@@ -174,7 +174,7 @@ type Note struct {
 	NoteTags []NoteTag `gorm:"many2many:notes_tags;"`
 }
 
-// NoteVersion is the PostgreSQL model for the note version
+// NoteVersion is the Postgres model for the note version
 type NoteVersion struct {
 	gorm.Model
 	NoteID        uint   `json:"note_id"`

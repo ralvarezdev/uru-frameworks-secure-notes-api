@@ -4,20 +4,22 @@ import (
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttpjson "github.com/ralvarezdev/go-net/http/json"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 )
 
 type (
 	// Controller is the structure for the API V1 controller
 	Controller struct {
-		authMiddleware   gonethttpmiddlewareauth.Middleware
-		logger           Logger
-		authLogger       gojwtvalidator.Logger
-		validatorService govalidatorservice.Service
-		jsonEncoder      gonethttpjson.Encoder
-		jsonDecoder      gonethttpjson.Decoder
+		service            *Service
+		validatorService   govalidatorservice.Service
+		responseHandler    gonethttpresponse.Handler
+		authenticator      gonethttpmiddlewareauth.Authenticator
+		jsonEncoder        gonethttpjson.Encoder
+		jsonDecoder        gonethttpjson.Decoder
+		logger             *Logger
+		jwtValidatorLogger *gojwtvalidator.Logger
 		gonethttproute.Controller
 	}
 )
@@ -25,23 +27,27 @@ type (
 // NewController creates a new API V1 controller
 func NewController(
 	routeGroup gonethttproute.RouterWrapper,
-	service Service,
-	authMiddleware gonethttpmiddlewareauth.Middleware,
+	service *Service,
 	validatorService govalidatorservice.Service,
+	responseHandler gonethttpresponse.Handler,
+	authenticator gonethttpmiddlewareauth.Authenticator,
 	jsonEncoder gonethttpjson.Encoder,
 	jsonDecoder gonethttpjson.Decoder,
+	logger *Logger,
+	jwtValidatorLogger *gojwtvalidator.Logger,
 ) (*Controller, error) {
 	return &Controller{
 		Controller: gonethttproute.Controller{
-			Service:       service,
 			RouterWrapper: routeGroup,
 		},
-		authMiddleware:   authMiddleware,
-		validatorService: validatorService,
-		jsonEncoder:      jsonEncoder,
-		jsonDecoder:      jsonDecoder,
-		internallogger.ApiV1,
-		internallogger.JwtValidator,
+		service:            service,
+		responseHandler:    responseHandler,
+		authenticator:      authenticator,
+		validatorService:   validatorService,
+		jsonEncoder:        jsonEncoder,
+		jsonDecoder:        jsonDecoder,
+		logger:             logger,
+		jwtValidatorLogger: jwtValidatorLogger,
 	}, nil
 }
 
