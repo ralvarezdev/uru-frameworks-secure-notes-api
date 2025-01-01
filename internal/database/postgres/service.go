@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	modelpg "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres/model"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +14,10 @@ type (
 )
 
 // NewService creates a new Postgres service
-func NewService(database *gorm.DB, connection *sql.DB) (*Service, error) {
+func NewService(database *gorm.DB, connection *sql.DB) (
+	instance *Service,
+	err error,
+) {
 	// Check if the database or the connection is nil
 	if database == nil {
 		return nil, ErrNilDatabase
@@ -24,32 +26,36 @@ func NewService(database *gorm.DB, connection *sql.DB) (*Service, error) {
 		return nil, ErrNilConnection
 	}
 
-	// Migrate the database
-	err := database.AutoMigrate(
-		&modelpg.Note{},
-		&modelpg.NoteTag{},
-		&modelpg.NoteVersion{},
-		&modelpg.User{},
-		&modelpg.UserAccessToken{},
-		&modelpg.UserEmail{},
-		&modelpg.UserEmailVerification{},
-		&modelpg.UserFailedLogInAttempt{},
-		&modelpg.UserHashedPassword{},
-		&modelpg.UserPhoneNumber{},
-		&modelpg.UserPhoneNumberVerification{},
-		&modelpg.UserRefreshToken{},
-		&modelpg.UserResetPassword{},
-		&modelpg.UserTokenSeed{},
-		&modelpg.UserTOTP{},
-		&modelpg.UserTOTPRecoveryCode{},
-		&modelpg.UserUsername{},
-	)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		// Migrate the database without the join tables and foreign keys
+		err = database.AutoMigrate(
+			&model.User{},
+			&model.UserTokenSeed{},
+			&model.UserFailedLogInAttempt{},
+			&model.UserRefreshToken{},
+			&model.UserAccessToken{},
+			&model.UserTOTP{},
+			&model.UserTOTPRecoveryCode{},
+			&model.UserHashedPassword{},
+			&model.UserUsername{},
+			&model.UserResetPassword{},
+			&model.UserEmail{},
+			&model.UserEmailVerification{},
+			&model.UserPhoneNumber{},
+			&model.UserPhoneNumberVerification{},
+			&model.Note{},
+			&model.NoteVersion{},
+			&model.Tag{},
+			&model.NoteTag{},
+		)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	return &Service{
-		database: database,
+		database:   database,
+		connection: connection,
 	}, nil
 }
 

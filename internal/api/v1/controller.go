@@ -7,6 +7,7 @@ import (
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
+	"net/http"
 )
 
 type (
@@ -52,7 +53,21 @@ func NewController(
 }
 
 // RegisterRoutes registers the routes for the API V1 controller
-func (c *Controller) RegisterRoutes() {}
+func (c *Controller) RegisterRoutes() {
+	c.RegisterRoute(
+		"GET /",
+		c.Ping,
+	)
+}
 
 // RegisterRouteGroups registers the route groups for the API V1 controller
 func (c *Controller) RegisterRouteGroups() {}
+
+// Ping pings the service
+func (c *Controller) Ping(w http.ResponseWriter, r *http.Request) {
+	// Get the ping response
+	response := c.service.Ping()
+
+	// Handle the success response
+	c.responseHandler.HandleSuccess(w, response)
+}

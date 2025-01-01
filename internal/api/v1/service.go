@@ -2,7 +2,10 @@ package v1
 
 import (
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
+	internaldto "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/dto"
+	"net/http"
 )
 
 type (
@@ -21,4 +24,13 @@ func NewService(
 		postgresqlService: postgresqlService,
 		jwtIssuer:         jwtIssuer,
 	}, nil
+}
+
+// Ping pings the service
+func (s *Service) Ping() *gonethttpresponse.Response {
+	return gonethttpresponse.NewResponseWithCode(
+		&internaldto.BasicResponse{
+			Message: "Pong",
+		}, http.StatusOK,
+	)
 }

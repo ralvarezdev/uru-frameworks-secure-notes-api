@@ -5,12 +5,12 @@ go 1.23.4
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
-	github.com/ralvarezdev/go-databases v0.2.2
+	github.com/ralvarezdev/go-databases v0.3.4
 	github.com/ralvarezdev/go-flags v0.2.3
 	github.com/ralvarezdev/go-jwt v0.3.4
 	github.com/ralvarezdev/go-loader v0.2.3
 	github.com/ralvarezdev/go-logger v0.2.2
-	github.com/ralvarezdev/go-net v0.3.2
+	github.com/ralvarezdev/go-net v0.3.5
 	github.com/ralvarezdev/go-validator v0.3.6
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12

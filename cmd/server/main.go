@@ -108,7 +108,9 @@ func main() {
 	postgresqlDsn := postgresqlDbUri + "/" + postgresqlDbName + "?sslmode=require"
 
 	// Connect to Postgres with GORM
-	postgresqlDb, err := gorm.Open(postgres.Open(postgresqlDsn), &gorm.Config{})
+	postgresqlDb, err := gorm.Open(
+		postgres.Open(postgresqlDsn), &gorm.Config{},
+	)
 	if err != nil {
 		panic(err)
 	}
