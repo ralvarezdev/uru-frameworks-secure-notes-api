@@ -55,7 +55,7 @@ func NewController(
 // RegisterRoutes registers the routes for the API V1 controller
 func (c *Controller) RegisterRoutes() {
 	c.RegisterRoute(
-		"GET /",
+		"GET /ping",
 		c.Ping,
 	)
 }

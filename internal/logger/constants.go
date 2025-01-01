@@ -7,6 +7,7 @@ import (
 	goloaderenv "github.com/ralvarezdev/go-loader/env"
 	goloaderlistener "github.com/ralvarezdev/go-loader/http/listener"
 	gologger "github.com/ralvarezdev/go-logger"
+	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	internalapiv1 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/api/v1"
 )
 
@@ -34,6 +35,14 @@ var (
 	Postgres, _ = godatabases.NewLogger(
 		gologger.NewDefaultLogger(
 			"POSTGRES",
+			nil,
+		),
+	)
+
+	// Route is the logger for the router
+	Route, _ = gonethttproute.NewLogger(
+		gologger.NewDefaultLogger(
+			"ROUTER",
 			nil,
 		),
 	)

@@ -4,6 +4,7 @@ import (
 	gologger "github.com/ralvarezdev/go-logger"
 )
 
+// Logger is the logger for the API V1
 type Logger struct {
 	logger gologger.Logger
 }

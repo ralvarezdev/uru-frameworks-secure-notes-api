@@ -211,7 +211,11 @@ func main() {
 	)
 
 	// Create the base router
-	baseRouter := gonethttproute.NewRouter()
+	baseRouter := gonethttproute.NewRouter(
+		"",
+		goflagsmode.Mode,
+		internallogger.Route,
+	)
 
 	// Create the API router
 	apiRouter, _ := gonethttproute.NewRouterGroup(
