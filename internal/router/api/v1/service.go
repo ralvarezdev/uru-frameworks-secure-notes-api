@@ -15,7 +15,7 @@ type (
 func (s *Service) Ping() *gonethttphandler.Response {
 	return gonethttphandler.NewResponseWithCode(
 		&common.BasicResponse{
-			Message: "Pong",
+			Message: "pong",
 		}, http.StatusOK,
 	)
 }

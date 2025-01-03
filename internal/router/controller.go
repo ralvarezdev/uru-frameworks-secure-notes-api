@@ -49,18 +49,13 @@ func NewController(
 }
 
 // RegisterRoutes registers the routes for the API V1 controller
-func (c *Controller) RegisterRoutes() {
-	c.RegisterRoute(
-		"GET /ping",
-		c.Ping,
-	)
-}
+func (c *Controller) RegisterRoutes() {}
 
 // RegisterGroups registers the router groups for the API V1 controller
 func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	apiController := internalrouterapi.NewController(
-		c.NewGroup(internalrouterapi.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,

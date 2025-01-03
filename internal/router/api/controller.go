@@ -56,11 +56,12 @@ func (c *Controller) RegisterRoutes() {}
 func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	v1Controller := internalrouterv1.NewController(
-		c.NewGroup(internalrouterv1.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
 		c.postgresService,
+		c.jwtIssuer,
 	)
 
 	// Register the controllers routes

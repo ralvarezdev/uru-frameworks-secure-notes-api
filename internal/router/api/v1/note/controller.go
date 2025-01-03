@@ -57,14 +57,14 @@ func (c *Controller) RegisterRoutes() {}
 func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	versionController := internalrouterversion.NewController(
-		c.NewGroup(internalrouterversion.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
 		c.postgresService,
 	)
 	versionsController := internalrouterversions.NewController(
-		c.NewGroup(internalrouterversions.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,

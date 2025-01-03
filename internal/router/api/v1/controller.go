@@ -41,7 +41,7 @@ func NewController(
 	validatorService govalidatorservice.Service,
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
-) (*Controller, error) {
+) *Controller {
 	return &Controller{
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),
@@ -56,7 +56,7 @@ func NewController(
 		validator:          &Validator{Service: validatorService},
 		logger:             internallogger.Api,
 		jwtValidatorLogger: internallogger.JwtValidator,
-	}, nil
+	}
 }
 
 // RegisterRoutes registers the routes for the API V1 controller
@@ -71,7 +71,7 @@ func (c *Controller) RegisterRoutes() {
 func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	authController := internalrouterauth.NewController(
-		c.NewGroup(internalrouterauth.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
@@ -79,28 +79,28 @@ func (c *Controller) RegisterGroups() {
 		c.jwtIssuer,
 	)
 	noteController := internalrouternote.NewController(
-		c.NewGroup(internalrouternote.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
 		c.postgresService,
 	)
 	notesController := internalrouternotes.NewController(
-		c.NewGroup(internalrouternotes.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
 		c.postgresService,
 	)
 	tagController := internalroutertag.NewController(
-		c.NewGroup(internalroutertag.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
 		c.postgresService,
 	)
 	userController := internalrouteruser.NewController(
-		c.NewGroup(internalrouteruser.BasePath),
+		c.RouterWrapper,
 		c.handler,
 		c.authenticator,
 		c.validatorService,
