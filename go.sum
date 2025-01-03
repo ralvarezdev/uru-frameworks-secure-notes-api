@@ -47,6 +47,9 @@ github.com/ralvarezdev/go-logger v0.2.2 h1:j58spza2L6s+vAibifHSuUPrXm0+6nWZWR3SO
 github.com/ralvarezdev/go-logger v0.2.2/go.mod h1:v5OvFrkS+wsYNTCVegXWiRhBtcYrQJr4LDMDntvpAos=
 github.com/ralvarezdev/go-net v0.4.0 h1:8nXQqZM01vZlQRsigRI20s/CZlSxMMOdSiJmpGqmDCg=
 github.com/ralvarezdev/go-net v0.4.0/go.mod h1:PyI55eg3CMJKCpNpC58Jfscbjqb/N2Q9f6xvhgpNdOY=
+github.com/ralvarezdev/go-net v0.4.1/go.mod h1:PyI55eg3CMJKCpNpC58Jfscbjqb/N2Q9f6xvhgpNdOY=
+github.com/ralvarezdev/go-net v0.4.2/go.mod h1:PyI55eg3CMJKCpNpC58Jfscbjqb/N2Q9f6xvhgpNdOY=
+github.com/ralvarezdev/go-net v0.4.3/go.mod h1:PyI55eg3CMJKCpNpC58Jfscbjqb/N2Q9f6xvhgpNdOY=
 github.com/ralvarezdev/go-validator v0.3.6 h1:wqUTaVOHfMlGNf0HQTNCZorc2xvPjxKXVlmNdeNQk1Q=
 github.com/ralvarezdev/go-validator v0.3.6/go.mod h1:Dm4EKnUbsCpaafFjrYVvENIRUJiHxEndjc6yLyhP96Y=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

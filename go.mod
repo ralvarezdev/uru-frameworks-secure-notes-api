@@ -10,7 +10,7 @@ require (
 	github.com/ralvarezdev/go-jwt v0.3.4
 	github.com/ralvarezdev/go-loader v0.2.3
 	github.com/ralvarezdev/go-logger v0.2.2
-	github.com/ralvarezdev/go-net v0.4.0
+	github.com/ralvarezdev/go-net v0.4.3
 	github.com/ralvarezdev/go-validator v0.3.6
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
