@@ -31,7 +31,7 @@ func (s *Service) SignUp(body *SignUpRequest) (*internalpostgres.User, error) {
 		internalbcrypt.Cost,
 	)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	// Generate a random salt
@@ -44,7 +44,7 @@ func (s *Service) SignUp(body *SignUpRequest) (*internalpostgres.User, error) {
 	user := internalpostgres.User{
 		FirstName: body.FirstName,
 		LastName:  body.LastName,
-		Salt:      string(salt),
+		Salt:      salt,
 		JoinedAt:  time.Now(),
 	}
 

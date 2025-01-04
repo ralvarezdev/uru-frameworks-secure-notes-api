@@ -25,8 +25,7 @@ func (l *Logger) SignUp(id string) {
 	l.logger.LogMessage(
 		gologger.NewLogMessage(
 			"User signed up",
-			gologgerstatus.StatusInfo,
-			nil,
+			gologgerstatus.Info,
 			id,
 		),
 	)

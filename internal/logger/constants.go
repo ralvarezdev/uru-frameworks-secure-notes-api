@@ -12,13 +12,12 @@ import (
 
 var (
 	// Flag is the logger for the flag
-	Flag, _ = goflagsmode.NewLogger(gologger.NewDefaultLogger("FLAG", nil))
+	Flag, _ = goflagsmode.NewLogger(gologger.NewDefaultLogger("FLAG"))
 
 	// Listener is the logger for the listener
 	Listener, _ = goloaderlistener.NewLogger(
 		gologger.NewDefaultLogger(
 			"NET LISTENER",
-			nil,
 		),
 	)
 
@@ -26,7 +25,6 @@ var (
 	Environment, _ = goloaderenv.NewLogger(
 		gologger.NewDefaultLogger(
 			"ENV",
-			nil,
 		),
 	)
 
@@ -34,7 +32,6 @@ var (
 	Postgres, _ = godatabases.NewLogger(
 		gologger.NewDefaultLogger(
 			"POSTGRES",
-			nil,
 		),
 	)
 
@@ -42,18 +39,16 @@ var (
 	Router, _ = gonethttproute.NewLogger(
 		gologger.NewDefaultLogger(
 			"ROUTER",
-			nil,
 		),
 	)
 
 	// Api is the logger for the API endpoints
-	Api, _ = NewLogger(gologger.NewDefaultLogger("API", nil))
+	Api, _ = NewLogger(gologger.NewDefaultLogger("API"))
 
 	// JwtValidator is the logger for the JWT validator
 	JwtValidator, _ = gojwtvalidator.NewLogger(
 		gologger.NewDefaultLogger(
 			"JWT VALIDATOR",
-			nil,
 		),
 	)
 )

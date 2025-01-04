@@ -10,5 +10,5 @@ var (
 	Encoder = gonethttpjson.NewDefaultEncoder(goflagsmode.Mode)
 
 	// Decoder is the JSON decoder
-	Decoder = gonethttpjson.NewDefaultDecoder(goflagsmode.Mode, Encoder)
+	Decoder, _ = gonethttpjson.NewDefaultDecoder(goflagsmode.Mode, Encoder)
 )

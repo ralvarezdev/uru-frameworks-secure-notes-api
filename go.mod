@@ -6,13 +6,13 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/ralvarezdev/go-crypto v0.5.0
-	github.com/ralvarezdev/go-databases v0.3.4
-	github.com/ralvarezdev/go-flags v0.2.4
-	github.com/ralvarezdev/go-jwt v0.3.4
-	github.com/ralvarezdev/go-loader v0.2.5
-	github.com/ralvarezdev/go-logger v0.2.2
-	github.com/ralvarezdev/go-net v0.4.8
-	github.com/ralvarezdev/go-validator v0.3.8
+	github.com/ralvarezdev/go-databases v0.3.5
+	github.com/ralvarezdev/go-flags v0.2.5
+	github.com/ralvarezdev/go-jwt v0.3.7
+	github.com/ralvarezdev/go-loader v0.2.7
+	github.com/ralvarezdev/go-logger v0.3.0
+	github.com/ralvarezdev/go-net v0.4.13
+	github.com/ralvarezdev/go-validator v0.4.4
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )

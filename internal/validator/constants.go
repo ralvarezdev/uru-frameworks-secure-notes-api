@@ -3,8 +3,9 @@ package validator
 import (
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
+	govalidatormapperparser "github.com/ralvarezdev/go-validator/structs/mapper/parser"
 	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	govalidatorvalidations "github.com/ralvarezdev/go-validator/structs/mapper/validations"
+	govalidatormappervalidator "github.com/ralvarezdev/go-validator/structs/mapper/validator"
 )
 
 var (
@@ -12,16 +13,14 @@ var (
 	JSONGenerator = govalidatormapper.NewJSONGenerator(goflagsmode.Mode)
 
 	// ValidationsValidator is the mapper validations validator
-	ValidationsValidator = govalidatorvalidations.NewDefaultValidator(
-		goflagsmode.Mode,
-	)
+	ValidationsValidator = govalidatormappervalidator.NewDefaultValidator(goflagsmode.Mode)
 
-	// ValidationsGenerator is the mapper validations generator
-	ValidationsGenerator = govalidatorvalidations.NewDefaultGenerator(nil)
+	// ValidationsParser is the mapper validations parser
+	ValidationsParser = govalidatormapperparser.NewJSONParser()
 
 	// ValidationsService is the mapper validations service
 	ValidationsService, _ = govalidatorservice.NewDefaultService(
-		ValidationsGenerator,
+		ValidationsParser,
 		ValidationsValidator,
 		goflagsmode.Mode,
 	)

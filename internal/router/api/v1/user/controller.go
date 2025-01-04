@@ -11,7 +11,7 @@ import (
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalcommon "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
+	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
 	"strconv"
@@ -69,26 +69,22 @@ func (c *Controller) RegisterGroups() {}
 // @Accept json
 // @Produce json
 // @Param request body SignUpRequest true "Sign Up Request"
-// @Success 201 {object} internalcommon.BasicResponse
+// @Success 201 {object} internalapiv1common.BasicResponse
 // @Failure 400 {object} gonethttpresponse.JSONErrorResponse
 // @Failure 500 {object} gonethttpresponse.JSONErrorResponse
 // @Router /api/v1/user/signup [post]
 func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body
+	// Decode the request body and validate the request
 	var body SignUpRequest
-	if err := c.handler.HandleRequest(w, r, &body); err != nil {
-		return
-	}
-
-	// Validate the request body
-	if err := c.validator.ValidateSignUpRequest(&body); err != nil {
-		c.handler.HandleResponse(
-			w,
-			gonethttpresponse.NewErrorResponseWithCode(
-				err,
-				http.StatusBadRequest,
-			),
-		)
+	ok := c.handler.HandleRequestAndValidations(
+		w,
+		r,
+		&body,
+		func() (interface{}, error) {
+			return c.validator.ValidateSignUpRequest(&body)
+		},
+	)
+	if !ok {
 		return
 	}
 
@@ -127,7 +123,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewResponseWithCode(
-			&internalcommon.BasicResponse{
+			&internalapiv1common.BasicResponse{
 				Message: SignUpSuccess,
 			}, http.StatusCreated,
 		),
