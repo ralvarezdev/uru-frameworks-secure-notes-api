@@ -1,5 +1,9 @@
 package user
 
+import (
+	"time"
+)
+
 // SignUpRequest is the request DTO to sign up
 type SignUpRequest struct {
 	FirstName string `json:"first_name"`
@@ -7,6 +11,13 @@ type SignUpRequest struct {
 	Username  string `json:"username"`
 	Password  string `json:"password"`
 	Email     string `json:"email"`
+}
+
+// UpdateProfileRequest is the request DTO to update profile
+type UpdateProfileRequest struct {
+	FirstName *string    `json:"first_name,omitempty"`
+	LastName  *string    `json:"last_name,omitempty"`
+	Birthdate *time.Time `json:"birthdate,omitempty"`
 }
 
 // GetMyProfileResponse is the response DTO to get my profile

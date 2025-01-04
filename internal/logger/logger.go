@@ -2,6 +2,7 @@ package logger
 
 import (
 	gologger "github.com/ralvarezdev/go-logger"
+	gologgerstatus "github.com/ralvarezdev/go-logger/status"
 )
 
 // Logger is the logger for the API server
@@ -17,4 +18,16 @@ func NewLogger(logger gologger.Logger) (*Logger, error) {
 	}
 
 	return &Logger{logger: logger}, nil
+}
+
+// SignUp logs the sign-up event
+func (l *Logger) SignUp(id string) {
+	l.logger.LogMessage(
+		gologger.NewLogMessage(
+			"User signed up",
+			gologgerstatus.StatusInfo,
+			nil,
+			id,
+		),
+	)
 }

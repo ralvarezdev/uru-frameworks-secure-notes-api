@@ -36,7 +36,7 @@ func NewService(database *gorm.DB, connection *sql.DB) (
 			&UserAccessToken{},
 			&UserTOTP{},
 			&UserTOTPRecoveryCode{},
-			&UserHashedPassword{},
+			&UserPasswordHash{},
 			&UserUsername{},
 			&UserResetPassword{},
 			&UserEmail{},
@@ -59,13 +59,12 @@ func NewService(database *gorm.DB, connection *sql.DB) (
 	}, nil
 }
 
-// Database returns the Postgres database
-func (s *Service) Database() *gorm.DB {
-	return s.database
-}
-
 // Close closes the Postgres service
 func (s *Service) Close() error {
-	// Close the connection
 	return s.connection.Close()
+}
+
+// RunTransaction runs a transaction
+func (s *Service) RunTransaction(transaction func(tx *gorm.DB) error) error {
+	return s.database.Transaction(transaction)
 }

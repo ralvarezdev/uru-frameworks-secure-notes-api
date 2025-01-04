@@ -31,14 +31,14 @@ type (
 		RevokedAt  *time.Time `json:"revoked_at,omitempty"`
 	}
 
-	// UserHashedPassword is the Postgres model for the user hashed password
-	UserHashedPassword struct {
+	// UserPasswordHash is the Postgres model for the user password hash
+	UserPasswordHash struct {
 		Model
-		UserID         uint       `json:"user_id" gorm:"not null"`
-		User           User       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-		HashedPassword string     `json:"hashed_password" gorm:"not null"`
-		AssignedAt     time.Time  `json:"assigned_at" gorm:"not null"`
-		RevokedAt      *time.Time `json:"revoked_at,omitempty"`
+		UserID       uint       `json:"user_id" gorm:"not null"`
+		User         User       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+		PasswordHash string     `json:"password_hash" gorm:"not null"`
+		AssignedAt   time.Time  `json:"assigned_at" gorm:"not null"`
+		RevokedAt    *time.Time `json:"revoked_at,omitempty"`
 	}
 
 	// UserResetPassword is the Postgres model for the user password reset
@@ -55,7 +55,7 @@ type (
 	// UserEmail is the Postgres model for the user email
 	UserEmail struct {
 		Model
-		UserID     uint       `json:"user_id" gorm:"uniqueIndex:idx_user_email,where:revoked_at IS NULL;not null"`
+		UserID     uint       `json:"user_id" gorm:"not null"`
 		User       User       `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 		Email      string     `json:"email" gorm:"uniqueIndex:idx_user_email,where:revoked_at IS NULL;not null"`
 		AssignedAt time.Time  `json:"assigned_at" gorm:"not null"`

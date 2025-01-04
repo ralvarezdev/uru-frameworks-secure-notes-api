@@ -5,15 +5,19 @@ import (
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	internalrouterauth "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/auth"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
 	internalrouternote "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note"
 	internalrouternotes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
 	internalroutertag "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/tag"
 	internalrouteruser "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/user"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
 )
 
@@ -36,9 +40,7 @@ type (
 // NewController creates a new API V1 controller
 func NewController(
 	baseRouter gonethttproute.RouterWrapper,
-	handler gonethttphandler.Handler,
 	authenticator gonethttpmiddlewareauth.Authenticator,
-	validatorService govalidatorservice.Service,
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
 ) *Controller {
@@ -47,13 +49,12 @@ func NewController(
 			RouterWrapper: baseRouter.NewGroup(BasePath),
 		},
 
-		handler:            handler,
+		handler:            internalhandler.Handler,
 		authenticator:      authenticator,
-		validatorService:   validatorService,
 		postgresService:    postgresService,
 		jwtIssuer:          jwtIssuer,
 		service:            &Service{},
-		validator:          &Validator{Service: validatorService},
+		validator:          &Validator{Service: internalvalidator.ValidationsService},
 		logger:             internallogger.Api,
 		jwtValidatorLogger: internallogger.JwtValidator,
 	}
@@ -72,38 +73,28 @@ func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	authController := internalrouterauth.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 		c.jwtIssuer,
 	)
 	noteController := internalrouternote.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 	)
 	notesController := internalrouternotes.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 	)
 	tagController := internalroutertag.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 	)
 	userController := internalrouteruser.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 	)
 
@@ -127,11 +118,14 @@ func (c *Controller) RegisterGroups() {
 // @Accept json
 // @Produce json
 // @Success 200 {object} BasicResponse
-// @Router /ping [get]
+// @Router /api/v1/ping [get]
 func (c *Controller) Ping(w http.ResponseWriter, r *http.Request) {
-	// Get the ping response
-	response := c.service.Ping()
-
-	// Handle the success response
-	c.handler.HandleSuccessResponse(w, response)
+	// Handle the response
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewResponseWithCode(
+			&common.BasicResponse{
+				Message: "pong",
+			}, http.StatusOK,
+		),
+	)
 }

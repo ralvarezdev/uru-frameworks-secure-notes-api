@@ -2,7 +2,7 @@ package auth
 
 import (
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 )
 
 type (

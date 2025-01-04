@@ -6,8 +6,8 @@ import (
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	internalrouterv1 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1"
 )
@@ -17,7 +17,6 @@ type (
 	Controller struct {
 		handler            gonethttphandler.Handler
 		authenticator      gonethttpmiddlewareauth.Authenticator
-		validatorService   govalidatorservice.Service
 		postgresService    *internalpostgres.Service
 		jwtIssuer          gojwtissuer.Issuer
 		logger             *internallogger.Logger
@@ -29,9 +28,7 @@ type (
 // NewController creates a new API controller
 func NewController(
 	baseRouter gonethttproute.RouterWrapper,
-	handler gonethttphandler.Handler,
 	authenticator gonethttpmiddlewareauth.Authenticator,
-	validatorService govalidatorservice.Service,
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
 ) *Controller {
@@ -39,9 +36,8 @@ func NewController(
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),
 		},
-		handler:            handler,
+		handler:            internalhandler.Handler,
 		authenticator:      authenticator,
-		validatorService:   validatorService,
 		postgresService:    postgresService,
 		jwtIssuer:          jwtIssuer,
 		logger:             internallogger.Api,
@@ -57,9 +53,7 @@ func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	v1Controller := internalrouterv1.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 		c.jwtIssuer,
 	)

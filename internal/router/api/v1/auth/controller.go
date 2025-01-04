@@ -6,9 +6,10 @@ import (
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
 
 type (
@@ -16,7 +17,6 @@ type (
 	Controller struct {
 		handler            gonethttphandler.Handler
 		authenticator      gonethttpmiddlewareauth.Authenticator
-		validatorService   govalidatorservice.Service
 		postgresService    *internalpostgres.Service
 		jwtIssuer          gojwtissuer.Issuer
 		service            *Service
@@ -30,9 +30,7 @@ type (
 // NewController creates a new API V1 auth controller
 func NewController(
 	baseRouter gonethttproute.RouterWrapper,
-	handler gonethttphandler.Handler,
 	authenticator gonethttpmiddlewareauth.Authenticator,
-	validatorService govalidatorservice.Service,
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
 ) *Controller {
@@ -40,16 +38,15 @@ func NewController(
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),
 		},
-		handler:          handler,
-		authenticator:    authenticator,
-		validatorService: validatorService,
-		postgresService:  postgresService,
-		jwtIssuer:        jwtIssuer,
+		handler:         internalhandler.Handler,
+		authenticator:   authenticator,
+		postgresService: postgresService,
+		jwtIssuer:       jwtIssuer,
 		service: &Service{
 			JwtIssuer:       jwtIssuer,
 			PostgresService: postgresService,
 		},
-		validator:          &Validator{Service: validatorService},
+		validator:          &Validator{Service: internalvalidator.ValidationsService},
 		logger:             internallogger.Api,
 		jwtValidatorLogger: internallogger.JwtValidator,
 	}

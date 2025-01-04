@@ -5,11 +5,12 @@ import (
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/database/postgres"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	internalrouterversion "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/version"
 	internalrouterversions "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/versions"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
 
 type (
@@ -19,7 +20,6 @@ type (
 		validator          *Validator
 		handler            gonethttphandler.Handler
 		authenticator      gonethttpmiddlewareauth.Authenticator
-		validatorService   govalidatorservice.Service
 		postgresService    *internalpostgres.Service
 		logger             *internallogger.Logger
 		jwtValidatorLogger *gojwtvalidator.Logger
@@ -30,21 +30,18 @@ type (
 // NewController creates a new API V1 note controller
 func NewController(
 	baseRouter gonethttproute.RouterWrapper,
-	handler gonethttphandler.Handler,
 	authenticator gonethttpmiddlewareauth.Authenticator,
-	validatorService govalidatorservice.Service,
 	postgresService *internalpostgres.Service,
 ) *Controller {
 	return &Controller{
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),
 		},
-		handler:            handler,
+		handler:            internalhandler.Handler,
 		authenticator:      authenticator,
-		validatorService:   validatorService,
 		postgresService:    postgresService,
 		service:            &Service{PostgresService: postgresService},
-		validator:          &Validator{Service: validatorService},
+		validator:          &Validator{Service: internalvalidator.ValidationsService},
 		logger:             internallogger.Api,
 		jwtValidatorLogger: internallogger.JwtValidator,
 	}
@@ -58,16 +55,12 @@ func (c *Controller) RegisterGroups() {
 	// Create the controllers
 	versionController := internalrouterversion.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 	)
 	versionsController := internalrouterversions.NewController(
 		c.RouterWrapper,
-		c.handler,
 		c.authenticator,
-		c.validatorService,
 		c.postgresService,
 	)
 
