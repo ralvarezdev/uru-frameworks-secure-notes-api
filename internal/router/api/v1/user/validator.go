@@ -30,7 +30,7 @@ func (v *Validator) ValidateEmail(
 	validations govalidatormappervalidations.Validations,
 ) {
 	if _, err := govalidatormail.ValidMailAddress(email); err != nil {
-		validations.AddFailedFieldValidationError(
+		validations.AddFieldValidationError(
 			emailField,
 			govalidatormail.ErrInvalidMailAddress,
 		)
@@ -44,7 +44,7 @@ func (v *Validator) ValidateBirthdate(
 	validations govalidatormappervalidations.Validations,
 ) {
 	if birthdate == nil || birthdate.After(time.Now()) {
-		validations.AddFailedFieldValidationError(
+		validations.AddFieldValidationError(
 			birthdateField,
 			govalidatorbirthdate.ErrInvalidBirthdate,
 		)
@@ -58,7 +58,7 @@ func (v *Validator) ValidateName(
 	validations govalidatormappervalidations.Validations,
 ) {
 	if name == "" {
-		validations.AddFailedFieldValidationError(
+		validations.AddFieldValidationError(
 			nameField,
 			govalidatorfield.ErrEmptyField,
 		)
@@ -89,6 +89,7 @@ func (v *Validator) ValidateSignUpRequest(request *SignUpRequest) (
 }
 
 // ValidateUpdateProfileRequest validates the UpdateProfileRequest
+/*
 func (v *Validator) ValidateUpdateProfileRequest(request *UpdateProfileRequest) (
 	interface{},
 	error,
@@ -116,3 +117,4 @@ func (v *Validator) ValidateUpdateProfileRequest(request *UpdateProfileRequest) 
 		},
 	)
 }
+*/

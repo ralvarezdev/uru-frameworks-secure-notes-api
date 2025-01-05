@@ -10,7 +10,7 @@ var (
 	// Router is the base router for server
 	Router = gonethttproute.NewRouter(
 		"",
-		goflagsmode.Mode,
+		goflagsmode.ModeFlag,
 		internallogger.Router,
 	)
 )

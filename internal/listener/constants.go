@@ -16,8 +16,8 @@ var (
 	Port *goloaderlistener.Port
 )
 
-// init initializes the default port for the server
-func init() {
+// Load loads the listener constants
+func Load() {
 	// Get the default port for the server
 	port, err := goloaderlistener.LoadPort(
 		internalloader.Loader,

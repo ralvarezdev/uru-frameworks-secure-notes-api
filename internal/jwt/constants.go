@@ -29,8 +29,8 @@ var (
 	Durations = make(map[gojwttoken.Token]time.Duration)
 )
 
-// init initializes the JWT constants
-func init() {
+// Load loads the JWT constants
+func Load() {
 	// Get the JWT keys
 	for _, env := range []string{
 		EnvPublicKey,

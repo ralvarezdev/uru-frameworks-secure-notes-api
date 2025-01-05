@@ -15,7 +15,8 @@ var (
 	Cost int
 )
 
-func init() {
+// Load loads the bcrypt constants
+func Load() {
 	// Get the cost parameter for the bcrypt hash
 	cost, err := internalloader.Loader.LoadIntVariable(CostKey)
 	if err != nil {

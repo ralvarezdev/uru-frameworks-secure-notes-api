@@ -9,7 +9,7 @@ import (
 var (
 	// Handler is the default handler for the requests and responses
 	Handler, _ = gonethttphandler.NewDefaultHandler(
-		goflagsmode.Mode,
+		goflagsmode.ModeFlag,
 		internaljson.Encoder,
 		internaljson.Decoder,
 	)

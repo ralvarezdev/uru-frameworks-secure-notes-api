@@ -2,10 +2,12 @@ package postgres
 
 import (
 	"database/sql"
+	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 const (
@@ -33,8 +35,8 @@ var (
 	Connection *sql.DB
 )
 
-// init initializes the Postgres database connection
-func init() {
+// Load loads the Postgres constants and connects to the Postgres database
+func Load() {
 	// Get the default URI for the Postgres database
 	uri, err := internalloader.Loader.LoadVariable(UriKey)
 	if err != nil {
@@ -54,9 +56,20 @@ func init() {
 	// Create the Postgres DSN
 	DSN = Uri + "/" + DatabaseName + "?sslmode=require"
 
+	// Create the GORM configuration
+	var gormConfig gorm.Config
+	if goflagsmode.ModeFlag.IsDebug() {
+		gormConfig = gorm.Config{TranslateError: true}
+	} else {
+		gormConfig = gorm.Config{
+			TranslateError: true,
+			Logger:         gormlogger.Discard,
+		}
+	}
+
 	// Connect to Postgres with GORM
 	database, err := gorm.Open(
-		postgres.Open(DSN), &gorm.Config{TranslateError: true},
+		postgres.Open(DSN), &gormConfig,
 	)
 	if err != nil {
 		panic(err)

@@ -15,8 +15,8 @@ var (
 	SaltLength int
 )
 
-// init initializes the salt length
-func init() {
+// Load loads the PBKDF2 constants
+func Load() {
 	// Get the salt length
 	saltLength, err := internalloader.Loader.LoadIntVariable(SaltLengthKey)
 	if err != nil {

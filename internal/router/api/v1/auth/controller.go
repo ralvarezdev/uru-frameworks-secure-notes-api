@@ -53,7 +53,36 @@ func NewController(
 }
 
 // RegisterRoutes registers the routes for the API V1 auth controller
-func (c *Controller) RegisterRoutes() {}
+func (c *Controller) RegisterRoutes() {
+	/*
+		c.RegisterRoute(
+			"POST /login",
+			c.LogIn,
+		)
+	*/
+}
 
 // RegisterGroups registers the router groups for the API V1 auth controller
 func (c *Controller) RegisterGroups() {}
+
+// LogIn logs in a user
+// @Summary Log in a user
+// @Description Authenticates a user and returns a seed token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body LogInRequest true "Log In Request"
+// @Success 200 {object} LogInResponse
+// @Failure 400 {object} gonethttphandler.ErrorResponse
+// @Failure 401 {object} gonethttphandler.ErrorResponse
+// @Failure 500 {object} gonethttphandler.ErrorResponse
+// @Router /api/v1/auth/login [post]
+/*
+func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
+	// Decode the request body and va
+	var body LogInRequest
+	if err := c.handler.HandleRequest(w, r, &body); err != nil {
+		return
+	}
+}
+*/

@@ -7,8 +7,8 @@ import (
 
 var (
 	// Encoder is the JSON encoder
-	Encoder = gonethttpjson.NewDefaultEncoder(goflagsmode.Mode)
+	Encoder = gonethttpjson.NewDefaultEncoder(goflagsmode.ModeFlag)
 
 	// Decoder is the JSON decoder
-	Decoder, _ = gonethttpjson.NewDefaultDecoder(goflagsmode.Mode, Encoder)
+	Decoder, _ = gonethttpjson.NewDefaultDecoder(goflagsmode.ModeFlag, Encoder)
 )

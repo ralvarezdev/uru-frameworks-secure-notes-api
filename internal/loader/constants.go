@@ -11,7 +11,7 @@ var (
 	Loader, _ = goloaderenv.NewDefaultLoader(
 		func() error {
 			// Check if the environment is production
-			if goflagsmode.Mode != nil && goflagsmode.Mode.IsProd() {
+			if goflagsmode.ModeFlag != nil && goflagsmode.ModeFlag.IsProd() {
 				return nil
 			}
 
