@@ -34,6 +34,9 @@ func NewController(
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
 ) *Controller {
+	// Load the validator mappers
+	LoadMappers()
+
 	return &Controller{
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),

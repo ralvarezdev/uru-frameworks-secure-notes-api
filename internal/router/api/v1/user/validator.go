@@ -4,6 +4,7 @@ import (
 	govalidatorfield "github.com/ralvarezdev/go-validator/field"
 	govalidatorbirthdate "github.com/ralvarezdev/go-validator/field/birthdate"
 	govalidatormail "github.com/ralvarezdev/go-validator/field/mail"
+	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
 	govalidatormapperservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
 	govalidatormappervalidations "github.com/ralvarezdev/go-validator/structs/mapper/validations"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
@@ -12,9 +13,13 @@ import (
 
 var (
 	// Mappers
-	SignUpRequestMapper, _        = internalvalidator.JSONGenerator.NewMapper(&SignUpRequest{})
-	UpdateProfileRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&UpdateProfileRequest{})
+	SignUpRequestMapper *govalidatormapper.Mapper
 )
+
+// LoadMappers loads the mappers
+func LoadMappers() {
+	SignUpRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&SignUpRequest{})
+}
 
 type (
 	// Validator is the structure for API V1 user validator

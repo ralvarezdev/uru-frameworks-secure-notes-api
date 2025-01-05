@@ -1,14 +1,20 @@
 package auth
 
 import (
+	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
 	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
 
 var (
 	// Mappers
-	LogInRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&LogInRequest{})
+	LogInRequestMapper *govalidatormapper.Mapper
 )
+
+// LoadMappers loads the mappers
+func LoadMappers() {
+	LogInRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&LogInRequest{})
+}
 
 type (
 	// Validator is the structure for API V1 auth validator

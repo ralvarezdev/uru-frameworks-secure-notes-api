@@ -37,6 +37,9 @@ func NewController(
 	authenticator gonethttpmiddlewareauth.Authenticator,
 	postgresService *internalpostgres.Service,
 ) *Controller {
+	// Load the validator mappers
+	LoadMappers()
+
 	return &Controller{
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),

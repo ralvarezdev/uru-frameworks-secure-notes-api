@@ -11,8 +11,8 @@ require (
 	github.com/ralvarezdev/go-jwt v0.3.11
 	github.com/ralvarezdev/go-loader v0.2.10
 	github.com/ralvarezdev/go-logger v0.4.4
-	github.com/ralvarezdev/go-net v0.4.16
-	github.com/ralvarezdev/go-validator v0.4.8
+	github.com/ralvarezdev/go-net v0.4.17
+	github.com/ralvarezdev/go-validator v0.4.9
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
