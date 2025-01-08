@@ -6,13 +6,13 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/ralvarezdev/go-crypto v0.5.0
-	github.com/ralvarezdev/go-databases v0.3.8
+	github.com/ralvarezdev/go-databases v0.3.9
 	github.com/ralvarezdev/go-flags v0.3.1
-	github.com/ralvarezdev/go-jwt v0.3.11
-	github.com/ralvarezdev/go-loader v0.2.10
-	github.com/ralvarezdev/go-logger v0.4.4
-	github.com/ralvarezdev/go-net v0.4.17
-	github.com/ralvarezdev/go-validator v0.4.9
+	github.com/ralvarezdev/go-jwt v0.3.12
+	github.com/ralvarezdev/go-loader v0.2.11
+	github.com/ralvarezdev/go-logger v0.4.5
+	github.com/ralvarezdev/go-net v0.5.6
+	github.com/ralvarezdev/go-validator v0.5.12
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
@@ -27,8 +27,10 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	github.com/ralvarezdev/go-reflect v0.1.0 // indirect
+	github.com/ralvarezdev/go-strings v0.1.0 // indirect
+	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )

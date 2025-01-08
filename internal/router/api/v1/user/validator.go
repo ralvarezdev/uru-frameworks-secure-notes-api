@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	govalidatorfield "github.com/ralvarezdev/go-validator/field"
 	govalidatorbirthdate "github.com/ralvarezdev/go-validator/field/birthdate"
 	govalidatormail "github.com/ralvarezdev/go-validator/field/mail"
@@ -32,7 +33,7 @@ type (
 func (v *Validator) ValidateEmail(
 	emailField string,
 	email string,
-	validations govalidatormappervalidations.Validations,
+	validations *govalidatormappervalidations.StructValidations,
 ) {
 	if _, err := govalidatormail.ValidMailAddress(email); err != nil {
 		validations.AddFieldValidationError(
@@ -46,7 +47,7 @@ func (v *Validator) ValidateEmail(
 func (v *Validator) ValidateBirthdate(
 	birthdateField string,
 	birthdate *time.Time,
-	validations govalidatormappervalidations.Validations,
+	validations *govalidatormappervalidations.StructValidations,
 ) {
 	if birthdate == nil || birthdate.After(time.Now()) {
 		validations.AddFieldValidationError(
@@ -60,7 +61,7 @@ func (v *Validator) ValidateBirthdate(
 func (v *Validator) ValidateName(
 	nameField string,
 	name string,
-	validations govalidatormappervalidations.Validations,
+	validations *govalidatormappervalidations.StructValidations,
 ) {
 	if name == "" {
 		validations.AddFieldValidationError(
@@ -71,15 +72,24 @@ func (v *Validator) ValidateName(
 }
 
 // ValidateSignUpRequest validates the SignUpRequest
-func (v *Validator) ValidateSignUpRequest(request *SignUpRequest) (
+func (v *Validator) ValidateSignUpRequest(body interface{}) (
 	interface{},
 	error,
 ) {
+	// Parse body
+	parsedBody, ok := body.(*SignUpRequest)
+	if !ok {
+		return nil, fmt.Errorf(
+			govalidatormapperservice.ErrInvalidBodyType,
+			SignUpRequestMapper.Type(),
+		)
+	}
+
 	return v.RunAndParseValidations(
-		func(validations govalidatormappervalidations.Validations) (err error) {
-			err = v.ValidateNilFields(
+		parsedBody,
+		func(validations *govalidatormappervalidations.StructValidations) (err error) {
+			err = v.ValidateRequiredFields(
 				validations,
-				request,
 				SignUpRequestMapper,
 			)
 			if err != nil {
@@ -87,7 +97,7 @@ func (v *Validator) ValidateSignUpRequest(request *SignUpRequest) (
 			}
 
 			// Check if the email is valid
-			v.ValidateEmail("email", request.Email, validations)
+			v.ValidateEmail("email", parsedBody.Email, validations)
 			return nil
 		},
 	)
@@ -100,7 +110,7 @@ func (v *Validator) ValidateUpdateProfileRequest(request *UpdateProfileRequest) 
 	error,
 ) {
 	return v.RunAndParseValidations(
-		func(validations govalidatormappervalidations.Validations) error {
+		func(validations *govalidatormappervalidations.StructValidations) error {
 			// Check if the birthdate is valid
 			if birthdate := request.Birthdate; birthdate != nil {
 				v.ValidateBirthdate(

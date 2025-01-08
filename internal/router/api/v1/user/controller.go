@@ -83,9 +83,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		w,
 		r,
 		&body,
-		func() (interface{}, error) {
-			return c.validator.ValidateSignUpRequest(&body)
-		},
+		c.validator.ValidateSignUpRequest,
 	)
 	if !ok {
 		return
@@ -99,9 +97,10 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	) && !errors.Is(err, ErrUsernameAlreadyRegistered) {
 		c.handler.HandleResponse(
 			w,
-			gonethttpresponse.NewDebugErrorResponseWithCode(
+			gonethttpresponse.NewDebugErrorResponse(
 				errors.New(gonethttp.InternalServerError),
 				err,
+				nil, nil,
 				http.StatusInternalServerError,
 			),
 		)
@@ -112,8 +111,9 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		c.handler.HandleResponse(
 			w,
-			gonethttpresponse.NewErrorResponseWithCode(
+			gonethttpresponse.NewErrorResponse(
 				err,
+				nil, nil,
 				http.StatusBadRequest,
 			),
 		)
@@ -125,7 +125,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Handle the response
 	c.handler.HandleResponse(
-		w, gonethttpresponse.NewResponseWithCode(
+		w, gonethttpresponse.NewSuccessResponse(
 			&internalapiv1common.BasicResponse{
 				Message: SignUpSuccess,
 			}, http.StatusCreated,

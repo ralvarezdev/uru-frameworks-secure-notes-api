@@ -84,8 +84,20 @@ func (c *Controller) RegisterGroups() {}
 func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and va
 	var body LogInRequest
-	if err := c.handler.HandleRequest(w, r, &body); err != nil {
+	ok := c.handler.HandleRequestAndValidations(
+		w,
+		r,
+		&body,
+		func() (interface{}, error) {
+			return c.validator.ValidateLogInRequest(&body)
+		},
+	)
+	if !ok {
 		return
 	}
+
+	// Log in the user
+	c.service.LogIn(&body)
+
 }
 */

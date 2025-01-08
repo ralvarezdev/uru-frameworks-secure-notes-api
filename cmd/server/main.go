@@ -18,6 +18,7 @@ import (
 	internallistener "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/listener"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	internalrouter "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"log"
 	"net/http"
 )
@@ -27,18 +28,19 @@ func init() {
 	// Parse the flags
 	flag.Parse()
 
+	// Log the mode flag
+	log.Printf("Running in %s mode...\n", goflagsmode.ModeFlag.Value())
+
 	// Call the load functions
 	internalbcrypt.Load()
 	internalpbkdf2.Load()
 	internalpostgres.Load()
 	internaljwt.Load()
 	internallistener.Load()
+	internalvalidator.Load()
 }
 
 func main() {
-	// Log the mode flag
-	log.Printf("Running in %s mode...\n", goflagsmode.ModeFlag.Value())
-
 	// Create the Postgres database service
 	postgresService, err := internalpostgres.NewService(
 		internalpostgres.Database,

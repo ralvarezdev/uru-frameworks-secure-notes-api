@@ -122,7 +122,7 @@ func (c *Controller) RegisterGroups() {
 func (c *Controller) Ping(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	c.handler.HandleResponse(
-		w, gonethttpresponse.NewResponseWithCode(
+		w, gonethttpresponse.NewSuccessResponse(
 			&common.BasicResponse{
 				Message: "pong",
 			}, http.StatusOK,

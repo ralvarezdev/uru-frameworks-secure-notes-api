@@ -25,15 +25,18 @@ type (
 
 // ValidateLogInRequest validates the LogInRequest
 /*
-func (v *Validator) ValidateLogInRequest(request *LogInRequest) error {
-	validations, _ := v.ValidateNilFields(
-		request,
-		LogInRequestMapper,
+func (v *Validator) ValidateLogInRequest(request *LogInRequest) (
+	interface{},
+	error,
+) {
+	return v.RunAndParseValidations(
+		func(validations *govalidatormappervalidations.StructValidations) error {
+			return v.ValidateRequiredFields(
+				validations,
+				request,
+				LogInRequestMapper,
+			)
+		},
 	)
-
-	// Check if the email is valid
-	v.ValidateEmail("email", request.Email, validations)
-
-	return v.CheckValidations(validations)
 }
 */

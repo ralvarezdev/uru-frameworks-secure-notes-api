@@ -68,3 +68,33 @@ func (s *Service) Close() error {
 func (s *Service) RunTransaction(transaction func(tx *gorm.DB) error) error {
 	return s.database.Transaction(transaction)
 }
+
+// UserUsernameWasFound checks if a user username was found
+func (s *Service) UserUsernameWasFound(userUsername *UserUsername) (
+	*UserUsername,
+	error,
+) {
+	if userUsername.ID != 0 {
+		return userUsername, nil
+	}
+	return nil, ErrUserNotFound
+}
+
+// GetUserUsernameByUsername gets a user username by username preloaded with the user
+func (s *Service) GetUserUsernameByUsername(username string) (
+	userUsername *UserUsername,
+	err error,
+) {
+	userUsername = &UserUsername{Username: username}
+	err = s.database.Preload(
+		"User.UserPasswordHash",
+		"revoked_at IS NULL",
+	).Where(
+		"username = ? AND revoked_at IS NULL",
+		username,
+	).First(&userUsername).Error
+	if err != nil {
+		return nil, err
+	}
+	return s.UserUsernameWasFound(userUsername)
+}

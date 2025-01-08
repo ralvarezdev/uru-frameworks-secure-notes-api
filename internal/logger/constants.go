@@ -9,6 +9,7 @@ import (
 	gologgermode "github.com/ralvarezdev/go-logger/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
+	govalidatormapperparserjson "github.com/ralvarezdev/go-validator/structs/mapper/parser/json"
 	govalidatormappervalidator "github.com/ralvarezdev/go-validator/structs/mapper/validator"
 )
 
@@ -61,6 +62,12 @@ var (
 	// MapperValidator is the logger for the mapper validator
 	MapperValidator, _ = govalidatormappervalidator.NewLogger(
 		"MAPPER VALIDATOR",
+		ModeLogger,
+	)
+
+	// MapperParser is the logger for the mapper parser
+	MapperParser, _ = govalidatormapperparserjson.NewLogger(
+		"MAPPER PARSER",
 		ModeLogger,
 	)
 )
