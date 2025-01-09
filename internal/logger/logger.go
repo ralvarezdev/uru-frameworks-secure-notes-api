@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	gologgermode "github.com/ralvarezdev/go-logger/mode"
 	gologgermodenamed "github.com/ralvarezdev/go-logger/mode/named"
 )
@@ -22,9 +23,9 @@ func NewLogger(header string, modeLogger gologgermode.Logger) (*Logger, error) {
 }
 
 // SignUp logs the sign-up event
-func (l *Logger) SignUp(id string) {
+func (l *Logger) SignUp(id uint) {
 	l.logger.Info(
 		"user signed up",
-		"user id: "+id,
+		fmt.Sprintf("user id: %d", id),
 	)
 }

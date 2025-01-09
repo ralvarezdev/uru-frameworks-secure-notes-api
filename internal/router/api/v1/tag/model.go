@@ -1,7 +1,7 @@
 package tag
 
 import (
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
+	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 )
 
 // CreateTagRequest is the request DTO to create a tag

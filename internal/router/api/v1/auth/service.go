@@ -34,12 +34,15 @@ func (s *Service) LogIn(body *LogInRequest) (*LogInResponse, error) {
 	err = s.PostgresService.RunTransaction(
 		func(tx *gorm.DB) error {
 			// Get the user username preloaded with the user
-			userUsername, err := s.PostgresService.GetUserUsernameByUsername(body.Username)
+			user, err := s.PostgresService.GetUserByUsername(body.Username)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(userUsername, passwordHash)
+			fmt.Printf("User: %+v\n", user)
+			fmt.Printf("Password: %s\n", passwordHash)
+			fmt.Printf("User Password Hash: %s\n", user.UserPasswordHashes[0])
+			fmt.Printf("User Username: %s\n", user.UserUsernames[0])
 
 				// Check if the password is correct
 				if !gocryptobcrypt.CheckPasswordHash(userUsername.) {

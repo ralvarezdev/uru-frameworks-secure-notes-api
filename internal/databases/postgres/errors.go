@@ -5,8 +5,7 @@ import (
 )
 
 var (
-	ErrNilService    = errors.New("database service cannot be nil")
-	ErrNilDatabase   = errors.New("database cannot be nil")
-	ErrNilConnection = errors.New("database connection cannot be nil")
-	ErrUserNotFound  = errors.New("user not found")
+	ErrNilService   = errors.New("database service cannot be nil")
+	ErrNilRow       = errors.New("row cannot be nil")
+	ErrUserNotFound = errors.New("user not found")
 )

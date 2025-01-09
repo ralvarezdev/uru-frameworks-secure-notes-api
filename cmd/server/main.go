@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
@@ -41,21 +43,30 @@ func init() {
 }
 
 func main() {
-	// Create the Postgres database service
-	postgresService, err := internalpostgres.NewService(
-		internalpostgres.Database,
-		internalpostgres.Connection,
+	// Connect to the database
+	db, err := internalpostgres.Config.Connect(
+		"pgx",
+		internalpostgres.DataSourceName,
 	)
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		internallogger.Postgres.DisconnectedFromDatabase()
-		if err = postgresService.Close(); err != nil {
+	defer func(db *sql.DB) {
+		err = db.Close()
+		if err != nil {
 			panic(err)
 		}
-	}()
+		internallogger.Postgres.DisconnectedFromDatabase()
+	}(db)
 	internallogger.Postgres.ConnectedToDatabase()
+
+	// Create the Postgres database service
+	postgresService, err := internalpostgres.NewService(
+		db,
+	)
+	if err != nil {
+		panic(err)
+	}
 
 	// Create the JWT claims validator
 	jwtClaimsValidator, _ := internalapiv1jwtclaims.NewDefaultValidator(

@@ -1,7 +1,7 @@
 package note
 
 import (
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
+	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 )
 
 // CreateNoteRequest is the request DTO to create a note

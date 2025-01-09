@@ -88,9 +88,7 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 		w,
 		r,
 		&body,
-		func() (interface{}, error) {
-			return c.validator.ValidateLogInRequest(&body)
-		},
+		c.validator.ValidateLogInRequest,
 	)
 	if !ok {
 		return

@@ -11,8 +11,8 @@ import (
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
+	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	internalrouterauth "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/auth"
-	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
 	internalrouternote "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note"
 	internalrouternotes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
 	internalroutertag "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/tag"
@@ -123,7 +123,7 @@ func (c *Controller) Ping(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewSuccessResponse(
-			&common.BasicResponse{
+			&internalapiv1common.BasicResponse{
 				Message: "pong",
 			}, http.StatusOK,
 		),

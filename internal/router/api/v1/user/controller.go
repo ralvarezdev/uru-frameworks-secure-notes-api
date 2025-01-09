@@ -11,10 +11,9 @@ import (
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/common"
+	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
-	"strconv"
 )
 
 type (
@@ -90,11 +89,29 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sign up the user
-	user, err := c.service.SignUp(&body)
-	if err != nil && !errors.Is(
-		err,
-		ErrEmailAlreadyRegistered,
-	) && !errors.Is(err, ErrUsernameAlreadyRegistered) {
+	userID, err := c.service.SignUp(&body)
+	if err == nil {
+		// Log the user sign up
+		c.logger.SignUp(*userID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				&internalapiv1common.BasicResponse{
+					Message: SignUpSuccess,
+				}, http.StatusCreated,
+			),
+		)
+		return
+	}
+
+	// Handle the response if the email or username is already registered
+	data := make(map[string]*[]string)
+	if errors.Is(err, ErrEmailAlreadyRegistered) {
+		data["email"] = &[]string{err.Error()}
+	} else if errors.Is(err, ErrUsernameAlreadyRegistered) {
+		data["username"] = &[]string{err.Error()}
+	} else {
 		c.handler.HandleResponse(
 			w,
 			gonethttpresponse.NewDebugErrorResponse(
@@ -107,28 +124,12 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if the email or username is already registered
-	if err != nil {
-		c.handler.HandleResponse(
-			w,
-			gonethttpresponse.NewErrorResponse(
-				err,
-				nil, nil,
-				http.StatusBadRequest,
-			),
-		)
-		return
-	}
-
-	// Log the user sign up
-	c.logger.SignUp(strconv.Itoa(int(user.ID)))
-
-	// Handle the response
+	// Handle the response if the email or username is already registered
 	c.handler.HandleResponse(
-		w, gonethttpresponse.NewSuccessResponse(
-			&internalapiv1common.BasicResponse{
-				Message: SignUpSuccess,
-			}, http.StatusCreated,
+		w,
+		gonethttpresponse.NewFailResponse(
+			data,
+			http.StatusBadRequest,
 		),
 	)
 }
