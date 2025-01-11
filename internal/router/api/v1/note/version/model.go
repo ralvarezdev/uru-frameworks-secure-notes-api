@@ -28,6 +28,5 @@ type GetNoteVersionRequest struct {
 
 // GetNoteVersionResponse is the response DTO to get a note version
 type GetNoteVersionResponse struct {
-	Message     string                          `json:"message"`
 	NoteVersion internalapiv1common.NoteVersion `json:"note_version"`
 }

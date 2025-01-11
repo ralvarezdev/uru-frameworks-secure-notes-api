@@ -23,9 +23,17 @@ func NewLogger(header string, modeLogger gologgermode.Logger) (*Logger, error) {
 }
 
 // SignUp logs the sign-up event
-func (l *Logger) SignUp(id uint) {
+func (l *Logger) SignUp(id int64) {
 	l.logger.Info(
 		"user signed up",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// LogIn logs the log-in event
+func (l *Logger) LogIn(id int64) {
+	l.logger.Info(
+		"user logged in",
 		fmt.Sprintf("user id: %d", id),
 	)
 }

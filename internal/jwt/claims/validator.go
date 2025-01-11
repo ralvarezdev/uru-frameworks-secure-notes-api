@@ -1,11 +1,15 @@
 package claims
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	gojwt "github.com/ralvarezdev/go-jwt"
 	gojwtredisauth "github.com/ralvarezdev/go-jwt/redis/auth"
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
+	"time"
 )
 
 // DefaultValidator struct
@@ -25,14 +29,42 @@ func NewDefaultValidator(
 	}, nil
 }
 
-// IsAccessTokenValid checks if the access token is valid
-func (d *DefaultValidator) IsAccessTokenValid(jwtId string) (bool, error) {
-	return false, nil
+// IsRefreshTokenValid checks if the refresh token is valid
+func (d *DefaultValidator) IsRefreshTokenValid(id string) (bool, error) {
+	// Get the database connection
+	db := d.postgresService.DB()
+
+	// Get the refresh token by the ID
+	var expiresAt time.Time
+	if err := db.QueryRow(
+		internalpostgresqueries.SelectUserRefreshTokenExpiresAtByID,
+		id,
+	).Scan(&expiresAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	return time.Now().Before(expiresAt), nil
 }
 
-// IsRefreshTokenValid checks if the refresh token is valid
-func (d *DefaultValidator) IsRefreshTokenValid(jwtId string) (bool, error) {
-	return false, nil
+// IsAccessTokenValid checks if the access token is valid
+func (d *DefaultValidator) IsAccessTokenValid(id string) (bool, error) {
+	// Get the database connection
+	db := d.postgresService.DB()
+
+	// Get the access token by the ID
+	var expiresAt time.Time
+	if err := db.QueryRow(
+		internalpostgresqueries.SelectUserAccessTokenExpiresAtByID,
+		id,
+	).Scan(&expiresAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	return time.Now().Before(expiresAt), nil
 }
 
 // ValidateClaims validates the claims

@@ -22,7 +22,6 @@ type UpdateProfileRequest struct {
 
 // GetMyProfileResponse is the response DTO to get my profile
 type GetMyProfileResponse struct {
-	Message         string  `json:"message"`
 	FirstName       string  `json:"first_name"`
 	LastName        string  `json:"last_name"`
 	Username        string  `json:"username"`

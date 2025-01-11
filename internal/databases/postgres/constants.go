@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	// UriKey is the key of the default URI for the Postgres database
-	UriKey = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRESQL_HOST"
+	// EnvUri is the key of the default URI for the Postgres database
+	EnvUri = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRESQL_HOST"
 
-	// DatabaseNameKey is the key of the default database name for the Postgres database
-	DatabaseNameKey = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRESQL_NAME"
+	// EnvDatabaseName is the key of the default database name for the Postgres database
+	EnvDatabaseName = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRESQL_NAME"
 )
 
 var (
@@ -32,19 +32,19 @@ var (
 // Load loads the Postgres constants
 func Load() {
 	// Get the default URI for the Postgres database
-	uri, err := internalloader.Loader.LoadVariable(UriKey)
+	uri, err := internalloader.Loader.LoadVariable(EnvUri)
 	if err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(UriKey)
+	internallogger.Environment.EnvironmentVariableLoaded(EnvUri)
 	Uri = uri
 
 	// Get the default database name for the Postgres database
-	databaseName, err := internalloader.Loader.LoadVariable(DatabaseNameKey)
+	databaseName, err := internalloader.Loader.LoadVariable(EnvDatabaseName)
 	if err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(DatabaseNameKey)
+	internallogger.Environment.EnvironmentVariableLoaded(EnvDatabaseName)
 	DatabaseName = databaseName
 
 	// Create the Postgres DSN

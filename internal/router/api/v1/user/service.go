@@ -11,7 +11,7 @@ import (
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresconstraints "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/constraints"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
-	"time"
+	"net/http"
 )
 
 type (
@@ -22,16 +22,13 @@ type (
 )
 
 // SignUp signs up a user
-func (s *Service) SignUp(body *SignUpRequest) (
-	*uint,
+func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
+	*int64,
 	error,
 ) {
 	if body == nil {
 		return nil, internal.ErrNilRequestBody
 	}
-
-	// Get the current time
-	currentTime := time.Now()
 
 	// Hash the password
 	passwordHash, err := gocryptobcrypt.HashPassword(
@@ -49,26 +46,24 @@ func (s *Service) SignUp(body *SignUpRequest) (
 	}
 
 	// Run the transaction
-	var userID uint
+	var userID int64
 	err = s.PostgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Create the new user
 			if err = tx.QueryRow(
-				internalpostgresqueries.UsersInsert,
+				internalpostgresqueries.InsertUser,
 				body.FirstName,
 				body.LastName,
 				salt,
-				currentTime,
 			).Scan(&userID); err != nil {
 				return err
 			}
 
 			// Create the new user's email
 			if _, err = tx.Exec(
-				internalpostgresqueries.UserEmailsInsert,
+				internalpostgresqueries.InsertUserEmail,
 				userID,
 				body.Email,
-				currentTime,
 			); err != nil {
 				isUniqueViolation, constraintName := godatabasessql.IsUniqueViolationError(err)
 				if isUniqueViolation {
@@ -81,10 +76,9 @@ func (s *Service) SignUp(body *SignUpRequest) (
 
 			// Create the new user's username
 			if _, err = tx.Exec(
-				internalpostgresqueries.UserUsernamesInsert,
+				internalpostgresqueries.InsertUserUsername,
 				userID,
 				body.Username,
-				currentTime,
 			); err != nil {
 				isUniqueViolation, constraintName := godatabasessql.IsUniqueViolationError(err)
 				if isUniqueViolation {
@@ -96,16 +90,12 @@ func (s *Service) SignUp(body *SignUpRequest) (
 			}
 
 			// Create the new user's password hash
-			if _, err = tx.Exec(
-				internalpostgresqueries.UserPasswordHashesInsert,
+			_, err = tx.Exec(
+				internalpostgresqueries.InsertUserPasswordHash,
 				userID,
 				passwordHash,
-				currentTime,
-			); err != nil {
-				return err
-			}
-
-			return nil
+			)
+			return err
 		},
 	)
 	return &userID, err

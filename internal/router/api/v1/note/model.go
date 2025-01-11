@@ -32,12 +32,10 @@ type GetNoteRequest struct {
 
 // GetNoteResponse is the response DTO to get a note
 type GetNoteResponse struct {
-	Message string                   `json:"message"`
-	Note    internalapiv1common.Note `json:"note"`
+	Note internalapiv1common.Note `json:"note"`
 }
 
 // ListNoteTagsResponse is the response DTO to list note tags
 type ListNoteTagsResponse struct {
-	Message  string                          `json:"message"`
 	NoteTags []internalapiv1common.TagWithID `json:"note_tags"`
 }

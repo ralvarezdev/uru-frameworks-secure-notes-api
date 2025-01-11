@@ -3,7 +3,6 @@ package postgres
 import (
 	"database/sql"
 	godatabasessqlservice "github.com/ralvarezdev/go-databases/sql/service"
-	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
 )
 
@@ -31,10 +30,12 @@ func NewService(db *sql.DB) (
 	}
 
 	// Migrate the database
+	/**/
 	err = instance.Migrate()
 	if err != nil {
 		return nil, err
 	}
+	/**/
 
 	return instance, nil
 }
@@ -42,34 +43,23 @@ func NewService(db *sql.DB) (
 // Migrate migrates the database
 func (s *Service) Migrate() error {
 	return s.Service.Migrate(
-		internalpostgresqueries.UsersMigrate,
-		internalpostgresqueries.UserUsernamesMigrate,
-		internalpostgresqueries.UserPasswordHashesMigrate,
-		internalpostgresqueries.UserResetPasswordMigrate,
-		internalpostgresqueries.UserEmailsMigrate,
-		internalpostgresqueries.UserEmailVerificationsMigrate,
-		internalpostgresqueries.UserPhoneNumbersMigrate,
-		internalpostgresqueries.UserPhoneNumberVerificationsMigrate,
-		internalpostgresqueries.UserTokenSeedsMigrate,
-		internalpostgresqueries.UserFailedLogInAttemptsMigrate,
-		internalpostgresqueries.UserRefreshTokensMigrate,
-		internalpostgresqueries.UserAccessTokensMigrate,
-		internalpostgresqueries.UserTOTPsMigrate,
-		internalpostgresqueries.UserTOTPRecoveryCodesMigrate,
-		internalpostgresqueries.NotesMigrate,
-		internalpostgresqueries.TagsMigrate,
-		internalpostgresqueries.NoteTagsMigrate,
-		internalpostgresqueries.NoteVersionsMigrate,
+		internalpostgresqueries.CreateUsers,
+		internalpostgresqueries.CreateUserUsernames,
+		internalpostgresqueries.CreateUserPasswordHashes,
+		internalpostgresqueries.CreateUserResetPasswords,
+		internalpostgresqueries.CreateUserEmails,
+		internalpostgresqueries.CreateUserEmailVerifications,
+		internalpostgresqueries.CreateUserPhoneNumbers,
+		internalpostgresqueries.CreateUserPhoneNumberVerifications,
+		internalpostgresqueries.CreateUserTokenSeeds,
+		internalpostgresqueries.UserFailedLogInAttemptsCreate,
+		internalpostgresqueries.CreateUserRefreshTokens,
+		internalpostgresqueries.CreateUserAccessTokens,
+		internalpostgresqueries.CreateUserTOTPs,
+		internalpostgresqueries.CreateUserTOTPRecoveryCodes,
+		internalpostgresqueries.CreateNotes,
+		internalpostgresqueries.CreateTags,
+		internalpostgresqueries.CreateNoteTags,
+		internalpostgresqueries.CreateNoteVersions,
 	)
-}
-
-// WasUserFound checks if a user was found
-func (s *Service) WasUserFound(user *internalpostgresmodel.User) (
-	*internalpostgresmodel.User,
-	error,
-) {
-	if user.ID != 0 {
-		return user, nil
-	}
-	return nil, ErrUserNotFound
 }

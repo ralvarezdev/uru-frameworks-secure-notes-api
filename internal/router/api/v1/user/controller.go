@@ -3,7 +3,7 @@ package user
 import (
 	"errors"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttperrors "github.com/ralvarezdev/go-net/http/errors"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
@@ -89,7 +89,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sign up the user
-	userID, err := c.service.SignUp(&body)
+	userID, err := c.service.SignUp(r, &body)
 	if err == nil {
 		// Log the user sign up
 		c.logger.SignUp(*userID)
@@ -115,7 +115,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		c.handler.HandleResponse(
 			w,
 			gonethttpresponse.NewDebugErrorResponse(
-				errors.New(gonethttp.InternalServerError),
+				gonethttperrors.InternalServerError,
 				err,
 				nil, nil,
 				http.StatusInternalServerError,
@@ -128,8 +128,9 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	c.handler.HandleResponse(
 		w,
 		gonethttpresponse.NewFailResponse(
-			data,
+			&data,
 			http.StatusBadRequest,
+			nil,
 		),
 	)
 }

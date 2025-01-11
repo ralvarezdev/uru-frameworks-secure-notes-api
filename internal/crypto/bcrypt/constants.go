@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	// CostKey is the key for the cost parameter in the bcrypt hash
-	CostKey = "URU_FRAMEWORKS_SECURE_NOTES_BCRYPT_COST"
+	// EnvCost is the key for the cost parameter in the bcrypt hash
+	EnvCost = "URU_FRAMEWORKS_SECURE_NOTES_BCRYPT_COST"
 )
 
 var (
@@ -18,10 +18,10 @@ var (
 // Load loads the bcrypt constants
 func Load() {
 	// Get the cost parameter for the bcrypt hash
-	cost, err := internalloader.Loader.LoadIntVariable(CostKey)
+	cost, err := internalloader.Loader.LoadIntVariable(EnvCost)
 	if err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(CostKey)
+	internallogger.Environment.EnvironmentVariableLoaded(EnvCost)
 	Cost = cost
 }

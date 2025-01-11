@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	// SaltLengthKey is the key for the salt length
-	SaltLengthKey = "URU_FRAMEWORKS_SECURE_NOTES_PBKDF2_SALT_LENGTH"
+	// EnvSaltLength is the key for the salt length
+	EnvSaltLength = "URU_FRAMEWORKS_SECURE_NOTES_PBKDF2_SALT_LENGTH"
 )
 
 var (
@@ -18,10 +18,10 @@ var (
 // Load loads the PBKDF2 constants
 func Load() {
 	// Get the salt length
-	saltLength, err := internalloader.Loader.LoadIntVariable(SaltLengthKey)
+	saltLength, err := internalloader.Loader.LoadIntVariable(EnvSaltLength)
 	if err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(SaltLengthKey)
+	internallogger.Environment.EnvironmentVariableLoaded(EnvSaltLength)
 	SaltLength = saltLength
 }

@@ -1,8 +1,23 @@
 package auth
 
 import (
+	"database/sql"
+	"errors"
+	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
+	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
+	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
+	gonethttp "github.com/ralvarezdev/go-net/http"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
+	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
+	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
+	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
+	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 type (
@@ -13,54 +28,285 @@ type (
 	}
 )
 
-// LogIn logs in a user
-/*
-func (s *Service) LogIn(body *LogInRequest) (*LogInResponse, error) {
-	// Check if the body is nil
-	if body == nil {
-		return nil, internal.ErrNilRequestBody
+// InsertUserFailedLogInAttempt inserts a failed login attempt for a user
+func (s *Service) InsertUserFailedLogInAttempt(
+	userID int64,
+	ipAddress string,
+	badPassword, bad2FACode bool,
+) error {
+	// Get the database connection
+	db := s.PostgresService.DB()
+
+	// Insert the failed login attempt
+	_, err := db.Exec(
+		internalpostgresqueries.InsertUserFailedLogInAttempt,
+		userID,
+		ipAddress,
+		badPassword,
+		bad2FACode,
+	)
+	return err
+}
+
+// ValidatePassword validates a password
+func (s *Service) ValidatePassword(
+	userID int64,
+	hash, password, ipAddress string,
+) (bool, error) {
+	// Check if the password is correct
+	if gocryptobcrypt.CompareHashAndPassword(
+		hash,
+		password,
+	) {
+		return true, nil
 	}
 
-	// Hash the password
-	passwordHash, err := gocryptobcrypt.HashPassword(
+	// Register the failed login attempt
+	if err := s.InsertUserFailedLogInAttempt(
+		userID,
+		ipAddress,
+		true,
+		false,
+	); err != nil {
+		return false, err
+	}
+
+	return false, nil
+}
+
+// ValidateTOTPCode validates a TOTP code
+func (s *Service) ValidateTOTPCode(
+	userID int64,
+	totpSecret,
+	totpCode,
+	ipAddress string,
+	time time.Time,
+) (bool, error) {
+	match, err := gocryptototp.CompareTOTPSha1(
+		totpCode,
+		totpSecret,
+		time,
+		uint64(internaltotp.Period),
+		internaltotp.Digits,
+	)
+	if match {
+		return true, nil
+	}
+
+	// Register the failed login attempt
+	_ = s.InsertUserFailedLogInAttempt(
+		userID,
+		ipAddress,
+		false,
+		true,
+	)
+
+	// Register error
+	if err != nil {
+		return false, err
+	}
+	return false, nil
+}
+
+// ValidateTOTPRecoveryCode validates a TOTP recovery code
+func (s *Service) ValidateTOTPRecoveryCode(
+	userID int64,
+	totpID int64,
+	totpRecoveryCode string,
+	ipAddress string,
+) (bool, error) {
+	// Get the database connection
+	db := s.PostgresService.DB()
+
+	// Get the TOTP recovery code by the user TOTP ID
+	var totpRecoveryCodeID string
+	if err := db.QueryRow(
+		internalpostgresqueries.SelectUserTOTPRecoveryCodeByCode,
+		totpID,
+		totpRecoveryCode,
+	).Scan(&totpRecoveryCode); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// Register the failed login attempt
+			_ = s.InsertUserFailedLogInAttempt(
+				userID,
+				ipAddress,
+				false,
+				true,
+			)
+		}
+		return false, err
+	}
+
+	// Revoke the TOTP recovery code
+	if _, err := db.Exec(
+		internalpostgresqueries.UpdateUserTOTPRecoveryCodeRevokedAtByID,
+		totpRecoveryCodeID,
+	); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// LogIn logs in a user
+func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
+	*int64,
+	*map[gojwttoken.Token]*string,
+	error,
+) {
+	// Check if the body is nil
+	if body == nil {
+		return nil, nil, internal.ErrNilRequestBody
+	}
+
+	// Get the database connection
+	db := s.PostgresService.DB()
+
+	// Get the current time
+	currentTime := time.Now()
+
+	// Get the client IP
+	clientIP := gonethttp.GetClientIP(r)
+
+	// Get the user ID and password hash by the username
+	var userID int64
+	var passwordHash string
+	if err := db.QueryRow(
+		internalpostgresqueries.SelectUserIDAndPasswordHashByUsername,
+		body.Username,
+	).Scan(&userID, &passwordHash); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, internalapiv1common.UserNotFoundByUsername
+		}
+		return nil, nil, err
+	}
+
+	// Validate the password
+	match, err := s.ValidatePassword(
+		userID,
+		passwordHash,
 		body.Password,
-		internalbcrypt.Cost,
+		clientIP,
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+	if !match {
+		return nil, nil, ErrInvalidPassword
+	}
+
+	// Get the user TOTP ID and secret
+	var userTOTPID int64
+	var userTOTPSecret string
+	totpIsActive := true
+	if err = db.QueryRow(
+		internalpostgresqueries.SelectUserTOTPSecretByUserID,
+		userID,
+	).Scan(&userTOTPID, &userTOTPSecret); err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, err
+		}
+		totpIsActive = false
+	}
+
+	// Validate the TOTP code, if it is active
+	if totpIsActive {
+		// Check if the TOTP code-related fields are nil
+		if body.TOTPCode == nil {
+			return nil, nil, ErrMissingTOTPCode
+		}
+		if body.IsTOTPRecoveryCode == nil {
+			return nil, nil, ErrMissingIsTOTPRecoveryCode
+		}
+
+		if !(*body.IsTOTPRecoveryCode) {
+			// Validate the TOTP code
+			match, err = s.ValidateTOTPCode(
+				userID,
+				userTOTPSecret,
+				*body.TOTPCode,
+				clientIP,
+				currentTime,
+			)
+			if err != nil {
+				return nil, nil, err
+			}
+			if !match {
+				return nil, nil, ErrInvalidTOTPCode
+			}
+		} else {
+			// Validate the TOTP recovery code
+			match, err = s.ValidateTOTPRecoveryCode(
+				userID,
+				userTOTPID,
+				*body.TOTPCode,
+				clientIP,
+			)
+			if err != nil {
+				return nil, nil, err
+			}
+			if !match {
+				return nil, nil, ErrInvalidTOTPRecoveryCode
+			}
+		}
 	}
 
 	// Run the transaction
+	var userRefreshTokenID, userAccessTokenID int64
+	refreshTokenExpiresAt := currentTime.Add(internaljwt.Durations[gojwttoken.RefreshToken])
+	accessTokenExpiresAt := currentTime.Add(internaljwt.Durations[gojwttoken.AccessToken])
 	err = s.PostgresService.RunTransaction(
-		func(tx *gorm.DB) error {
-			// Get the user username preloaded with the user
-			user, err := s.PostgresService.GetUserByUsername(body.Username)
-			if err != nil {
+		func(tx *sql.Tx) error {
+			// Insert the user refresh token
+			if err = tx.QueryRow(
+				internalpostgresqueries.InsertParentUserRefreshToken,
+				userID,
+				clientIP,
+				currentTime,
+				refreshTokenExpiresAt,
+			).Scan(&userRefreshTokenID); err != nil {
 				return err
 			}
 
-			fmt.Printf("User: %+v\n", user)
-			fmt.Printf("Password: %s\n", passwordHash)
-			fmt.Printf("User Password Hash: %s\n", user.UserPasswordHashes[0])
-			fmt.Printf("User Username: %s\n", user.UserUsernames[0])
-
-				// Check if the password is correct
-				if !gocryptobcrypt.CheckPasswordHash(userUsername.) {
-					return nil, ErrInvalidPassword
-				}
-
-				// Create the JWT token
-				token, err := s.JwtIssuer.IssueToken(user.ID)
-				if err != nil {
-					return nil, err
-				}
-
-
-			return nil
+			// Insert the user access token
+			return tx.QueryRow(
+				internalpostgresqueries.InsertUserAccessToken,
+				userID,
+				userRefreshTokenID,
+				currentTime,
+				accessTokenExpiresAt,
+			).Scan(&userAccessTokenID)
 		},
 	)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	return &LogInResponse{}, nil
+	// Create the user tokens claims
+	userTokensClaims := make(map[gojwttoken.Token]*internaljwtclaims.Claims)
+	userTokensClaims[gojwttoken.RefreshToken] = internaljwtclaims.NewRefreshTokenClaims(
+		userRefreshTokenID,
+		strconv.FormatInt(userID, 10),
+		currentTime,
+		refreshTokenExpiresAt,
+	)
+	userTokensClaims[gojwttoken.AccessToken] = internaljwtclaims.NewAccessTokenClaims(
+		userAccessTokenID,
+		strconv.FormatInt(userID, 10),
+		currentTime,
+		accessTokenExpiresAt,
+	)
+
+	// Issue the user tokens
+	userTokens := make(map[gojwttoken.Token]*string)
+	for token, claims := range userTokensClaims {
+		rawToken, err := s.JwtIssuer.IssueToken(claims)
+		if err != nil {
+			return nil, nil, err
+		}
+		userTokens[token] = &rawToken
+	}
+
+	return &userID, &userTokens, nil
 
 }
-*/

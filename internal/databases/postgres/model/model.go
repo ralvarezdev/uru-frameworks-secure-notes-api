@@ -87,23 +87,12 @@ type (
 
 	// UserFailedLogInAttempt is the Postgres model for the user failed login attempt
 	UserFailedLogInAttempt struct {
-		ID              int64
-		UserID          int64
-		UserTokenSeedID sql.NullInt64
-		IPv4Address     string
-		BadPassword     sql.NullBool
-		Bad2FACode      sql.NullBool
-		AttemptedAt     time.Time
-	}
-
-	// UserTokenSeed is the Postgres model for the user token seed
-	UserTokenSeed struct {
-		ID        int64
-		UserID    int64
-		TokenSeed string
-		CreatedAt time.Time
-		ExpiresAt time.Time
-		RevokedAt sql.NullTime
+		ID          int64
+		UserID      int64
+		IPAddress   string
+		BadPassword sql.NullBool
+		Bad2FACode  sql.NullBool
+		AttemptedAt time.Time
 	}
 
 	// UserRefreshToken is the Postgres model for the user refresh token
@@ -111,8 +100,7 @@ type (
 		ID                   int64
 		UserID               int64
 		ParentRefreshTokenID sql.NullInt64
-		UserTokenSeedID      sql.NullInt64
-		IPv4Address          string
+		IPAddress            string
 		IssuedAt             time.Time
 		ExpiresAt            time.Time
 		RevokedAt            sql.NullTime
@@ -134,7 +122,6 @@ type (
 		UserID     int64
 		Secret     string
 		CreatedAt  time.Time
-		ExpiresAt  time.Time
 		VerifiedAt sql.NullTime
 		RevokedAt  sql.NullTime
 	}

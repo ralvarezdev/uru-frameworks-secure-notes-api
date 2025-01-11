@@ -26,6 +26,5 @@ type GetTagRequest struct {
 
 // GetTagResponse is the response DTO to get a tag
 type GetTagResponse struct {
-	Message string                  `json:"message"`
-	Tag     internalapiv1common.Tag `json:"tag"`
+	Tag internalapiv1common.Tag `json:"tag"`
 }

@@ -119,9 +119,9 @@ func main() {
 	routerController.RegisterGroups()
 
 	// Serve the API server
-	internallogger.Listener.ServerStarted(internallistener.Port.Port)
+	internallogger.Listener.ServerStarted(internallistener.Port)
 	if err = http.ListenAndServe(
-		":"+internallistener.Port.Port,
+		":"+internallistener.Port,
 		routerController.Handler(),
 	); err != nil {
 		panic(goloaderlistener.ErrFailedToServe)

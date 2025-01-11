@@ -6,13 +6,11 @@ import (
 
 // ListNoteVersionsResponse is the response DTO to list note versions
 type ListNoteVersionsResponse struct {
-	Message        string   `json:"message"`
 	NoteVersionsID []string `json:"note_versions_id"`
 }
 
 // ListLastNoteVersionsWithContentResponse is the response DTO to list last note versions with their content
 type ListLastNoteVersionsWithContentResponse struct {
-	Message      string                                  `json:"message"`
 	NoteVersions []internalapiv1common.NoteVersionWithID `json:"note_versions"`
 }
 
@@ -24,6 +22,5 @@ type SyncNoteVersionsRequest struct {
 
 // SyncNoteVersionsResponse is the response DTO to sync note versions
 type SyncNoteVersionsResponse struct {
-	Message          string                                `json:"message"`
 	SyncNoteVersions []internalapiv1common.SyncNoteVersion `json:"sync_note_versions"`
 }

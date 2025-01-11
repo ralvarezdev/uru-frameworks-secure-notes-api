@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	// UsersMigrate is the SQL query to create the users table
-	UsersMigrate = `
+	// CreateUsers is the SQL query to create the users table
+	CreateUsers = `
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 `
 
-	// UserUsernamesMigrate is the SQL query to create the user_usernames table
-	UserUsernamesMigrate = fmt.Sprintf(
+	// CreateUserUsernames is the SQL query to create the user_usernames table
+	CreateUserUsernames = fmt.Sprintf(
 		`
 CREATE TABLE IF NOT EXISTS user_usernames (
     id BIGSERIAL PRIMARY KEY,
@@ -34,8 +34,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_usernames (username) WHERE revoked_
 `, internalpostgresconstraints.UserUsernamesUniqueUsername,
 	)
 
-	// UserPasswordHashesMigrate is the SQL query to create the user_password_hashes table
-	UserPasswordHashesMigrate = `
+	// CreateUserPasswordHashes is the SQL query to create the user_password_hashes table
+	CreateUserPasswordHashes = `
 CREATE TABLE IF NOT EXISTS user_password_hashes (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS user_password_hashes (
 );
 `
 
-	// UserResetPasswordMigrate is the SQL query to create the UserResetPassword table
-	UserResetPasswordMigrate = `
+	// CreateUserResetPasswords is the SQL query to create the UserResetPassword table
+	CreateUserResetPasswords = `
 CREATE TABLE IF NOT EXISTS user_reset_passwords (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -59,8 +59,8 @@ CREATE TABLE IF NOT EXISTS user_reset_passwords (
 );
 `
 
-	// UserEmailsMigrate is the SQL query to create the user_emails table
-	UserEmailsMigrate = fmt.Sprintf(
+	// CreateUserEmails is the SQL query to create the user_emails table
+	CreateUserEmails = fmt.Sprintf(
 		`
 CREATE TABLE IF NOT EXISTS user_emails (
     id BIGSERIAL PRIMARY KEY,
@@ -74,8 +74,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (email) WHERE revoked_at IS 
 `, internalpostgresconstraints.UserEmailsUniqueEmail,
 	)
 
-	// UserEmailVerificationsMigrate is the SQL query to create the user_email_verifications table
-	UserEmailVerificationsMigrate = `
+	// CreateUserEmailVerifications is the SQL query to create the user_email_verifications table
+	CreateUserEmailVerifications = `
 CREATE TABLE IF NOT EXISTS user_email_verifications (
     id BIGSERIAL PRIMARY KEY,
     user_email_id BIGINT NOT NULL,
@@ -88,8 +88,8 @@ CREATE TABLE IF NOT EXISTS user_email_verifications (
 );
 `
 
-	// UserPhoneNumbersMigrate is the SQL query to create the user_phone_numbers table
-	UserPhoneNumbersMigrate = `
+	// CreateUserPhoneNumbers is the SQL query to create the user_phone_numbers table
+	CreateUserPhoneNumbers = `
 CREATE TABLE IF NOT EXISTS user_phone_numbers (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -100,8 +100,8 @@ CREATE TABLE IF NOT EXISTS user_phone_numbers (
 );
 `
 
-	// UserPhoneNumberVerificationsMigrate is the SQL query to create the user_phone_number_verifications table
-	UserPhoneNumberVerificationsMigrate = `
+	// CreateUserPhoneNumberVerifications is the SQL query to create the user_phone_number_verifications table
+	CreateUserPhoneNumberVerifications = `
 CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
     id BIGSERIAL PRIMARY KEY,
     user_phone_number_id BIGINT NOT NULL,
@@ -114,8 +114,8 @@ CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
 );
 `
 
-	// UserTokenSeedsMigrate is the SQL query to create the user_token_seeds table
-	UserTokenSeedsMigrate = `
+	// CreateUserTokenSeeds is the SQL query to create the user_token_seeds table
+	CreateUserTokenSeeds = `
 CREATE TABLE IF NOT EXISTS user_token_seeds (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -127,8 +127,8 @@ CREATE TABLE IF NOT EXISTS user_token_seeds (
 );
 `
 
-	// UserFailedLogInAttemptsMigrate is the SQL query to create the user_failed_log_in_attempts table
-	UserFailedLogInAttemptsMigrate = `
+	// UserFailedLogInAttemptsCreate is the SQL query to create the user_failed_log_in_attempts table
+	UserFailedLogInAttemptsCreate = `
 CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -142,8 +142,8 @@ CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
 );
 `
 
-	// UserRefreshTokensMigrate is the SQL query to create the user_refresh_tokens table
-	UserRefreshTokensMigrate = `
+	// CreateUserRefreshTokens is the SQL query to create the user_refresh_tokens table
+	CreateUserRefreshTokens = `
 CREATE TABLE IF NOT EXISTS user_refresh_tokens (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -159,8 +159,8 @@ CREATE TABLE IF NOT EXISTS user_refresh_tokens (
 );
 `
 
-	// UserAccessTokensMigrate is the SQL query to create the user_access_tokens table
-	UserAccessTokensMigrate = `
+	// CreateUserAccessTokens is the SQL query to create the user_access_tokens table
+	CreateUserAccessTokens = `
 CREATE TABLE IF NOT EXISTS user_access_tokens (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -173,8 +173,8 @@ CREATE TABLE IF NOT EXISTS user_access_tokens (
 );
 `
 
-	// UserTOTPsMigrate is the SQL query to create the user_totps table
-	UserTOTPsMigrate = `
+	// CreateUserTOTPs is the SQL query to create the user_totps table
+	CreateUserTOTPs = `
 CREATE TABLE IF NOT EXISTS user_totps (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -187,8 +187,8 @@ CREATE TABLE IF NOT EXISTS user_totps (
 );
 `
 
-	// UserTOTPRecoveryCodesMigrate is the SQL query to create the user_totp_recovery_codes table
-	UserTOTPRecoveryCodesMigrate = `
+	// CreateUserTOTPRecoveryCodes is the SQL query to create the user_totp_recovery_codes table
+	CreateUserTOTPRecoveryCodes = `
 CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
     id BIGSERIAL PRIMARY KEY,
     user_totp_id BIGINT NOT NULL,
@@ -198,8 +198,8 @@ CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
 );
 `
 
-	// TagsMigrate is the SQL query to create the tags table
-	TagsMigrate = `
+	// CreateTags is the SQL query to create the tags table
+	CreateTags = `
 CREATE TABLE IF NOT EXISTS tags (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -208,8 +208,8 @@ CREATE TABLE IF NOT EXISTS tags (
 );
 `
 
-	// NotesMigrate is the SQL query to create the notes table
-	NotesMigrate = `
+	// CreateNotes is the SQL query to create the notes table
+	CreateNotes = `
 CREATE TABLE IF NOT EXISTS notes (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -221,8 +221,8 @@ CREATE TABLE IF NOT EXISTS notes (
 );
 `
 
-	// NoteTagsMigrate is the SQL query to create the note_tags table
-	NoteTagsMigrate = `
+	// CreateNoteTags is the SQL query to create the note_tags table
+	CreateNoteTags = `
 CREATE TABLE IF NOT EXISTS note_tags (
     id BIGSERIAL PRIMARY KEY,
     note_id BIGINT NOT NULL,
@@ -233,8 +233,8 @@ CREATE TABLE IF NOT EXISTS note_tags (
 );
 `
 
-	// NoteVersionsMigrate is the SQL query to create the note_versions table
-	NoteVersionsMigrate = `
+	// CreateNoteVersions is the SQL query to create the note_versions table
+	CreateNoteVersions = `
 CREATE TABLE IF NOT EXISTS note_versions (
     id SERIAL PRIMARY KEY,
     note_id BIGINT NOT NULL,

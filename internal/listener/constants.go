@@ -1,32 +1,29 @@
 package listener
 
 import (
-	goloaderlistener "github.com/ralvarezdev/go-loader/http/listener"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 )
 
 const (
-	// PortKey is the key of the default port for the server
-	PortKey = "PORT"
+	// EnvPort is the key of the default port for the server
+	EnvPort = "PORT"
 )
 
 var (
 	// Port is the default port for the server
-	Port *goloaderlistener.Port
+	Port string
 )
 
 // Load loads the listener constants
 func Load() {
 	// Get the default port for the server
-	port, err := goloaderlistener.LoadPort(
-		internalloader.Loader,
-		"0.0.0.0",
-		PortKey,
+	port, err := internalloader.Loader.LoadVariable(
+		EnvPort,
 	)
 	if err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(PortKey)
+	internallogger.Environment.EnvironmentVariableLoaded(EnvPort)
 	Port = port
 }
