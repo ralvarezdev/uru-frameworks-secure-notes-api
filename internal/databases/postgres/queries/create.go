@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
     id BIGSERIAL PRIMARY KEY,
     user_totp_id BIGINT NOT NULL,
     code VARCHAR(255) UNIQUE NOT NULL,
+	created_at TIMESTAMP NOT NULL,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_totp_id) REFERENCES user_totps(id) ON DELETE CASCADE
 );

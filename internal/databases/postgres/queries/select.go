@@ -22,6 +22,18 @@ AND
 	user_password_hashes.revoked_at IS NULL
 `
 
+	// SelectUserEmailByUserID is the query to select the user email by user ID
+	SelectUserEmailByUserID = `
+SELECT
+	user_emails.email
+FROM
+	user_emails
+WHERE
+	user_emails.user_id = $1
+AND
+	user_emails.revoked_at IS NULL
+`
+
 	// SelectUserTOTPSecretVerifiedByUserID is the query to select the user TOTP secret that has been verified by user ID
 	SelectUserTOTPSecretVerifiedByUserID = `
 SELECT

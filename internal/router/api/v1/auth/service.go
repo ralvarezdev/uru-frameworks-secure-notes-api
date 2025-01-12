@@ -5,7 +5,6 @@ import (
 	"errors"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
-	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gonethttp "github.com/ralvarezdev/go-net/http"
@@ -452,13 +451,22 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 
 	// Run transaction
 	var userTOTPID int64
+	var userEmail, userTOTPSecret string
 	err = s.PostgresService.RunTransaction(
 		func(tx *sql.Tx) error {
+			// Get the user email by the user ID
+			if err = tx.QueryRow(
+				internalpostgresqueries.SelectUserEmailByUserID,
+				userID,
+			).Scan(&userEmail); err != nil {
+				return err
+			}
+
 			// Get the user TOTP ID by the user ID
 			if err = tx.QueryRow(
 				internalpostgresqueries.SelectUserTOTPByUserID,
 				userID,
-			).Scan(&userTOTPID); err != nil {
+			).Scan(&userTOTPID, &userTOTPSecret); err != nil {
 				if errors.Is(err, sql.ErrNoRows) {
 					return nil
 				}
@@ -478,7 +486,7 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 	}
 
 	// Generate the TOTP secret
-	totpSecret, err := gocryptorandomutf8.Generate(internaltotp.SecretLength)
+	totpSecret, err := gocryptototp.NewSecret(internaltotp.SecretLength)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -495,7 +503,7 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 	// Generate the TOTP URL
 	totpUrl, err := internaltotp.Url.Generate(
 		totpSecret,
-		strconv.Itoa(int(userID)),
+		userEmail,
 	)
 	if err != nil {
 		return nil, nil, err

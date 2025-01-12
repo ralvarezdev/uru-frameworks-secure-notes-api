@@ -46,7 +46,6 @@ var (
 
 // Load loads the TOTP constants
 func Load() {
-
 	// Get the TOTP period
 	if err := internalloader.Loader.LoadIntVariable(
 		EnvPeriod,
@@ -112,7 +111,7 @@ VALUES
 	Url = gocryptototp.NewUrl(
 		"Secure Notes",
 		"SHA1",
-		Period,
 		Digits,
+		Period,
 	)
 }

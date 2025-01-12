@@ -436,7 +436,6 @@ func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 		c.handler.HandleResponse(
 			w, gonethttpresponse.NewSuccessResponse(
 				VerifyTOTPResponse{
-					IsVerified:    recoveryCodes != nil,
 					RecoveryCodes: *recoveryCodes,
 				},
 				http.StatusOK,

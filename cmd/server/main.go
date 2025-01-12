@@ -10,6 +10,7 @@ import (
 	gonethttpjwtvalidator "github.com/ralvarezdev/go-net/http/jwt/validator"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
+	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
@@ -36,6 +37,7 @@ func init() {
 	// Call the load functions
 	internalloader.Load()
 	internalbcrypt.Load()
+	internaltotp.Load()
 	internalpbkdf2.Load()
 	internalpostgres.Load()
 	internaljwt.Load()

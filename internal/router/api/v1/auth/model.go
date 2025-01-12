@@ -35,8 +35,7 @@ type VerifyTOTPRequest struct {
 
 // VerifyTOTPResponse is the response DTO to verify TOTP
 type VerifyTOTPResponse struct {
-	IsVerified    bool     `json:"is_verified"`
-	RecoveryCodes []string `json:"recovery_codes,omitempty"`
+	RecoveryCodes []string `json:"recovery_codes"`
 }
 
 // RevokeTOTPRequest is the request DTO to revoke TOTP
