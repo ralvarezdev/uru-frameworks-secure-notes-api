@@ -2,7 +2,6 @@ package pbkdf2
 
 import (
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 )
 
 const (
@@ -18,10 +17,10 @@ var (
 // Load loads the PBKDF2 constants
 func Load() {
 	// Get the salt length
-	saltLength, err := internalloader.Loader.LoadIntVariable(EnvSaltLength)
-	if err != nil {
+	if err := internalloader.Loader.LoadIntVariable(
+		EnvSaltLength,
+		&SaltLength,
+	); err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(EnvSaltLength)
-	SaltLength = saltLength
 }

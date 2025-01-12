@@ -3,7 +3,6 @@ package postgres
 import (
 	godatabasessql "github.com/ralvarezdev/go-databases/sql"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"time"
 )
 
@@ -32,20 +31,17 @@ var (
 // Load loads the Postgres constants
 func Load() {
 	// Get the default URI for the Postgres database
-	uri, err := internalloader.Loader.LoadVariable(EnvUri)
-	if err != nil {
+	if err := internalloader.Loader.LoadVariable(EnvUri, &Uri); err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(EnvUri)
-	Uri = uri
 
 	// Get the default database name for the Postgres database
-	databaseName, err := internalloader.Loader.LoadVariable(EnvDatabaseName)
-	if err != nil {
+	if err := internalloader.Loader.LoadVariable(
+		EnvDatabaseName,
+		&DatabaseName,
+	); err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(EnvDatabaseName)
-	DatabaseName = databaseName
 
 	// Create the Postgres DSN
 	DataSourceName = Uri + "/" + DatabaseName + "?sslmode=require"

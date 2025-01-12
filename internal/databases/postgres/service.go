@@ -30,12 +30,12 @@ func NewService(db *sql.DB) (
 	}
 
 	// Migrate the database
-	/**/
-	err = instance.Migrate()
-	if err != nil {
-		return nil, err
-	}
-	/**/
+	/*
+		err = instance.Migrate()
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	return instance, nil
 }

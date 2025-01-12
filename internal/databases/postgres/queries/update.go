@@ -50,4 +50,24 @@ SET
 WHERE
 	user_access_tokens.user_id = $1
 `
+
+	// UpdateUserTOTPRevokedAtByID is the query to update the TOTP revoked at field by the ID
+	UpdateUserTOTPRevokedAtByID = `
+UPDATE
+	user_totps
+SET
+	revoked_at = NOW()
+WHERE
+	user_totps.id = $1
+`
+
+	// UpdateUserTOTPVerifiedAtByID is the query to update the TOTP verified at field by the ID
+	UpdateUserTOTPVerifiedAtByID = `
+UPDATE
+	user_totps
+SET
+	verified_at = NOW()
+WHERE
+	user_totps.id = $1
+`
 )

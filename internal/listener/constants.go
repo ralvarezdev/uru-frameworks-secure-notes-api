@@ -2,7 +2,6 @@ package listener
 
 import (
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 )
 
 const (
@@ -18,12 +17,10 @@ var (
 // Load loads the listener constants
 func Load() {
 	// Get the default port for the server
-	port, err := internalloader.Loader.LoadVariable(
+	if err := internalloader.Loader.LoadVariable(
 		EnvPort,
-	)
-	if err != nil {
+		&Port,
+	); err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(EnvPort)
-	Port = port
 }

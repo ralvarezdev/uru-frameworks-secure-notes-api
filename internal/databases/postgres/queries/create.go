@@ -163,7 +163,6 @@ CREATE TABLE IF NOT EXISTS user_totps (
     user_id BIGINT NOT NULL,
     secret VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
     verified_at TIMESTAMP,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

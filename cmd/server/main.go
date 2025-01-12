@@ -7,7 +7,6 @@ import (
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	goloaderlistener "github.com/ralvarezdev/go-loader/http/listener"
 	gonethttpjwtvalidator "github.com/ralvarezdev/go-net/http/jwt/validator"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -18,6 +17,7 @@ import (
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internalapiv1jwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internallistener "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/listener"
+	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	internalrouter "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
@@ -34,6 +34,7 @@ func init() {
 	log.Printf("Running in %s mode...\n", goflagsmode.ModeFlag.Value())
 
 	// Call the load functions
+	internalloader.Load()
 	internalbcrypt.Load()
 	internalpbkdf2.Load()
 	internalpostgres.Load()
@@ -119,11 +120,11 @@ func main() {
 	routerController.RegisterGroups()
 
 	// Serve the API server
-	internallogger.Listener.ServerStarted(internallistener.Port)
+	internallogger.Api.ServerStarted(internallistener.Port)
 	if err = http.ListenAndServe(
 		":"+internallistener.Port,
 		routerController.Handler(),
 	); err != nil {
-		panic(goloaderlistener.ErrFailedToServe)
+		panic(err)
 	}
 }

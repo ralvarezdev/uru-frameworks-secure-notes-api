@@ -22,6 +22,14 @@ func NewLogger(header string, modeLogger gologgermode.Logger) (*Logger, error) {
 	return &Logger{logger: namedLogger}, nil
 }
 
+// ServerStarted logs a success message when the server starts
+func (l *Logger) ServerStarted(port string) {
+	l.logger.Info(
+		"server started",
+		"port: "+port,
+	)
+}
+
 // LogIn logs the log-in event
 func (l *Logger) LogIn(id int64) {
 	l.logger.Info(
@@ -66,6 +74,22 @@ func (l *Logger) RefreshToken(id int64) {
 func (l *Logger) SignUp(id int64) {
 	l.logger.Info(
 		"user signed up",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// GenerateTOTPUrl logs the generate TOTP URL event
+func (l *Logger) GenerateTOTPUrl(id int64) {
+	l.logger.Info(
+		"user generated totp url",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// VerifyTOTP logs the verify TOTP event
+func (l *Logger) VerifyTOTP(id int64) {
+	l.logger.Info(
+		"user verified totp",
 		fmt.Sprintf("user id: %d", id),
 	)
 }

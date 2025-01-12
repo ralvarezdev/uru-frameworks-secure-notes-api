@@ -22,8 +22,8 @@ AND
 	user_password_hashes.revoked_at IS NULL
 `
 
-	// SelectUserTOTPSecretByUserID is the query to select the user TOTP secret by user ID
-	SelectUserTOTPSecretByUserID = `
+	// SelectUserTOTPSecretVerifiedByUserID is the query to select the user TOTP secret that has been verified by user ID
+	SelectUserTOTPSecretVerifiedByUserID = `
 SELECT
 	user_totps.id,
 	user_totps.secret
@@ -73,5 +73,18 @@ WHERE
 	user_access_tokens.id = $1
 AND	
 	user_access_tokens.revoked_at IS NULL
+`
+
+	// SelectUserTOTPByUserID is the query to select the user TOTP by user ID
+	SelectUserTOTPByUserID = `
+SELECT
+	user_totps.id,
+	user_totps.secret
+FROM
+	user_totps
+WHERE
+	user_totps.user_id = $1
+AND
+	user_totps.revoked_at IS NULL
 `
 )

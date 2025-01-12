@@ -3,7 +3,6 @@ package jwt
 import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"time"
 )
 
@@ -36,11 +35,10 @@ func Load() {
 		EnvPublicKey,
 		EnvPrivateKey,
 	} {
-		key, err := internalloader.Loader.LoadVariable(env)
-		if err != nil {
+		var key string
+		if err := internalloader.Loader.LoadVariable(env, &key); err != nil {
 			panic(err)
 		}
-		internallogger.Environment.EnvironmentVariableLoaded(env)
 		Keys[env] = key
 	}
 
@@ -49,11 +47,13 @@ func Load() {
 		gojwttoken.AccessToken:  EnvAccessTokenDuration,
 		gojwttoken.RefreshToken: EnvRefreshTokenDuration,
 	} {
-		tokenDuration, err := internalloader.Loader.LoadDurationVariable(env)
-		if err != nil {
+		var tokenDuration time.Duration
+		if err := internalloader.Loader.LoadDurationVariable(
+			env,
+			&tokenDuration,
+		); err != nil {
 			panic(err)
 		}
-		internallogger.Environment.EnvironmentVariableLoaded(env)
 		Durations[key] = tokenDuration
 	}
 }

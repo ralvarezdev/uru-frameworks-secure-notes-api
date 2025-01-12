@@ -23,15 +23,20 @@ type RevokeRefreshTokenRequest struct {
 	UserRefreshTokenID int64 `json:"user_refresh_token_id"`
 }
 
+// GenerateTOTPUrlResponse is the response DTO to generate TOTP URL
+type GenerateTOTPUrlResponse struct {
+	TOTPUrl string `json:"totp_url"`
+}
+
 // VerifyTOTPRequest is the request DTO to verify TOTP
 type VerifyTOTPRequest struct {
-	TOTPKey  string `json:"totp_key"`
 	TOTPCode string `json:"totp_code"`
 }
 
 // VerifyTOTPResponse is the response DTO to verify TOTP
 type VerifyTOTPResponse struct {
-	IsVerified *bool `json:"is_verified,omitempty"`
+	IsVerified    bool     `json:"is_verified"`
+	RecoveryCodes []string `json:"recovery_codes,omitempty"`
 }
 
 // RevokeTOTPRequest is the request DTO to revoke TOTP

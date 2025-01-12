@@ -69,13 +69,18 @@ func (c *Controller) RegisterRoutes() {
 		c.LogIn,
 	)
 	c.RegisterRoute(
-		"DELETE /refresh-token",
-		c.RevokeRefreshToken,
+		"POST /logout",
+		c.LogOut,
 		c.authenticator.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
-		"POST /logout",
-		c.LogOut,
+		"POST /refresh-token",
+		c.RefreshToken,
+		c.authenticator.Authenticate(gojwtinterception.RefreshToken),
+	)
+	c.RegisterRoute(
+		"DELETE /refresh-token",
+		c.RevokeRefreshToken,
 		c.authenticator.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
@@ -84,9 +89,14 @@ func (c *Controller) RegisterRoutes() {
 		c.authenticator.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
-		"POST /refresh-token",
-		c.RefreshToken,
-		c.authenticator.Authenticate(gojwtinterception.RefreshToken),
+		"POST /totp/generate",
+		c.GenerateTOTPUrl,
+		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+	)
+	c.RegisterRoute(
+		"POST /totp/verify",
+		c.VerifyTOTP,
+		c.authenticator.Authenticate(gojwtinterception.AccessToken),
 	)
 }
 
@@ -342,6 +352,125 @@ func (c *Controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Handle the error
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewDebugErrorResponse(
+			gonethttperrors.InternalServerError,
+			err,
+			nil, nil, http.StatusInternalServerError,
+		),
+	)
+}
+
+// GenerateTOTPUrl generates a TOTP URL
+// @Summary Generate a TOTP URL
+// @Description Generates a TOTP URL
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} GenerateTOTPUrlResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
+// @Router /api/v1/auth/totp/generate [post]
+func (c *Controller) GenerateTOTPUrl(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Generate the TOTP URL
+	userID, totpUrl, err := c.service.GenerateTOTPUrl(r)
+	if err == nil {
+		// Log the successful TOTP URL generation
+		c.logger.GenerateTOTPUrl(*userID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				GenerateTOTPUrlResponse{
+					TOTPUrl: *totpUrl,
+				},
+				http.StatusCreated,
+			),
+		)
+		return
+	}
+
+	// Handle the error
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewDebugErrorResponse(
+			gonethttperrors.InternalServerError,
+			err,
+			nil, nil, http.StatusInternalServerError,
+		),
+	)
+}
+
+// VerifyTOTP verifies a TOTP code
+// @Summary Verify a TOTP code
+// @Description Verifies a TOTP code
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body VerifyTOTPRequest
+// @Success 200 {object} VerifyTOTPResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
+// @Router /api/v1/auth/totp/verify [post]
+func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
+	// Decode the request body and validate the request
+	var body VerifyTOTPRequest
+	if !c.handler.HandleRequestAndValidations(
+		w,
+		r,
+		&body,
+		c.validator.ValidateVerifyTOTPRequest,
+	) {
+		return
+	}
+
+	// Verify the TOTP code
+	userID, recoveryCodes, err := c.service.VerifyTOTP(r, &body)
+	if err == nil {
+		// Log the successful TOTP verification
+		c.logger.VerifyTOTP(*userID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				VerifyTOTPResponse{
+					IsVerified:    recoveryCodes != nil,
+					RecoveryCodes: *recoveryCodes,
+				},
+				http.StatusOK,
+			),
+		)
+		return
+	}
+
+	// Handle the error
+	anErrorOccurred := false
+	data := make(map[string]*[]string)
+	if errors.Is(err, ErrInvalidTOTPCode) {
+		data["totp_code"] = &[]string{err.Error()}
+	} else if errors.Is(
+		err,
+		internalapiv1common.UserTOTPSecretNotFoundByUserID,
+	) {
+		data["totp_secret"] = &[]string{err.Error()}
+	} else {
+		anErrorOccurred = true
+	}
+
+	// Check if an error occurred
+	if !anErrorOccurred {
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewFailResponse(
+				&data,
+				nil,
+				http.StatusUnauthorized,
+			),
+		)
+		return
+	}
+
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
 			gonethttperrors.InternalServerError,

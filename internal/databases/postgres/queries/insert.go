@@ -138,4 +138,26 @@ VALUES (
 RETURNING
 	id
 `
+
+	// InsertUserTOTP is the SQL query to insert a user TOTP key
+	InsertUserTOTP = `
+INSERT INTO user_totps (
+	user_id,
+	secret,
+	created_at
+)
+VALUES (
+	$1,
+	$2,
+	NOW()
+)
+RETURNING
+	id
+`
+)
+
+var (
+	// InsertUserTOTPRecoveryCodes is the SQL query to insert the user TOTP recovery codes
+	// This is dynamically set based on the recovery codes count
+	InsertUserTOTPRecoveryCodes string
 )

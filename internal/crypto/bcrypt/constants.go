@@ -2,7 +2,6 @@ package bcrypt
 
 import (
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 )
 
 const (
@@ -18,10 +17,10 @@ var (
 // Load loads the bcrypt constants
 func Load() {
 	// Get the cost parameter for the bcrypt hash
-	cost, err := internalloader.Loader.LoadIntVariable(EnvCost)
-	if err != nil {
+	if err := internalloader.Loader.LoadIntVariable(
+		EnvCost,
+		&Cost,
+	); err != nil {
 		panic(err)
 	}
-	internallogger.Environment.EnvironmentVariableLoaded(EnvCost)
-	Cost = cost
 }

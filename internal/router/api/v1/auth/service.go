@@ -5,6 +5,7 @@ import (
 	"errors"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
+	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gonethttp "github.com/ralvarezdev/go-net/http"
@@ -266,7 +267,7 @@ func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 	var userTOTPSecret string
 	totpIsActive := true
 	if err = db.QueryRow(
-		internalpostgresqueries.SelectUserTOTPSecretByUserID,
+		internalpostgresqueries.SelectUserTOTPSecretVerifiedByUserID,
 		userID,
 	).Scan(&userTOTPID, &userTOTPSecret); err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
@@ -436,4 +437,161 @@ func (s *Service) RefreshToken(r *http.Request) (
 		&userRefreshTokenID,
 	)
 	return &userID, userTokens, err
+}
+
+// GenerateTOTPUrl generates a TOTP URL
+func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get the database connection
+	db := s.PostgresService.DB()
+
+	// Run transaction
+	var userTOTPID int64
+	err = s.PostgresService.RunTransaction(
+		func(tx *sql.Tx) error {
+			// Get the user TOTP ID by the user ID
+			if err = tx.QueryRow(
+				internalpostgresqueries.SelectUserTOTPByUserID,
+				userID,
+			).Scan(&userTOTPID); err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return nil
+				}
+				return err
+			}
+
+			// Revoke the existing TOTP secret
+			_, err = tx.Exec(
+				internalpostgresqueries.UpdateUserTOTPRevokedAtByID,
+				userTOTPID,
+			)
+			return err
+		},
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Generate the TOTP secret
+	totpSecret, err := gocryptorandomutf8.Generate(internaltotp.SecretLength)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Insert the TOTP secret
+	if _, err = db.Exec(
+		internalpostgresqueries.InsertUserTOTP,
+		userID,
+		totpSecret,
+	); err != nil {
+		return nil, nil, err
+	}
+
+	// Generate the TOTP URL
+	totpUrl, err := internaltotp.Url.Generate(
+		totpSecret,
+		strconv.Itoa(int(userID)),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &userID, &totpUrl, nil
+}
+
+// VerifyTOTP verifies a TOTP secret
+func (s *Service) VerifyTOTP(
+	r *http.Request,
+	body *VerifyTOTPRequest,
+) (*int64, *[]string, error) {
+	// Check if the body is nil
+	if body == nil {
+		return nil, nil, gonethttp.ErrNilRequestBody
+	}
+
+	// Get the current time in UTC
+	currentTime := time.Now().UTC()
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+
+	// Get the database connection
+	db := s.PostgresService.DB()
+
+	// Get the user TOTP ID and secret
+	var userTOTPID int64
+	var userTOTPSecret string
+	if err = db.QueryRow(
+		internalpostgresqueries.SelectUserTOTPByUserID,
+		userID,
+	).Scan(&userTOTPID, &userTOTPSecret); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil, internalapiv1common.UserTOTPSecretNotFoundByUserID
+		}
+		return nil, nil, err
+	}
+
+	// Verify the TOTP code with the secret
+	match, err := gocryptototp.CompareTOTPSha1(
+		body.TOTPCode,
+		userTOTPSecret,
+		currentTime,
+		uint64(internaltotp.Period),
+		internaltotp.Digits,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !match {
+		return nil, nil, ErrInvalidTOTPCode
+	}
+
+	// Generate the TOTP recovery codes
+	totpRecoveryCodes, err := gocryptototp.GenerateRecoveryCodes(
+		internaltotp.RecoveryCodesCount,
+		internaltotp.RecoveryCodesLength,
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create the insert TOTP recovery codes arguments
+	insertTOTPRecoveryCodesArgs := make(
+		[]interface{},
+		len(*totpRecoveryCodes)+1,
+	)
+	insertTOTPRecoveryCodesArgs[0] = &userTOTPID
+	for i, code := range *totpRecoveryCodes {
+		insertTOTPRecoveryCodesArgs[i+1] = &code
+	}
+
+	// Run transaction
+	err = s.PostgresService.RunTransaction(
+		func(tx *sql.Tx) error {
+			// Update the user TOTP verified at
+			if _, err = tx.Exec(
+				internalpostgresqueries.UpdateUserTOTPVerifiedAtByID,
+				userTOTPID,
+			); err != nil {
+				return err
+			}
+
+			// Insert the user TOTP recovery codes
+			_, err = tx.Exec(
+				internalpostgresqueries.InsertUserTOTPRecoveryCodes,
+				insertTOTPRecoveryCodesArgs...,
+			)
+			return err
+		},
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &userID, totpRecoveryCodes, err
 }
