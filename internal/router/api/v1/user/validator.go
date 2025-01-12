@@ -2,12 +2,13 @@ package user
 
 import (
 	"fmt"
-	govalidatorfield "github.com/ralvarezdev/go-validator/field"
-	govalidatorbirthdate "github.com/ralvarezdev/go-validator/field/birthdate"
-	govalidatormail "github.com/ralvarezdev/go-validator/field/mail"
-	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
-	govalidatormapperservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	govalidatormappervalidations "github.com/ralvarezdev/go-validator/structs/mapper/validations"
+	gonethttp "github.com/ralvarezdev/go-net/http"
+	govalidatorfield "github.com/ralvarezdev/go-validator/struct/field"
+	govalidatorfieldbirthdate "github.com/ralvarezdev/go-validator/struct/field/birthdate"
+	govalidatorfieldmail "github.com/ralvarezdev/go-validator/struct/field/mail"
+	govalidatormapper "github.com/ralvarezdev/go-validator/struct/mapper"
+	govalidatormappervalidation "github.com/ralvarezdev/go-validator/struct/mapper/validation"
+	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"time"
 )
@@ -25,7 +26,7 @@ func LoadMappers() {
 type (
 	// Validator is the structure for API V1 user validator
 	Validator struct {
-		govalidatormapperservice.Service
+		govalidatormappervalidator.Service
 	}
 )
 
@@ -33,12 +34,12 @@ type (
 func (v *Validator) ValidateEmail(
 	emailField string,
 	email string,
-	validations *govalidatormappervalidations.StructValidations,
+	validations *govalidatormappervalidation.StructValidations,
 ) {
-	if _, err := govalidatormail.ValidMailAddress(email); err != nil {
+	if _, err := govalidatorfieldmail.ValidMailAddress(email); err != nil {
 		validations.AddFieldValidationError(
 			emailField,
-			govalidatormail.ErrInvalidMailAddress,
+			govalidatorfieldmail.ErrInvalidMailAddress,
 		)
 	}
 }
@@ -47,12 +48,12 @@ func (v *Validator) ValidateEmail(
 func (v *Validator) ValidateBirthdate(
 	birthdateField string,
 	birthdate *time.Time,
-	validations *govalidatormappervalidations.StructValidations,
+	validations *govalidatormappervalidation.StructValidations,
 ) {
 	if birthdate == nil || birthdate.After(time.Now()) {
 		validations.AddFieldValidationError(
 			birthdateField,
-			govalidatorbirthdate.ErrInvalidBirthdate,
+			govalidatorfieldbirthdate.ErrInvalidBirthdate,
 		)
 	}
 }
@@ -61,7 +62,7 @@ func (v *Validator) ValidateBirthdate(
 func (v *Validator) ValidateName(
 	nameField string,
 	name string,
-	validations *govalidatormappervalidations.StructValidations,
+	validations *govalidatormappervalidation.StructValidations,
 ) {
 	if name == "" {
 		validations.AddFieldValidationError(
@@ -80,14 +81,14 @@ func (v *Validator) ValidateSignUpRequest(body interface{}) (
 	parsedBody, ok := body.(*SignUpRequest)
 	if !ok {
 		return nil, fmt.Errorf(
-			govalidatormapperservice.ErrInvalidBodyType,
+			gonethttp.ErrInvalidRequestBody,
 			SignUpRequestMapper.Type(),
 		)
 	}
 
 	return v.RunAndParseValidations(
 		parsedBody,
-		func(validations *govalidatormappervalidations.StructValidations) (err error) {
+		func(validations *govalidatormappervalidation.StructValidations) (err error) {
 			err = v.ValidateRequiredFields(
 				validations,
 				SignUpRequestMapper,
@@ -110,7 +111,7 @@ func (v *Validator) ValidateUpdateProfileRequest(request *UpdateProfileRequest) 
 	error,
 ) {
 	return v.RunAndParseValidations(
-		func(validations *govalidatormappervalidations.StructValidations) error {
+		func(validations *govalidatormappervalidation.StructValidations) error {
 			// Check if the birthdate is valid
 			if birthdate := request.Birthdate; birthdate != nil {
 				v.ValidateBirthdate(

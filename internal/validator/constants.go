@@ -2,11 +2,10 @@ package validator
 
 import (
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
-	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
-	govalidatormapperparser "github.com/ralvarezdev/go-validator/structs/mapper/parser"
-	govalidatormapperparserjson "github.com/ralvarezdev/go-validator/structs/mapper/parser/json"
-	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	govalidatormappervalidator "github.com/ralvarezdev/go-validator/structs/mapper/validator"
+	govalidatormapper "github.com/ralvarezdev/go-validator/struct/mapper"
+	govalidatormapperparser "github.com/ralvarezdev/go-validator/struct/mapper/parser"
+	govalidatormapperparserjson "github.com/ralvarezdev/go-validator/struct/mapper/parser/json"
+	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 )
 
@@ -21,7 +20,7 @@ var (
 	ValidationsParser govalidatormapperparser.Parser
 
 	// ValidationsService is the mapper validations service
-	ValidationsService govalidatorservice.Service
+	ValidationsService govalidatormappervalidator.Service
 )
 
 // Load initializes the validator constants
@@ -39,7 +38,7 @@ func Load() {
 		ValidationsParser = govalidatormapperparserjson.NewParser(nil)
 	}
 
-	ValidationsService, _ = govalidatorservice.NewDefaultService(
+	ValidationsService, _ = govalidatormappervalidator.NewDefaultService(
 		ValidationsParser,
 		ValidationsValidator,
 	)

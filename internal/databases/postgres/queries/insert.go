@@ -87,7 +87,7 @@ RETURNING
 	InsertUserFailedLogInAttempt = `
 INSERT INTO user_failed_log_in_attempts (
 	user_id,
-	ipv4_address,
+	ip_address,
 	bad_password,
 	bad_2fa_code,
 	attempted_at
@@ -101,30 +101,12 @@ VALUES (
 )
 `
 
-	// InsertParentUserRefreshToken is the SQL query to insert a root refresh token
-	InsertParentUserRefreshToken = `
+	// InsertUserRefreshToken is the SQL query to insert a user refresh token
+	InsertUserRefreshToken = `
 INSERT INTO user_refresh_tokens (
 	user_id,
-	ipv4_address,
-	issued_at,
-	expires_at
-)
-VALUES (
-	$1,
-	$2,
-	$3,
-	$4
-)
-RETURNING
-	id
-`
-
-	// InsertChildUserRefreshToken is the SQL query to insert a child refresh token
-	InsertChildUserRefreshToken = `
-INSERT INTO user_refresh_tokens (
-	user_id,
-	parent_refresh_token_id,
-	ipv4_address,
+	parent_user_refresh_token_id,
+	ip_address,
 	issued_at,
 	expires_at
 )

@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
+	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttperrors "github.com/ralvarezdev/go-net/http/errors"
@@ -67,6 +68,26 @@ func (c *Controller) RegisterRoutes() {
 		"POST /login",
 		c.LogIn,
 	)
+	c.RegisterRoute(
+		"DELETE /refresh-token",
+		c.RevokeRefreshToken,
+		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+	)
+	c.RegisterRoute(
+		"POST /logout",
+		c.LogOut,
+		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+	)
+	c.RegisterRoute(
+		"DELETE /refresh-tokens",
+		c.RevokeRefreshTokens,
+		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+	)
+	c.RegisterRoute(
+		"POST /refresh-token",
+		c.RefreshToken,
+		c.authenticator.Authenticate(gojwtinterception.RefreshToken),
+	)
 }
 
 // RegisterGroups registers the router groups for the API V1 auth controller
@@ -75,25 +96,24 @@ func (c *Controller) RegisterGroups() {}
 // LogIn logs in a user
 // @Summary Log in a user
 // @Description Authenticates a user and returns a seed token
-// @Tags Auth
+// @Tags api v1 auth
 // @Accept json
 // @Produce json
 // @Param request body LogInRequest true "Log In Request"
 // @Success 200 {object} LogInResponse
-// @Failure 400 {object} gonethttphandler.ErrorResponse
-// @Failure 401 {object} gonethttphandler.ErrorResponse
-// @Failure 500 {object} gonethttphandler.ErrorResponse
+// @Failure 400 {object} gonethttphandler.JSendResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
 // @Router /api/v1/auth/login [post]
 func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body and va
+	// Decode the request body and validate the request
 	var body LogInRequest
-	ok := c.handler.HandleRequestAndValidations(
+	if !c.handler.HandleRequestAndValidations(
 		w,
 		r,
 		&body,
 		c.validator.ValidateLogInRequest,
-	)
-	if !ok {
+	) {
 		return
 	}
 
@@ -106,7 +126,7 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 		// Handle the response
 		c.handler.HandleResponse(
 			w, gonethttpresponse.NewSuccessResponse(
-				LogInResponse{
+				RefreshTokenResponse{
 					RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
 					AccessToken:  (*userTokens)[gojwttoken.AccessToken],
 				},
@@ -142,8 +162,8 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 		c.handler.HandleResponse(
 			w, gonethttpresponse.NewFailResponse(
 				&data,
-				http.StatusUnauthorized,
 				nil,
+				http.StatusUnauthorized,
 			),
 		)
 		return
@@ -156,6 +176,177 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 			nil,
 			nil,
 			http.StatusInternalServerError,
+		),
+	)
+}
+
+// RevokeRefreshToken revokes a user's refresh token
+// @Summary Revoke a user's refresh token
+// @Description Revokes a user's refresh token
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body RevokeRefreshTokenRequest
+// @Success 200 {object} internalapiv1common.BasicResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
+// @Router /api/v1/auth/refresh-token [delete]
+func (c *Controller) RevokeRefreshToken(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Decode the request body and validate the request
+	var body RevokeRefreshTokenRequest
+	if !c.handler.HandleRequestAndValidations(
+		w,
+		r,
+		&body,
+		c.validator.ValidateRevokeRefreshTokenRequest,
+	) {
+		return
+	}
+
+	// Revoke the user's refresh token
+	err := c.service.RevokeRefreshToken(r, body.UserRefreshTokenID)
+	if err == nil {
+		// Log the successful token revocation
+		c.logger.RevokeRefreshToken(body.UserRefreshTokenID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				nil,
+				http.StatusOK,
+			),
+		)
+		return
+	}
+
+	// Handle the error
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewDebugErrorResponse(
+			gonethttperrors.InternalServerError,
+			err,
+			nil, nil, http.StatusInternalServerError,
+		),
+	)
+}
+
+// LogOut logs out a user
+// @Summary Log out a user
+// @Description Logs out a user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} internalapiv1common.BasicResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
+// @Router /api/v1/auth/logout [post]
+func (c *Controller) LogOut(w http.ResponseWriter, r *http.Request) {
+	// Log out the user
+	userID, err := c.service.LogOut(r)
+	if err == nil {
+		// Log the successful logout
+		c.logger.LogOut(*userID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				nil,
+				http.StatusOK,
+			),
+		)
+		return
+	}
+
+	// Handle the error
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewDebugErrorResponse(
+			gonethttperrors.InternalServerError,
+			err,
+			nil, nil, http.StatusInternalServerError,
+		),
+	)
+}
+
+// RevokeRefreshTokens revokes a user's refresh tokens
+// @Summary Revoke a user's refresh tokens
+// @Description Revokes a user's refresh tokens
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body RevokeRefreshTokensRequest
+// @Success 200 {object} internalapiv1common.BasicResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
+// @Router /api/v1/auth/refresh-tokens [delete]
+func (c *Controller) RevokeRefreshTokens(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Revoke the user's refresh tokens
+	userID, err := c.service.RevokeRefreshTokens(r)
+	if err == nil {
+		// Log the successful token revocation
+		c.logger.RevokeRefreshTokens(*userID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				nil,
+				http.StatusOK,
+			),
+		)
+		return
+	}
+
+	// Handle the error
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewDebugErrorResponse(
+			gonethttperrors.InternalServerError,
+			err,
+			nil, nil, http.StatusInternalServerError,
+		),
+	)
+}
+
+// RefreshToken refreshes a user token
+// @Summary Refresh a user token
+// @Description Refreshes a user token
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body RefreshTokenRequest
+// @Success 200 {object} RefreshTokenResponse
+// @Failure 401 {object} gonethttphandler.JSendResponse
+// @Failure 500 {object} gonethttphandler.JSendResponse
+// @Router /api/v1/auth/refresh-token [post]
+func (c *Controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	// Refresh the token
+	userID, userTokens, err := c.service.RefreshToken(r)
+	if err == nil {
+		// Log the successful token refresh
+		c.logger.RefreshToken(*userID)
+
+		// Handle the response
+		c.handler.HandleResponse(
+			w, gonethttpresponse.NewSuccessResponse(
+				RefreshTokenResponse{
+					RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
+					AccessToken:  (*userTokens)[gojwttoken.AccessToken],
+				},
+				http.StatusCreated,
+			),
+		)
+		return
+	}
+
+	// Handle the error
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewDebugErrorResponse(
+			gonethttperrors.InternalServerError,
+			err,
+			nil, nil, http.StatusInternalServerError,
 		),
 	)
 }

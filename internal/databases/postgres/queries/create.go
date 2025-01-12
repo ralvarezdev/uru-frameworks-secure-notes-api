@@ -114,31 +114,16 @@ CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
 );
 `
 
-	// CreateUserTokenSeeds is the SQL query to create the user_token_seeds table
-	CreateUserTokenSeeds = `
-CREATE TABLE IF NOT EXISTS user_token_seeds (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    token_seed VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-`
-
 	// UserFailedLogInAttemptsCreate is the SQL query to create the user_failed_log_in_attempts table
 	UserFailedLogInAttemptsCreate = `
 CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    user_token_seed_id BIGINT,
-    ipv4_address VARCHAR(15) NOT NULL,
+    ip_address VARCHAR(15) NOT NULL,
     bad_password BOOLEAN,
     bad_2fa_code BOOLEAN,
     attempted_at TIMESTAMP NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_token_seed_id) REFERENCES user_token_seeds(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
 
@@ -147,15 +132,13 @@ CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
 CREATE TABLE IF NOT EXISTS user_refresh_tokens (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    parent_refresh_token_id BIGINT,
-    user_token_seed_id BIGINT,
-    ipv4_address VARCHAR(15) NOT NULL,
+    parent_user_refresh_token_id BIGINT,
+    ip_address VARCHAR(15) NOT NULL,
     issued_at TIMESTAMP NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_token_seed_id) REFERENCES user_token_seeds(id) ON DELETE CASCADE
+    FOREIGN KEY (parent_user_refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE CASCADE
 );
 `
 

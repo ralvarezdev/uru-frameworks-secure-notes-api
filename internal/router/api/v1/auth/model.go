@@ -4,6 +4,12 @@ import (
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 )
 
+// RefreshTokenResponse is the response DTO to refresh token
+type RefreshTokenResponse struct {
+	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`
+}
+
 // LogInRequest is the request DTO to log in
 type LogInRequest struct {
 	Username           string  `json:"username"`
@@ -12,17 +18,9 @@ type LogInRequest struct {
 	IsTOTPRecoveryCode *bool   `json:"is_totp_recovery_code,omitempty"`
 }
 
-// LogInResponse is the response DTO to log in
-type LogInResponse struct {
-	RefreshToken *string `json:"refresh_token,omitempty"`
-	AccessToken  *string `json:"access_token,omitempty"`
-}
-
-// RefreshTokenResponse is the response DTO to refresh token
-type RefreshTokenResponse struct {
-	Message      string  `json:"message"`
-	RefreshToken *string `json:"refresh_token,omitempty"`
-	AccessToken  *string `json:"access_token,omitempty"`
+// RevokeRefreshTokenRequest is the request DTO to revoke refresh token
+type RevokeRefreshTokenRequest struct {
+	UserRefreshTokenID int64 `json:"user_refresh_token_id"`
 }
 
 // VerifyTOTPRequest is the request DTO to verify TOTP
@@ -53,12 +51,5 @@ type GetUserRefreshTokenResponse struct {
 
 // ListUserRefreshTokensResponse is the response DTO to list user refresh tokens that have not been revoked or expired
 type ListUserRefreshTokensResponse struct {
-	UserRefreshTokens []internalapiv1common.UserRefreshTokenWithID `json:"user_refresh_tokens"`
+	UserRefreshTokens []*internalapiv1common.UserRefreshTokenWithID `json:"user_refresh_tokens"`
 }
-
-// RevokeUserRefreshTokenRequest is the request DTO to revoke a user refresh token
-type RevokeUserRefreshTokenRequest struct {
-	UserRefreshTokenID string `json:"user_refresh_token_id"`
-}
-
-// RevokeUserRefreshTokens

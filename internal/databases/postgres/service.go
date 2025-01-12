@@ -51,7 +51,6 @@ func (s *Service) Migrate() error {
 		internalpostgresqueries.CreateUserEmailVerifications,
 		internalpostgresqueries.CreateUserPhoneNumbers,
 		internalpostgresqueries.CreateUserPhoneNumberVerifications,
-		internalpostgresqueries.CreateUserTokenSeeds,
 		internalpostgresqueries.UserFailedLogInAttemptsCreate,
 		internalpostgresqueries.CreateUserRefreshTokens,
 		internalpostgresqueries.CreateUserAccessTokens,

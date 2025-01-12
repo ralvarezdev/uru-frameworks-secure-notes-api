@@ -11,7 +11,6 @@ import (
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
 )
@@ -67,24 +66,23 @@ func (c *Controller) RegisterGroups() {}
 // SignUp signs up a new user
 // @Summary Sign up a new user
 // @Description Creates a new user account with the provided details
-// @Tags User
+// @Tags api v1 user
 // @Accept json
 // @Produce json
 // @Param request body SignUpRequest true "Sign Up Request"
 // @Success 201 {object} internalapiv1common.BasicResponse
-// @Failure 400 {object} gonethttpresponse.JSONErrorResponse
-// @Failure 500 {object} gonethttpresponse.JSONErrorResponse
+// @Failure 400 {object} gonethttpresponse.JSendResponse
+// @Failure 500 {object} gonethttpresponse.JSendResponse
 // @Router /api/v1/user/signup [post]
 func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
 	var body SignUpRequest
-	ok := c.handler.HandleRequestAndValidations(
+	if !c.handler.HandleRequestAndValidations(
 		w,
 		r,
 		&body,
 		c.validator.ValidateSignUpRequest,
-	)
-	if !ok {
+	) {
 		return
 	}
 
@@ -97,9 +95,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		// Handle the response
 		c.handler.HandleResponse(
 			w, gonethttpresponse.NewSuccessResponse(
-				&internalapiv1common.BasicResponse{
-					Message: SignUpSuccess,
-				}, http.StatusCreated,
+				nil, http.StatusCreated,
 			),
 		)
 		return
@@ -129,8 +125,8 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		w,
 		gonethttpresponse.NewFailResponse(
 			&data,
-			http.StatusBadRequest,
 			nil,
+			http.StatusBadRequest,
 		),
 	)
 }

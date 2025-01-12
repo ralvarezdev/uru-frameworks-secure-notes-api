@@ -92,13 +92,13 @@ func main() {
 	}
 
 	// Create the JWT validator handler
-	jwtValidatorErrorHandler, _ := gonethttpjwtvalidator.NewDefaultErrorHandler(internaljson.Encoder)
+	jwtValidatorFailHandler, _ := gonethttpjwtvalidator.NewDefaultFailHandler(internaljson.Encoder)
 
 	// Create API authenticator middleware
 	authenticator, _ := gonethttpmiddlewareauth.NewMiddleware(
 		jwtValidator,
 		internalhandler.Handler,
-		jwtValidatorErrorHandler,
+		jwtValidatorFailHandler,
 	)
 	if err != nil {
 		panic(err)

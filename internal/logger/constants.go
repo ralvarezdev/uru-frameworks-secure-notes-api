@@ -8,9 +8,9 @@ import (
 	gologger "github.com/ralvarezdev/go-logger"
 	gologgermode "github.com/ralvarezdev/go-logger/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
-	govalidatormapperparserjson "github.com/ralvarezdev/go-validator/structs/mapper/parser/json"
-	govalidatormappervalidator "github.com/ralvarezdev/go-validator/structs/mapper/validator"
+	govalidatormapper "github.com/ralvarezdev/go-validator/struct/mapper"
+	govalidatormapperparserjson "github.com/ralvarezdev/go-validator/struct/mapper/parser/json"
+	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 )
 
 var (

@@ -2,26 +2,29 @@ package auth
 
 import (
 	"fmt"
-	govalidatormapper "github.com/ralvarezdev/go-validator/structs/mapper"
-	govalidatormapperservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
-	govalidatormappervalidations "github.com/ralvarezdev/go-validator/structs/mapper/validations"
+	gonethttp "github.com/ralvarezdev/go-net/http"
+	govalidatormapper "github.com/ralvarezdev/go-validator/struct/mapper"
+	govalidatormappervalidation "github.com/ralvarezdev/go-validator/struct/mapper/validation"
+	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
 
 var (
 	// Mappers
-	LogInRequestMapper *govalidatormapper.Mapper
+	LogInRequestMapper              *govalidatormapper.Mapper
+	RevokeRefreshTokenRequestMapper *govalidatormapper.Mapper
 )
 
 // LoadMappers loads the mappers
 func LoadMappers() {
 	LogInRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&LogInRequest{})
+	RevokeRefreshTokenRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&RevokeRefreshTokenRequest{})
 }
 
 type (
 	// Validator is the structure for API V1 auth validator
 	Validator struct {
-		govalidatormapperservice.Service
+		govalidatormappervalidator.Service
 	}
 )
 
@@ -34,17 +37,42 @@ func (v *Validator) ValidateLogInRequest(body interface{}) (
 	parsedBody, ok := body.(*LogInRequest)
 	if !ok {
 		return nil, fmt.Errorf(
-			govalidatormapperservice.ErrInvalidBodyType,
+			gonethttp.ErrInvalidRequestBody,
 			LogInRequestMapper.Type(),
 		)
 	}
 
 	return v.RunAndParseValidations(
 		parsedBody,
-		func(validations *govalidatormappervalidations.StructValidations) error {
+		func(validations *govalidatormappervalidation.StructValidations) error {
 			return v.ValidateRequiredFields(
 				validations,
 				LogInRequestMapper,
+			)
+		},
+	)
+}
+
+// ValidateRevokeRefreshTokenRequest validates the RevokeRefreshTokenRequest
+func (v *Validator) ValidateRevokeRefreshTokenRequest(body interface{}) (
+	interface{},
+	error,
+) {
+	// Parse body
+	parsedBody, ok := body.(*RevokeRefreshTokenRequest)
+	if !ok {
+		return nil, fmt.Errorf(
+			gonethttp.ErrInvalidRequestBody,
+			RevokeRefreshTokenRequestMapper.Type(),
+		)
+	}
+
+	return v.RunAndParseValidations(
+		parsedBody,
+		func(validations *govalidatormappervalidation.StructValidations) error {
+			return v.ValidateRequiredFields(
+				validations,
+				RevokeRefreshTokenRequestMapper,
 			)
 		},
 	)

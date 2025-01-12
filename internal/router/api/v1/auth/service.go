@@ -8,7 +8,6 @@ import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gonethttp "github.com/ralvarezdev/go-net/http"
-	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
@@ -148,22 +147,89 @@ func (s *Service) ValidateTOTPRecoveryCode(
 	return true, nil
 }
 
+// GenerateTokens generates user refresh token and user access token
+func (s *Service) GenerateTokens(
+	userID int64,
+	clientIP string,
+	time time.Time,
+	parentUserRefreshTokenID *int64,
+) (*map[gojwttoken.Token]string, error) {
+	// Run the transaction
+	var userRefreshTokenID, userAccessTokenID int64
+	refreshTokenExpiresAt := time.Add(internaljwt.Durations[gojwttoken.RefreshToken])
+	accessTokenExpiresAt := time.Add(internaljwt.Durations[gojwttoken.AccessToken])
+	err := s.PostgresService.RunTransaction(
+		func(tx *sql.Tx) error {
+			// Insert the user refresh token
+			if err := tx.QueryRow(
+				internalpostgresqueries.InsertUserRefreshToken,
+				userID,
+				parentUserRefreshTokenID,
+				clientIP,
+				time,
+				refreshTokenExpiresAt,
+			).Scan(&userRefreshTokenID); err != nil {
+				return err
+			}
+
+			// Insert the user access token
+			return tx.QueryRow(
+				internalpostgresqueries.InsertUserAccessToken,
+				userID,
+				userRefreshTokenID,
+				time,
+				accessTokenExpiresAt,
+			).Scan(&userAccessTokenID)
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the user tokens claims
+	userTokensClaims := make(map[gojwttoken.Token]*internaljwtclaims.Claims)
+	userTokensClaims[gojwttoken.RefreshToken] = internaljwtclaims.NewRefreshTokenClaims(
+		userRefreshTokenID,
+		strconv.FormatInt(userID, 10),
+		time,
+		refreshTokenExpiresAt,
+	)
+	userTokensClaims[gojwttoken.AccessToken] = internaljwtclaims.NewAccessTokenClaims(
+		userAccessTokenID,
+		strconv.FormatInt(userID, 10),
+		time,
+		accessTokenExpiresAt,
+	)
+
+	// Issue the user tokens
+	userTokens := make(map[gojwttoken.Token]string)
+	for token, claims := range userTokensClaims {
+		rawToken, err := s.JwtIssuer.IssueToken(claims)
+		if err != nil {
+			return nil, err
+		}
+		userTokens[token] = rawToken
+	}
+
+	return &userTokens, nil
+}
+
 // LogIn logs in a user
 func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 	*int64,
-	*map[gojwttoken.Token]*string,
+	*map[gojwttoken.Token]string,
 	error,
 ) {
 	// Check if the body is nil
 	if body == nil {
-		return nil, nil, internal.ErrNilRequestBody
+		return nil, nil, gonethttp.ErrNilRequestBody
 	}
 
 	// Get the database connection
 	db := s.PostgresService.DB()
 
-	// Get the current time
-	currentTime := time.Now()
+	// Get the current time in UTC
+	currentTime := time.Now().UTC()
 
 	// Get the client IP
 	clientIP := gonethttp.GetClientIP(r)
@@ -251,62 +317,123 @@ func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 		}
 	}
 
+	// Generate the user tokens
+	userTokens, err := s.GenerateTokens(
+		userID,
+		clientIP,
+		currentTime,
+		nil,
+	)
+	return &userID, userTokens, err
+}
+
+// RevokeRefreshToken revokes a user refresh token
+func (s *Service) RevokeRefreshToken(
+	r *http.Request,
+	userRefreshTokenID int64,
+) error {
 	// Run the transaction
-	var userRefreshTokenID, userAccessTokenID int64
-	refreshTokenExpiresAt := currentTime.Add(internaljwt.Durations[gojwttoken.RefreshToken])
-	accessTokenExpiresAt := currentTime.Add(internaljwt.Durations[gojwttoken.AccessToken])
-	err = s.PostgresService.RunTransaction(
+	return s.PostgresService.RunTransaction(
 		func(tx *sql.Tx) error {
-			// Insert the user refresh token
-			if err = tx.QueryRow(
-				internalpostgresqueries.InsertParentUserRefreshToken,
-				userID,
-				clientIP,
-				currentTime,
-				refreshTokenExpiresAt,
-			).Scan(&userRefreshTokenID); err != nil {
+			// Revoke the user refresh token by the ID
+			if _, err := tx.Exec(
+				internalpostgresqueries.UpdateUserRefreshTokenRevokedAtByID,
+				userRefreshTokenID,
+			); err != nil {
 				return err
 			}
 
-			// Insert the user access token
-			return tx.QueryRow(
-				internalpostgresqueries.InsertUserAccessToken,
-				userID,
+			// Revoke the user access token by the user refresh token ID
+			_, err := tx.Exec(
+				internalpostgresqueries.UpdateUserAccessTokenRevokedAtByUserRefreshTokenID,
 				userRefreshTokenID,
-				currentTime,
-				accessTokenExpiresAt,
-			).Scan(&userAccessTokenID)
+			)
+			return err
 		},
+	)
+}
+
+// LogOut logs out a user
+func (s *Service) LogOut(r *http.Request) (*int64, error) {
+	// Get the user refresh token ID from the request
+	userRefreshTokenID, err := internaljwtclaims.GetID(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Revoke the user refresh token
+	return &userRefreshTokenID, s.RevokeRefreshToken(
+		r,
+		userRefreshTokenID,
+	)
+}
+
+// RevokeRefreshTokens revokes all user refresh tokens
+func (s *Service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Run the transaction
+	return &userID, s.PostgresService.RunTransaction(
+		func(tx *sql.Tx) error {
+			// Revoke the user refresh tokens by the user ID
+			if _, err = tx.Exec(
+				internalpostgresqueries.UpdateUserRefreshTokensRevokedAtByUserID,
+				userID,
+			); err != nil {
+				return err
+			}
+
+			// Delete the user access token by the user refresh token ID
+			_, err = tx.Exec(
+				internalpostgresqueries.UpdateUserAccessTokensRevokedAtByUserID,
+				userID,
+			)
+			return err
+		},
+	)
+}
+
+// RefreshToken refreshes a user token
+func (s *Service) RefreshToken(r *http.Request) (
+	*int64,
+	*map[gojwttoken.Token]string,
+	error,
+) {
+	// Get the user ID and the user refresh token ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		return nil, nil, err
+	}
+	userRefreshTokenID, err := internaljwtclaims.GetID(r)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Get the current time in UTC
+	currentTime := time.Now().UTC()
+
+	// Get the client IP
+	clientIP := gonethttp.GetClientIP(r)
+
+	// Revoke the user refresh token
+	err = s.RevokeRefreshToken(
+		r,
+		userRefreshTokenID,
 	)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Create the user tokens claims
-	userTokensClaims := make(map[gojwttoken.Token]*internaljwtclaims.Claims)
-	userTokensClaims[gojwttoken.RefreshToken] = internaljwtclaims.NewRefreshTokenClaims(
-		userRefreshTokenID,
-		strconv.FormatInt(userID, 10),
+	// Generate the user tokens
+	userTokens, err := s.GenerateTokens(
+		userID,
+		clientIP,
 		currentTime,
-		refreshTokenExpiresAt,
+		&userRefreshTokenID,
 	)
-	userTokensClaims[gojwttoken.AccessToken] = internaljwtclaims.NewAccessTokenClaims(
-		userAccessTokenID,
-		strconv.FormatInt(userID, 10),
-		currentTime,
-		accessTokenExpiresAt,
-	)
-
-	// Issue the user tokens
-	userTokens := make(map[gojwttoken.Token]*string)
-	for token, claims := range userTokensClaims {
-		rawToken, err := s.JwtIssuer.IssueToken(claims)
-		if err != nil {
-			return nil, nil, err
-		}
-		userTokens[token] = &rawToken
-	}
-
-	return &userID, &userTokens, nil
-
+	return &userID, userTokens, err
 }

@@ -7,11 +7,10 @@ import (
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	govalidatorservice "github.com/ralvarezdev/go-validator/structs/mapper/service"
+	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	internalrouterauth "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/auth"
 	internalrouternote "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note"
 	internalrouternotes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
@@ -26,7 +25,7 @@ type (
 	Controller struct {
 		handler            gonethttphandler.Handler
 		authenticator      gonethttpmiddlewareauth.Authenticator
-		validatorService   govalidatorservice.Service
+		validatorService   govalidatormappervalidator.Service
 		postgresService    *internalpostgres.Service
 		jwtIssuer          gojwtissuer.Issuer
 		service            *Service
@@ -48,7 +47,6 @@ func NewController(
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),
 		},
-
 		handler:            internalhandler.Handler,
 		authenticator:      authenticator,
 		postgresService:    postgresService,
@@ -114,7 +112,7 @@ func (c *Controller) RegisterGroups() {
 // Ping pings the service
 // @Summary Ping the service
 // @Description Returns a pong response to check if the service is running
-// @Tags v1
+// @Tags api v1
 // @Accept json
 // @Produce json
 // @Success 200 {object} BasicResponse
@@ -123,9 +121,7 @@ func (c *Controller) Ping(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewSuccessResponse(
-			&internalapiv1common.BasicResponse{
-				Message: "pong",
-			}, http.StatusOK,
+			nil, http.StatusOK,
 		),
 	)
 }

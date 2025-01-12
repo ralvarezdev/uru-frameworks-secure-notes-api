@@ -102,21 +102,13 @@ func (d *DefaultValidator) ValidateClaims(
 	// Validate the token
 	if isRefreshToken {
 		// Check if the refresh token is valid
-		isValid, err := d.IsRefreshTokenValid(
+		return d.IsRefreshTokenValid(
 			jwtId,
 		)
-		if err != nil {
-			return false, err
-		}
-		return isValid, nil
 	}
 
 	// Check if the access token is valid
-	isValid, err := d.IsAccessTokenValid(
+	return d.IsAccessTokenValid(
 		jwtId,
 	)
-	if err != nil {
-		return false, err
-	}
-	return isValid, nil
 }

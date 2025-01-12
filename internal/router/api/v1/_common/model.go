@@ -8,35 +8,6 @@ import (
 type BasicRequest struct {
 }
 
-// BasicResponse is the response DTO for the basic response
-type BasicResponse struct {
-	Message string `json:"message"`
-}
-
-// BasicWasUpdatedResponse is the response DTO for the basic was updated response
-type BasicWasUpdatedResponse struct {
-	Message    string `json:"message"`
-	WasUpdated bool   `json:"was_updated"`
-}
-
-// BasicWasVerifiedResponse is the response DTO for the basic was verified response
-type BasicWasVerifiedResponse struct {
-	Message     string `json:"message"`
-	WasVerified bool   `json:"was_verified"`
-}
-
-// BasicWasRevokedResponse is the response DTO for the basic was revoked response
-type BasicWasRevokedResponse struct {
-	Message    string `json:"message"`
-	WasRevoked bool   `json:"was_revoked"`
-}
-
-// BasicWasDeletedResponse is the response DTO for the basic was deleted response
-type BasicWasDeletedResponse struct {
-	Message    string `json:"message"`
-	WasDeleted bool   `json:"was_deleted"`
-}
-
 // UserRefreshToken is the response DTO for the user refresh token
 type UserRefreshToken struct {
 	IssuedAt    time.Time  `json:"issued_at"`

@@ -9,12 +9,12 @@ require (
 	github.com/ralvarezdev/go-crypto v0.5.2
 	github.com/ralvarezdev/go-databases v0.4.7
 	github.com/ralvarezdev/go-flags v0.3.1
-	github.com/ralvarezdev/go-jwt v0.3.13
+	github.com/ralvarezdev/go-jwt v0.3.15
 	github.com/ralvarezdev/go-loader v0.2.11
 	github.com/ralvarezdev/go-logger v0.4.5
-	github.com/ralvarezdev/go-net v0.5.11
+	github.com/ralvarezdev/go-net v0.5.19
 	github.com/ralvarezdev/go-security-headers v0.1.1
-	github.com/ralvarezdev/go-validator v0.5.13
+	github.com/ralvarezdev/go-validator v0.5.14
 )
 
 require (

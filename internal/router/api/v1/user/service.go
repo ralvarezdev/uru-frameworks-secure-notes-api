@@ -5,7 +5,7 @@ import (
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	godatabasessql "github.com/ralvarezdev/go-databases/sql"
-	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
+	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
@@ -27,7 +27,7 @@ func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
 	error,
 ) {
 	if body == nil {
-		return nil, internal.ErrNilRequestBody
+		return nil, gonethttp.ErrNilRequestBody
 	}
 
 	// Hash the password

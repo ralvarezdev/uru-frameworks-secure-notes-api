@@ -97,13 +97,13 @@ type (
 
 	// UserRefreshToken is the Postgres model for the user refresh token
 	UserRefreshToken struct {
-		ID                   int64
-		UserID               int64
-		ParentRefreshTokenID sql.NullInt64
-		IPAddress            string
-		IssuedAt             time.Time
-		ExpiresAt            time.Time
-		RevokedAt            sql.NullTime
+		ID                       int64
+		UserID                   int64
+		ParentUserRefreshTokenID sql.NullInt64
+		IPAddress                string
+		IssuedAt                 time.Time
+		ExpiresAt                time.Time
+		RevokedAt                sql.NullTime
 	}
 
 	// UserAccessToken is the Postgres model for the user access token
