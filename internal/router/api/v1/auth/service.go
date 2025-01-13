@@ -215,13 +215,13 @@ func (s *Service) GenerateTokens(
 }
 
 // LogIn logs in a user
-func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
+func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	*int64,
 	*map[gojwttoken.Token]string,
 	error,
 ) {
-	// Check if the body is nil
-	if body == nil {
+	// Check if the request body is nil
+	if requestBody == nil {
 		return nil, nil, gonethttp.ErrNilRequestBody
 	}
 
@@ -239,7 +239,7 @@ func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 	var passwordHash string
 	if err := db.QueryRow(
 		internalpostgresqueries.SelectUserIDAndPasswordHashByUsername,
-		body.Username,
+		requestBody.Username,
 	).Scan(&userID, &passwordHash); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil, internalapiv1common.UserNotFoundByUsername
@@ -251,7 +251,7 @@ func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 	match, err := s.ValidatePassword(
 		userID,
 		passwordHash,
-		body.Password,
+		requestBody.Password,
 		clientIP,
 	)
 	if err != nil {
@@ -278,19 +278,19 @@ func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 	// Validate the TOTP code, if it is active
 	if totpIsActive {
 		// Check if the TOTP code-related fields are nil
-		if body.TOTPCode == nil {
+		if requestBody.TOTPCode == nil {
 			return nil, nil, ErrMissingTOTPCode
 		}
-		if body.IsTOTPRecoveryCode == nil {
+		if requestBody.IsTOTPRecoveryCode == nil {
 			return nil, nil, ErrMissingIsTOTPRecoveryCode
 		}
 
-		if !(*body.IsTOTPRecoveryCode) {
+		if !(*requestBody.IsTOTPRecoveryCode) {
 			// Validate the TOTP code
 			match, err = s.ValidateTOTPCode(
 				userID,
 				userTOTPSecret,
-				*body.TOTPCode,
+				*requestBody.TOTPCode,
 				clientIP,
 				currentTime,
 			)
@@ -305,7 +305,7 @@ func (s *Service) LogIn(r *http.Request, body *LogInRequest) (
 			match, err = s.ValidateTOTPRecoveryCode(
 				userID,
 				userTOTPID,
-				*body.TOTPCode,
+				*requestBody.TOTPCode,
 				clientIP,
 			)
 			if err != nil {
@@ -515,10 +515,10 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 // VerifyTOTP verifies a TOTP secret
 func (s *Service) VerifyTOTP(
 	r *http.Request,
-	body *VerifyTOTPRequest,
+	requestBody *VerifyTOTPRequest,
 ) (*int64, *[]string, error) {
-	// Check if the body is nil
-	if body == nil {
+	// Check if the request body is nil
+	if requestBody == nil {
 		return nil, nil, gonethttp.ErrNilRequestBody
 	}
 
@@ -546,7 +546,7 @@ func (s *Service) VerifyTOTP(
 
 	// Verify the TOTP code with the secret
 	match, err := gocryptototp.CompareTOTPSha1(
-		body.TOTPCode,
+		requestBody.TOTPCode,
 		userTOTPSecret,
 		currentTime,
 		uint64(internaltotp.Period),

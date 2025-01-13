@@ -3,11 +3,11 @@ package user
 import (
 	"errors"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttperrors "github.com/ralvarezdev/go-net/http/errors"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
+	gonethttpstatuserrors "github.com/ralvarezdev/go-net/http/status/errors"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
@@ -101,32 +101,28 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle the response if the email or username is already registered
-	data := make(map[string]*[]string)
-	if errors.Is(err, ErrEmailAlreadyRegistered) {
-		data["email"] = &[]string{err.Error()}
-	} else if errors.Is(err, ErrUsernameAlreadyRegistered) {
-		data["username"] = &[]string{err.Error()}
-	} else {
+	// Check if the errors is a request error
+	var e gonethttpresponse.RequestError
+	if errors.As(err, &e) {
 		c.handler.HandleResponse(
 			w,
-			gonethttpresponse.NewDebugErrorResponse(
-				gonethttperrors.InternalServerError,
-				err,
-				nil, nil,
-				http.StatusInternalServerError,
+			gonethttpresponse.NewFailResponse(
+				gonethttpresponse.NewRequestErrorsBodyData(e),
+				nil,
+				http.StatusBadRequest,
 			),
 		)
 		return
 	}
 
-	// Handle the response if the email or username is already registered
 	c.handler.HandleResponse(
 		w,
-		gonethttpresponse.NewFailResponse(
-			&data,
-			nil,
-			http.StatusBadRequest,
+		gonethttpresponse.NewDebugErrorResponse(
+			gonethttpstatuserrors.InternalServerError,
+			err,
+			nil, nil,
+			http.StatusInternalServerError,
 		),
 	)
+
 }

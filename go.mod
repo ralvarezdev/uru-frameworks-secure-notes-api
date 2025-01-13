@@ -6,13 +6,13 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
-	github.com/ralvarezdev/go-crypto v0.5.4
+	github.com/ralvarezdev/go-crypto v0.5.5
 	github.com/ralvarezdev/go-databases v0.4.7
 	github.com/ralvarezdev/go-flags v0.3.1
 	github.com/ralvarezdev/go-jwt v0.3.15
 	github.com/ralvarezdev/go-loader v0.2.13
 	github.com/ralvarezdev/go-logger v0.4.5
-	github.com/ralvarezdev/go-net v0.5.19
+	github.com/ralvarezdev/go-net v0.5.26
 	github.com/ralvarezdev/go-security-headers v0.1.1
 	github.com/ralvarezdev/go-validator v0.5.14
 )

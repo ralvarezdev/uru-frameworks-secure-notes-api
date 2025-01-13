@@ -1,10 +1,16 @@
 package user
 
 import (
-	"errors"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 )
 
 var (
-	ErrUsernameAlreadyRegistered = errors.New("username is already registered")
-	ErrEmailAlreadyRegistered    = errors.New("email is already registered")
+	ErrUsernameAlreadyRegistered = gonethttpresponse.NewFieldError(
+		"username",
+		"username is already registered",
+	)
+	ErrEmailAlreadyRegistered = gonethttpresponse.NewFieldError(
+		"email",
+		"email is already registered",
+	)
 )

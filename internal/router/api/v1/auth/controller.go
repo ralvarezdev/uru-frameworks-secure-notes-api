@@ -6,15 +6,14 @@ import (
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttperrors "github.com/ralvarezdev/go-net/http/errors"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
+	gonethttpstatuserrors "github.com/ralvarezdev/go-net/http/status/errors"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
 )
@@ -117,18 +116,18 @@ func (c *Controller) RegisterGroups() {}
 // @Router /api/v1/auth/login [post]
 func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
-	var body LogInRequest
+	var requestBody LogInRequest
 	if !c.handler.HandleRequestAndValidations(
 		w,
 		r,
-		&body,
+		&requestBody,
 		c.validator.ValidateLogInRequest,
 	) {
 		return
 	}
 
 	// Log in the user
-	userID, userTokens, err := c.service.LogIn(r, &body)
+	userID, userTokens, err := c.service.LogIn(r, &requestBody)
 	if err == nil {
 		// Log the successful login
 		c.logger.LogIn(*userID)
@@ -146,32 +145,12 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle the error
-	anErrorOccurred := false
-	data := make(map[string]*[]string)
-	if errors.Is(err, internalapiv1common.UserNotFoundByUsername) {
-		data["username"] = &[]string{err.Error()}
-	} else if errors.Is(err, ErrInvalidPassword) {
-		data["password"] = &[]string{err.Error()}
-	} else if errors.Is(err, ErrInvalidTOTPCode) || errors.Is(
-		err,
-		ErrMissingTOTPCode,
-	) {
-		data["totp_code"] = &[]string{err.Error()}
-	} else if errors.Is(err, ErrInvalidTOTPRecoveryCode) || errors.Is(
-		err,
-		ErrMissingIsTOTPRecoveryCode,
-	) {
-		data["is_totp_recovery_code"] = &[]string{err.Error()}
-	} else {
-		anErrorOccurred = true
-	}
-
-	// Check if an error occurred
-	if !anErrorOccurred {
+	// Check if the errors is a request error
+	var e gonethttpresponse.RequestError
+	if errors.As(err, &e) {
 		c.handler.HandleResponse(
 			w, gonethttpresponse.NewFailResponse(
-				&data,
+				gonethttpresponse.NewRequestErrorsBodyData(e),
 				nil,
 				http.StatusUnauthorized,
 			),
@@ -181,7 +160,7 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil,
 			nil,
@@ -206,21 +185,21 @@ func (c *Controller) RevokeRefreshToken(
 	r *http.Request,
 ) {
 	// Decode the request body and validate the request
-	var body RevokeRefreshTokenRequest
+	var requestBody RevokeRefreshTokenRequest
 	if !c.handler.HandleRequestAndValidations(
 		w,
 		r,
-		&body,
+		&requestBody,
 		c.validator.ValidateRevokeRefreshTokenRequest,
 	) {
 		return
 	}
 
 	// Revoke the user's refresh token
-	err := c.service.RevokeRefreshToken(r, body.UserRefreshTokenID)
+	err := c.service.RevokeRefreshToken(r, requestBody.UserRefreshTokenID)
 	if err == nil {
 		// Log the successful token revocation
-		c.logger.RevokeRefreshToken(body.UserRefreshTokenID)
+		c.logger.RevokeRefreshToken(requestBody.UserRefreshTokenID)
 
 		// Handle the response
 		c.handler.HandleResponse(
@@ -235,7 +214,7 @@ func (c *Controller) RevokeRefreshToken(
 	// Handle the error
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil, nil, http.StatusInternalServerError,
 		),
@@ -272,7 +251,7 @@ func (c *Controller) LogOut(w http.ResponseWriter, r *http.Request) {
 	// Handle the error
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil, nil, http.StatusInternalServerError,
 		),
@@ -285,7 +264,6 @@ func (c *Controller) LogOut(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param request body RevokeRefreshTokensRequest
 // @Success 200 {object} internalapiv1common.BasicResponse
 // @Failure 401 {object} gonethttphandler.JSendResponse
 // @Failure 500 {object} gonethttphandler.JSendResponse
@@ -313,7 +291,7 @@ func (c *Controller) RevokeRefreshTokens(
 	// Handle the error
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil, nil, http.StatusInternalServerError,
 		),
@@ -326,7 +304,6 @@ func (c *Controller) RevokeRefreshTokens(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param request body RefreshTokenRequest
 // @Success 200 {object} RefreshTokenResponse
 // @Failure 401 {object} gonethttphandler.JSendResponse
 // @Failure 500 {object} gonethttphandler.JSendResponse
@@ -354,7 +331,7 @@ func (c *Controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Handle the error
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil, nil, http.StatusInternalServerError,
 		),
@@ -396,7 +373,7 @@ func (c *Controller) GenerateTOTPUrl(
 	// Handle the error
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil, nil, http.StatusInternalServerError,
 		),
@@ -416,18 +393,18 @@ func (c *Controller) GenerateTOTPUrl(
 // @Router /api/v1/auth/totp/verify [post]
 func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
-	var body VerifyTOTPRequest
+	var requestBody VerifyTOTPRequest
 	if !c.handler.HandleRequestAndValidations(
 		w,
 		r,
-		&body,
+		&requestBody,
 		c.validator.ValidateVerifyTOTPRequest,
 	) {
 		return
 	}
 
 	// Verify the TOTP code
-	userID, recoveryCodes, err := c.service.VerifyTOTP(r, &body)
+	userID, recoveryCodes, err := c.service.VerifyTOTP(r, &requestBody)
 	if err == nil {
 		// Log the successful TOTP verification
 		c.logger.VerifyTOTP(*userID)
@@ -444,25 +421,12 @@ func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle the error
-	anErrorOccurred := false
-	data := make(map[string]*[]string)
-	if errors.Is(err, ErrInvalidTOTPCode) {
-		data["totp_code"] = &[]string{err.Error()}
-	} else if errors.Is(
-		err,
-		internalapiv1common.UserTOTPSecretNotFoundByUserID,
-	) {
-		data["totp_secret"] = &[]string{err.Error()}
-	} else {
-		anErrorOccurred = true
-	}
-
-	// Check if an error occurred
-	if !anErrorOccurred {
+	// Check if the errors is a request error
+	var e gonethttpresponse.RequestError
+	if errors.As(err, &e) {
 		c.handler.HandleResponse(
 			w, gonethttpresponse.NewFailResponse(
-				&data,
+				gonethttpresponse.NewRequestErrorsBodyData(e),
 				nil,
 				http.StatusUnauthorized,
 			),
@@ -472,7 +436,7 @@ func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 
 	c.handler.HandleResponse(
 		w, gonethttpresponse.NewDebugErrorResponse(
-			gonethttperrors.InternalServerError,
+			gonethttpstatuserrors.InternalServerError,
 			err,
 			nil, nil, http.StatusInternalServerError,
 		),
