@@ -2,27 +2,44 @@ package auth
 
 import (
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	"net/http"
 )
 
 var (
-	ErrInvalidPassword = gonethttpresponse.NewFieldError(
+	ErrLogInInvalidPassword = gonethttpresponse.NewFieldError(
 		"password",
 		"invalid password",
+		http.StatusUnauthorized,
+		nil,
 	)
-	ErrInvalidTOTPCode = gonethttpresponse.NewFieldError(
+	ErrLogInInvalidTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		"invalid TOTP code",
+		http.StatusUnauthorized,
+		nil,
 	)
-	ErrInvalidTOTPRecoveryCode = gonethttpresponse.NewFieldError(
+	ErrLogInInvalidTOTPRecoveryCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		"invalid TOTP recovery code",
+		http.StatusUnauthorized,
+		nil,
 	)
-	ErrMissingTOTPCode = gonethttpresponse.NewFieldError(
+	ErrLogInMissingTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		"missing TOTP code",
+		http.StatusUnauthorized,
+		nil,
 	)
-	ErrMissingIsTOTPRecoveryCode = gonethttpresponse.NewFieldError(
+	ErrLogInMissingIsTOTPRecoveryCode = gonethttpresponse.NewFieldError(
 		"is_totp_recovery_code",
 		"missing is TOTP recovery code",
+		http.StatusUnauthorized,
+		nil,
+	)
+	ErrVerifyTOTPInvalidTOTPCode = gonethttpresponse.NewFieldError(
+		"totp_code",
+		"TOTP code is required",
+		http.StatusUnauthorized,
+		nil,
 	)
 )

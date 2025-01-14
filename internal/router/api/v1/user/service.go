@@ -68,7 +68,7 @@ func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
 				isUniqueViolation, constraintName := godatabasessql.IsUniqueViolationError(err)
 				if isUniqueViolation {
 					if constraintName == internalpostgresconstraints.UserEmailsUniqueEmail {
-						return ErrEmailAlreadyRegistered
+						return ErrSignUpEmailAlreadyRegistered
 					}
 				}
 				return err
@@ -83,7 +83,7 @@ func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
 				isUniqueViolation, constraintName := godatabasessql.IsUniqueViolationError(err)
 				if isUniqueViolation {
 					if constraintName == internalpostgresconstraints.UserUsernamesUniqueUsername {
-						return ErrUsernameAlreadyRegistered
+						return ErrSignUpUsernameAlreadyRegistered
 					}
 				}
 				return err

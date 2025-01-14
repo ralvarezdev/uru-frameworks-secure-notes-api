@@ -1,13 +1,11 @@
 package user
 
 import (
-	"errors"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	gonethttpstatuserrors "github.com/ralvarezdev/go-net/http/status/errors"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
@@ -77,7 +75,7 @@ func (c *Controller) RegisterGroups() {}
 func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
 	var body SignUpRequest
-	if !c.handler.HandleRequestAndValidations(
+	if !c.handler.DecodeAndValidate(
 		w,
 		r,
 		&body,
@@ -88,41 +86,17 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Sign up the user
 	userID, err := c.service.SignUp(r, &body)
-	if err == nil {
-		// Log the user sign up
-		c.logger.SignUp(*userID)
-
-		// Handle the response
-		c.handler.HandleResponse(
-			w, gonethttpresponse.NewSuccessResponse(
-				nil, http.StatusCreated,
-			),
-		)
-		return
+	if err != nil {
+		c.handler.HandleError(w, err)
 	}
 
-	// Check if the errors is a request error
-	var e gonethttpresponse.RequestError
-	if errors.As(err, &e) {
-		c.handler.HandleResponse(
-			w,
-			gonethttpresponse.NewFailResponse(
-				gonethttpresponse.NewRequestErrorsBodyData(e),
-				nil,
-				http.StatusBadRequest,
-			),
-		)
-		return
-	}
+	// Log the user sign up
+	c.logger.SignUp(*userID)
 
+	// Handle the response
 	c.handler.HandleResponse(
-		w,
-		gonethttpresponse.NewDebugErrorResponse(
-			gonethttpstatuserrors.InternalServerError,
-			err,
-			nil, nil,
-			http.StatusInternalServerError,
+		w, gonethttpresponse.NewSuccessResponse(
+			nil, http.StatusCreated,
 		),
 	)
-
 }

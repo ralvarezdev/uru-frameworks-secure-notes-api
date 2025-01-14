@@ -258,7 +258,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 		return nil, nil, err
 	}
 	if !match {
-		return nil, nil, ErrInvalidPassword
+		return nil, nil, ErrLogInInvalidPassword
 	}
 
 	// Get the user TOTP ID and secret
@@ -279,10 +279,10 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	if totpIsActive {
 		// Check if the TOTP code-related fields are nil
 		if requestBody.TOTPCode == nil {
-			return nil, nil, ErrMissingTOTPCode
+			return nil, nil, ErrLogInMissingTOTPCode
 		}
 		if requestBody.IsTOTPRecoveryCode == nil {
-			return nil, nil, ErrMissingIsTOTPRecoveryCode
+			return nil, nil, ErrLogInMissingIsTOTPRecoveryCode
 		}
 
 		if !(*requestBody.IsTOTPRecoveryCode) {
@@ -298,7 +298,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 				return nil, nil, err
 			}
 			if !match {
-				return nil, nil, ErrInvalidTOTPCode
+				return nil, nil, ErrLogInInvalidTOTPCode
 			}
 		} else {
 			// Validate the TOTP recovery code
@@ -312,7 +312,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 				return nil, nil, err
 			}
 			if !match {
-				return nil, nil, ErrInvalidTOTPRecoveryCode
+				return nil, nil, ErrLogInInvalidTOTPRecoveryCode
 			}
 		}
 	}
@@ -556,7 +556,7 @@ func (s *Service) VerifyTOTP(
 		return nil, nil, err
 	}
 	if !match {
-		return nil, nil, ErrInvalidTOTPCode
+		return nil, nil, ErrVerifyTOTPInvalidTOTPCode
 	}
 
 	// Generate the TOTP recovery codes
