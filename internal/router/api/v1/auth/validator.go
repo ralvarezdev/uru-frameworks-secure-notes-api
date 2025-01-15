@@ -11,15 +11,13 @@ import (
 
 var (
 	// Mappers
-	LogInRequestMapper              *govalidatormapper.Mapper
-	RevokeRefreshTokenRequestMapper *govalidatormapper.Mapper
-	VerifyTOTPRequestMapper         *govalidatormapper.Mapper
+	LogInRequestMapper      *govalidatormapper.Mapper
+	VerifyTOTPRequestMapper *govalidatormapper.Mapper
 )
 
 // LoadMappers loads the mappers
 func LoadMappers() {
 	LogInRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&LogInRequest{})
-	RevokeRefreshTokenRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&RevokeRefreshTokenRequest{})
 	VerifyTOTPRequestMapper, _ = internalvalidator.JSONGenerator.NewMapper(&VerifyTOTPRequest{})
 }
 
@@ -50,31 +48,6 @@ func (v *Validator) ValidateLogInRequest(body interface{}) (
 			return v.ValidateRequiredFields(
 				validations,
 				LogInRequestMapper,
-			)
-		},
-	)
-}
-
-// ValidateRevokeRefreshTokenRequest validates the RevokeRefreshTokenRequest
-func (v *Validator) ValidateRevokeRefreshTokenRequest(body interface{}) (
-	interface{},
-	error,
-) {
-	// Parse body
-	parsedBody, ok := body.(*RevokeRefreshTokenRequest)
-	if !ok {
-		return nil, fmt.Errorf(
-			gonethttp.ErrInvalidRequestBody,
-			RevokeRefreshTokenRequestMapper.Type(),
-		)
-	}
-
-	return v.RunAndParseValidations(
-		parsedBody,
-		func(validations *govalidatormappervalidation.StructValidations) error {
-			return v.ValidateRequiredFields(
-				validations,
-				RevokeRefreshTokenRequestMapper,
 			)
 		},
 	)

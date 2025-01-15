@@ -4,12 +4,6 @@ import (
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 )
 
-// RefreshTokenResponse is the response DTO to refresh token
-type RefreshTokenResponse struct {
-	RefreshToken string `json:"refresh_token"`
-	AccessToken  string `json:"access_token"`
-}
-
 // LogInRequest is the request DTO to log in
 type LogInRequest struct {
 	Username           string  `json:"username"`
@@ -18,9 +12,10 @@ type LogInRequest struct {
 	IsTOTPRecoveryCode *bool   `json:"is_totp_recovery_code,omitempty"`
 }
 
-// RevokeRefreshTokenRequest is the request DTO to revoke refresh token
-type RevokeRefreshTokenRequest struct {
-	UserRefreshTokenID int64 `json:"user_refresh_token_id"`
+// RefreshTokenResponse is the response DTO to refresh token
+type RefreshTokenResponse struct {
+	RefreshToken string `json:"refresh_token"`
+	AccessToken  string `json:"access_token"`
 }
 
 // GenerateTOTPUrlResponse is the response DTO to generate TOTP URL
@@ -38,22 +33,12 @@ type VerifyTOTPResponse struct {
 	RecoveryCodes []string `json:"recovery_codes"`
 }
 
-// RevokeTOTPRequest is the request DTO to revoke TOTP
-type RevokeTOTPRequest struct {
-	Password string `json:"password"`
+// GetRefreshTokenResponse is the response DTO to get a refresh token that has not been revoked or expired
+type GetRefreshTokenResponse struct {
+	RefreshToken *internalapiv1common.UserRefreshToken `json:"refresh_token"`
 }
 
-// GetUserRefreshTokenRequest is the request DTO to get a user refresh token that has not been revoked or expired
-type GetUserRefreshTokenRequest struct {
-	UserRefreshTokenID string `json:"user_refresh_token_id"`
-}
-
-// GetUserRefreshTokenResponse is the response DTO to get a user refresh token that has not been revoked or expired
-type GetUserRefreshTokenResponse struct {
-	UserRefreshToken *internalapiv1common.UserRefreshToken `json:"user_refresh_token,omitempty"`
-}
-
-// ListUserRefreshTokensResponse is the response DTO to list user refresh tokens that have not been revoked or expired
-type ListUserRefreshTokensResponse struct {
-	UserRefreshTokens []*internalapiv1common.UserRefreshTokenWithID `json:"user_refresh_tokens"`
+// ListRefreshTokensResponse is the response DTO to list refresh tokens that have not been revoked or expired
+type ListRefreshTokensResponse struct {
+	RefreshTokens []*internalapiv1common.UserRefreshTokenWithID `json:"refresh_tokens"`
 }

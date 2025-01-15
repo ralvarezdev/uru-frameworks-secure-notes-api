@@ -49,20 +49,6 @@ AND
 	user_totps.verified_at IS NOT NULL
 `
 
-	// SelectUserTOTPRecoveryCodeByCode is the query to select the user TOTP recovery code by code
-	SelectUserTOTPRecoveryCodeByCode = `
-SELECT
-	user_totp_recovery_codes.id
-FROM
-	user_totp_recovery_codes
-WHERE
-	user_totp_recovery_codes.user_totp_id = $1
-WHERE
-	user_totp_recovery_codes.code = $2
-AND
-	user_totp_recovery_codes.revoked_at IS NULL
-`
-
 	// SelectUserRefreshTokenExpiresAtByID is the query to select the user refresh token expires at by ID
 	SelectUserRefreshTokenExpiresAtByID = `
 SELECT
@@ -92,11 +78,43 @@ AND
 SELECT
 	user_totps.id,
 	user_totps.secret
+	user_totps.verified_at
 FROM
 	user_totps
 WHERE
 	user_totps.user_id = $1
 AND
 	user_totps.revoked_at IS NULL
+`
+
+	// SelectUserRefreshTokensByUserID is the query to select the user refresh tokens by user ID
+	SelectUserRefreshTokensByUserID = `
+SELECT
+	user_refresh_tokens.id,
+	user_refresh_tokens.issued_at,
+	user_refresh_tokens.expires_at,
+	user_refresh_tokens.ip_address
+FROM
+	user_refresh_tokens
+WHERE
+	user_refresh_tokens.user_id = $1
+AND
+	user_refresh_tokens.revoked_at IS NULL
+`
+
+	// SelectUserRefreshTokenByIDAndUserID is the query to select the user refresh token by ID and user ID
+	SelectUserRefreshTokenByIDAndUserID = `
+SELECT
+	user_refresh_tokens.issued_at,
+	user_refresh_tokens.expires_at,
+	user_refresh_tokens.ip_address
+FROM
+	user_refresh_tokens
+WHERE	
+	user_refresh_tokens.id = $1
+AND
+	user_refresh_tokens.user_id = $2
+AND
+	user_refresh_tokens.revoked_at IS NULL
 `
 )

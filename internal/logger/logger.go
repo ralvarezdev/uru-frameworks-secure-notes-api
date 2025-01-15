@@ -93,3 +93,28 @@ func (l *Logger) VerifyTOTP(id int64) {
 		fmt.Sprintf("user id: %d", id),
 	)
 }
+
+// ListRefreshTokens logs the list refresh tokens event
+func (l *Logger) ListRefreshTokens(id int64) {
+	l.logger.Info(
+		"user listed refresh tokens",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// GetRefreshToken logs the get refresh token event
+func (l *Logger) GetRefreshToken(id, refreshTokenID int64) {
+	l.logger.Info(
+		"user got refresh token",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("refresh token id: %d", refreshTokenID),
+	)
+}
+
+// RevokeTOTP logs the revoke TOTP event
+func (l *Logger) RevokeTOTP(id int64) {
+	l.logger.Info(
+		"user revoked totp",
+		fmt.Sprintf("user id: %d", id),
+	)
+}

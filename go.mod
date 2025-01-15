@@ -12,8 +12,9 @@ require (
 	github.com/ralvarezdev/go-jwt v0.3.15
 	github.com/ralvarezdev/go-loader v0.2.13
 	github.com/ralvarezdev/go-logger v0.4.5
-	github.com/ralvarezdev/go-net v0.5.33
+	github.com/ralvarezdev/go-net v0.6.2
 	github.com/ralvarezdev/go-security-headers v0.1.1
+	github.com/ralvarezdev/go-strings v0.1.4
 	github.com/ralvarezdev/go-validator v0.5.14
 )
 
@@ -25,7 +26,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/ralvarezdev/go-reflect v0.1.0 // indirect
-	github.com/ralvarezdev/go-strings v0.1.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect

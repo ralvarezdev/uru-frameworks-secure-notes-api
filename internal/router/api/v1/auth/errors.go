@@ -1,11 +1,19 @@
 package auth
 
 import (
+	"fmt"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	govalidatormappervalidations "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 	"net/http"
 )
 
 var (
+	ErrLogInInvalidUsername = gonethttpresponse.NewFieldError(
+		"username",
+		"user not found by username",
+		http.StatusUnauthorized,
+		nil,
+	)
 	ErrLogInInvalidPassword = gonethttpresponse.NewFieldError(
 		"password",
 		"invalid password",
@@ -24,22 +32,49 @@ var (
 		http.StatusUnauthorized,
 		nil,
 	)
-	ErrLogInMissingTOTPCode = gonethttpresponse.NewFieldError(
+	ErrLogInRequiredTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
-		"missing TOTP code",
-		http.StatusUnauthorized,
+		fmt.Sprintf(govalidatormappervalidations.ErrRequiredField, "totp_code"),
+		http.StatusBadRequest,
 		nil,
 	)
-	ErrLogInMissingIsTOTPRecoveryCode = gonethttpresponse.NewFieldError(
+	ErrLogInRequiredIsTOTPRecoveryCode = gonethttpresponse.NewFieldError(
 		"is_totp_recovery_code",
-		"missing is TOTP recovery code",
-		http.StatusUnauthorized,
+		fmt.Sprintf(
+			govalidatormappervalidations.ErrRequiredField,
+			"is_totp_recovery_code",
+		),
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrGenerateTOTPUrlAlreadyVerified = gonethttpresponse.NewFieldError(
+		"totp",
+		"TOTP is already verified",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrVerifyTOTPNotGenerated = gonethttpresponse.NewFieldError(
+		"totp",
+		"user has not generated TOTP",
+		http.StatusBadRequest,
 		nil,
 	)
 	ErrVerifyTOTPInvalidTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
-		"TOTP code is required",
-		http.StatusUnauthorized,
+		"invalid TOTP code",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrVerifyTOTPAlreadyVerified = gonethttpresponse.NewFieldError(
+		"totp",
+		"TOTP is already verified",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrGetRefreshTokenNotFound = gonethttpresponse.NewFieldError(
+		"id",
+		"refresh token not found",
+		http.StatusNotFound,
 		nil,
 	)
 )

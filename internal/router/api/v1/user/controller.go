@@ -68,9 +68,9 @@ func (c *Controller) RegisterGroups() {}
 // @Accept json
 // @Produce json
 // @Param request body SignUpRequest true "Sign Up Request"
-// @Success 201 {object} internalapiv1common.BasicResponse
-// @Failure 400 {object} gonethttpresponse.JSendResponse
-// @Failure 500 {object} gonethttpresponse.JSendResponse
+// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/user/signup [post]
 func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
@@ -88,6 +88,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	userID, err := c.service.SignUp(r, &body)
 	if err != nil {
 		c.handler.HandleError(w, err)
+		return
 	}
 
 	// Log the user sign up
@@ -95,7 +96,7 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Handle the response
 	c.handler.HandleResponse(
-		w, gonethttpresponse.NewSuccessResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil, http.StatusCreated,
 		),
 	)

@@ -4,21 +4,17 @@ import (
 	"time"
 )
 
-// BasicRequest is the request DTO for the basic request
-type BasicRequest struct {
-}
-
 // UserRefreshToken is the response DTO for the user refresh token
 type UserRefreshToken struct {
-	IssuedAt    time.Time  `json:"issued_at"`
-	ExpiresAt   time.Time  `json:"expires_at"`
-	RevokedAt   *time.Time `json:"revoked_at,omitempty"`
-	IPv4Address string     `json:"ipv4_address"`
+	IssuedAt  time.Time  `json:"issued_at"`
+	ExpiresAt time.Time  `json:"expires_at"`
+	RevokedAt *time.Time `json:"revoked_at,omitempty"`
+	IPAddress string     `json:"ip_address"`
 }
 
 // UserRefreshTokenWithID is the response DTO for the user refresh token with ID
 type UserRefreshTokenWithID struct {
-	UserRefreshTokenID string `json:"user_refresh_token_id"`
+	ID int64 `json:"id"`
 	UserRefreshToken
 }
 
@@ -31,7 +27,7 @@ type Tag struct {
 
 // TagWithID is the response DTO for the tag with ID
 type TagWithID struct {
-	TagID string `json:"note_tag_id"`
+	ID int64 `json:"id"`
 	Tag
 }
 
@@ -47,7 +43,7 @@ type Note struct {
 
 // NoteWithID is the response DTO for the note with ID
 type NoteWithID struct {
-	NoteID string `json:"note_id"`
+	ID int64 `json:"id"`
 	Note
 }
 
@@ -61,7 +57,7 @@ type NoteVersion struct {
 
 // NoteVersionWithID is the response DTO for the note version with ID
 type NoteVersionWithID struct {
-	NoteVersionID string `json:"note_version_id"`
+	ID int64 `json:"id"`
 	NoteVersion
 }
 
