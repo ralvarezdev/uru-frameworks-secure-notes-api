@@ -9,7 +9,7 @@ var (
 	ErrIdClaimNotValid             = errors.New("jwt_id not valid")
 	ErrMustBeAccessToken           = errors.New("must be access token")
 	ErrMustBeRefreshToken          = errors.New("must be refresh token")
-	ErrTokenExpired                = errors.New("token expired")
 	ErrInvalidSubjectClaim         = errors.New("invalid subject claim")
 	ErrInvalidIDClaim              = errors.New("invalid id claim")
+	ErrInvalidTokenValueType       = "invalid token value type, expected: %s"
 )

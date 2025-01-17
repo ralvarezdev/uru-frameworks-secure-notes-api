@@ -24,9 +24,9 @@ var (
 )
 
 // Load initializes the validator constants
-func Load() {
+func Load(mode *goflagsmode.Flag) {
 	// Added the logger to the constants if the debug mode is enabled
-	if goflagsmode.ModeFlag.IsDebug() {
+	if mode != nil && mode.IsDebug() {
 		JSONGenerator = govalidatormapper.NewJSONGenerator(internallogger.MapperGenerator)
 		ValidationsValidator = govalidatormappervalidator.NewDefaultValidator(
 			internallogger.MapperValidator,

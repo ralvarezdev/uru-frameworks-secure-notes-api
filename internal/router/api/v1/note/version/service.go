@@ -7,6 +7,6 @@ import (
 type (
 	// Service is the structure for the API V1 service for the note version route group
 	Service struct {
-		PostgresService *internalpostgres.Service
+		postgresService *internalpostgres.Service
 	}
 )

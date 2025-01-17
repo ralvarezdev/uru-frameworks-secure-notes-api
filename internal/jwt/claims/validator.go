@@ -5,7 +5,8 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	gojwt "github.com/ralvarezdev/go-jwt"
-	gojwtredisauth "github.com/ralvarezdev/go-jwt/redis/auth"
+	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
+	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
@@ -14,18 +15,18 @@ import (
 
 // DefaultValidator struct
 type DefaultValidator struct {
-	postgresService     *internalpostgres.Service
-	redisTokenValidator gojwtredisauth.TokenValidator
+	postgresService *internalpostgres.Service
+	tokenValidator  gojwtcache.TokenValidator
 }
 
 // NewDefaultValidator creates a new default validator
 func NewDefaultValidator(
 	postgresService *internalpostgres.Service,
-	redisTokenValidator gojwtredisauth.TokenValidator,
+	tokenValidator gojwtcache.TokenValidator,
 ) (*DefaultValidator, error) {
 	return &DefaultValidator{
-		postgresService:     postgresService,
-		redisTokenValidator: redisTokenValidator,
+		postgresService: postgresService,
+		tokenValidator:  tokenValidator,
 	}, nil
 }
 
@@ -45,7 +46,23 @@ func (d *DefaultValidator) IsRefreshTokenValid(id string) (bool, error) {
 		}
 		return false, err
 	}
-	return time.Now().Before(expiresAt), nil
+
+	// Check if it is before the expiration time
+	isValid := time.Now().Before(expiresAt)
+
+	// Check if the token validator is not nil
+	if d.tokenValidator != nil {
+		// Set the refresh token in the cache
+		if err := d.tokenValidator.Set(
+			gojwttoken.RefreshToken,
+			id,
+			isValid,
+			expiresAt,
+		); err != nil {
+			return false, err
+		}
+	}
+	return isValid, nil
 }
 
 // IsAccessTokenValid checks if the access token is valid
@@ -64,7 +81,23 @@ func (d *DefaultValidator) IsAccessTokenValid(id string) (bool, error) {
 		}
 		return false, err
 	}
-	return time.Now().Before(expiresAt), nil
+
+	// Check if it is before the expiration time
+	isValid := time.Now().Before(expiresAt)
+
+	// Check if the token validator is not nil
+	if d.tokenValidator != nil {
+		// Set the access token in the cache
+		if err := d.tokenValidator.Set(
+			gojwttoken.AccessToken,
+			id,
+			isValid,
+			expiresAt,
+		); err != nil {
+			return false, err
+		}
+	}
+	return isValid, nil
 }
 
 // ValidateClaims validates the claims
@@ -79,7 +112,7 @@ func (d *DefaultValidator) ValidateClaims(
 	}
 
 	// Get the JWT Identifier
-	jwtId, ok := (*claims)[gojwt.IdClaim].(string)
+	jti, ok := (*claims)[gojwt.IdClaim].(string)
 	if !ok {
 		return false, ErrIdClaimNotValid
 	}
@@ -94,21 +127,33 @@ func (d *DefaultValidator) ValidateClaims(
 		return false, ErrMustBeAccessToken
 	}
 
-	// Check if redis is enabled. If it is, check if the token is valid
-	if d.redisTokenValidator != nil {
-		return d.redisTokenValidator.IsTokenValid(jwtId)
+	// Check if the token validator is not nil
+	if d.tokenValidator != nil {
+		// Check if it is a refresh token
+		var token gojwttoken.Token
+		if isRefreshToken {
+			token = gojwttoken.RefreshToken
+		} else {
+			token = gojwttoken.AccessToken
+		}
+
+		// Check if the token is valid
+		isValid, err := d.tokenValidator.IsValid(token, jti)
+		if err == nil {
+			return isValid, nil
+		}
 	}
 
 	// Validate the token
 	if isRefreshToken {
 		// Check if the refresh token is valid
 		return d.IsRefreshTokenValid(
-			jwtId,
+			jti,
 		)
 	}
 
 	// Check if the access token is valid
 	return d.IsAccessTokenValid(
-		jwtId,
+		jti,
 	)
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
+	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gonethttp "github.com/ralvarezdev/go-net/http"
@@ -22,10 +23,44 @@ import (
 type (
 	// Service is the structure for the API V1 service for the auth route group
 	Service struct {
-		JwtIssuer       gojwtissuer.Issuer
-		PostgresService *internalpostgres.Service
+		jwtIssuer         gojwtissuer.Issuer
+		jwtTokenValidator gojwtcache.TokenValidator
+		postgresService   *internalpostgres.Service
+	}
+
+	// TokenInfo struct for the cache
+	TokenInfo struct {
+		Type      gojwttoken.Token
+		ID        int64
+		ExpiresAt time.Time
 	}
 )
+
+// SetTokenToCache sets the token to the cache
+func (s *Service) SetTokenToCache(
+	token gojwttoken.Token,
+	id int64,
+	expiresAt time.Time,
+	isValid bool,
+) {
+	_ = s.jwtTokenValidator.Set(
+		token,
+		strconv.FormatInt(id, 10),
+		isValid,
+		expiresAt,
+	)
+}
+
+// RevokeTokenFromCache revokes the token from the cache
+func (s *Service) RevokeTokenFromCache(
+	token gojwttoken.Token,
+	id int64,
+) {
+	_ = s.jwtTokenValidator.Revoke(
+		token,
+		strconv.FormatInt(id, 10),
+	)
+}
 
 // InsertUserFailedLogInAttempt inserts a failed login attempt for a user
 func (s *Service) InsertUserFailedLogInAttempt(
@@ -34,7 +69,7 @@ func (s *Service) InsertUserFailedLogInAttempt(
 	badPassword, bad2FACode bool,
 ) error {
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Insert the failed login attempt
 	_, err := db.Exec(
@@ -115,7 +150,7 @@ func (s *Service) ValidateTOTPRecoveryCode(
 	ipAddress string,
 ) (bool, error) {
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Revoke the TOTP recovery code
 	result, err := db.Exec(
@@ -155,9 +190,15 @@ func (s *Service) GenerateTokens(
 ) (*map[gojwttoken.Token]string, error) {
 	// Run the transaction
 	var userRefreshTokenID, userAccessTokenID int64
-	refreshTokenExpiresAt := time.Add(internaljwt.Durations[gojwttoken.RefreshToken])
-	accessTokenExpiresAt := time.Add(internaljwt.Durations[gojwttoken.AccessToken])
-	err := s.PostgresService.RunTransaction(
+	userRefreshTokenInfo := TokenInfo{
+		Type:      gojwttoken.RefreshToken,
+		ExpiresAt: time.Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	}
+	userAccessTokenInfo := TokenInfo{
+		Type:      gojwttoken.AccessToken,
+		ExpiresAt: time.Add(internaljwt.Durations[gojwttoken.AccessToken]),
+	}
+	err := s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Insert the user refresh token
 			if err := tx.QueryRow(
@@ -166,7 +207,7 @@ func (s *Service) GenerateTokens(
 				parentUserRefreshTokenID,
 				clientIP,
 				time,
-				refreshTokenExpiresAt,
+				userRefreshTokenInfo.ExpiresAt,
 			).Scan(&userRefreshTokenID); err != nil {
 				return err
 			}
@@ -177,7 +218,7 @@ func (s *Service) GenerateTokens(
 				userID,
 				userRefreshTokenID,
 				time,
-				accessTokenExpiresAt,
+				userAccessTokenInfo.ExpiresAt,
 			).Scan(&userAccessTokenID)
 		},
 	)
@@ -185,29 +226,41 @@ func (s *Service) GenerateTokens(
 		return nil, err
 	}
 
-	// Create the user tokens claims
-	userTokensClaims := make(map[gojwttoken.Token]*internaljwtclaims.Claims)
-	userTokensClaims[gojwttoken.RefreshToken] = internaljwtclaims.NewRefreshTokenClaims(
-		userRefreshTokenID,
-		strconv.FormatInt(userID, 10),
-		time,
-		refreshTokenExpiresAt,
-	)
-	userTokensClaims[gojwttoken.AccessToken] = internaljwtclaims.NewAccessTokenClaims(
-		userAccessTokenID,
-		strconv.FormatInt(userID, 10),
-		time,
-		accessTokenExpiresAt,
-	)
+	// Add the tokens ID to the tokens
+	userRefreshTokenInfo.ID = userRefreshTokenID
+	userAccessTokenInfo.ID = userAccessTokenID
 
-	// Issue the user tokens
+	// Set the tokens in the cache as valid
+	go func() {
+		for _, token := range []TokenInfo{
+			userAccessTokenInfo,
+			userRefreshTokenInfo,
+		} {
+			s.SetTokenToCache(token.Type, token.ID, token.ExpiresAt, true)
+		}
+	}()
+
+	// Generate the user tokens
 	userTokens := make(map[gojwttoken.Token]string)
-	for token, claims := range userTokensClaims {
-		rawToken, err := s.JwtIssuer.IssueToken(claims)
+	for _, token := range []TokenInfo{
+		userRefreshTokenInfo,
+		userAccessTokenInfo,
+	} {
+		// Create the user token claims
+		userTokenClaims := internaljwtclaims.NewClaims(
+			token.Type,
+			token.ID,
+			strconv.FormatInt(userID, 10),
+			time,
+			token.ExpiresAt,
+		)
+
+		// Issue the user tokens
+		rawToken, err := s.jwtIssuer.IssueToken(userTokenClaims)
 		if err != nil {
 			return nil, err
 		}
-		userTokens[token] = rawToken
+		userTokens[token.Type] = rawToken
 	}
 
 	return &userTokens, nil
@@ -225,7 +278,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	}
 
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Get the current time in UTC
 	currentTime := time.Now().UTC()
@@ -337,8 +390,31 @@ func (s *Service) RevokeRefreshToken(
 		return err
 	}
 
+	// Get the database connection
+	db := s.postgresService.DB()
+
+	// Set the tokens in the cache as invalid
+	go func() {
+		// Get the user access token ID by the user refresh token ID
+		var userAccessTokenID int64
+		if err := db.QueryRow(
+			internalpostgresqueries.SelectUserAccessTokenIDByRefreshTokenID,
+			userRefreshTokenID,
+		).Scan(&userAccessTokenID); err != nil {
+			return
+		}
+
+		// Revoke the tokens in the cache
+		for token, id := range map[gojwttoken.Token]int64{
+			gojwttoken.RefreshToken: userRefreshTokenID,
+			gojwttoken.AccessToken:  userAccessTokenID,
+		} {
+			s.RevokeTokenFromCache(token, id)
+		}
+	}()
+
 	// Run the transaction
-	return s.PostgresService.RunTransaction(
+	err = s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Revoke the user refresh token by the ID and user ID
 			if _, err := tx.Exec(
@@ -350,7 +426,7 @@ func (s *Service) RevokeRefreshToken(
 			}
 
 			// Revoke the user access token by the user refresh token ID and user ID
-			_, err := tx.Exec(
+			_, err = tx.Exec(
 				internalpostgresqueries.UpdateUserAccessTokenRevokedAtByRefreshTokenIDAndUserID,
 				userRefreshTokenID,
 				userID,
@@ -358,6 +434,8 @@ func (s *Service) RevokeRefreshToken(
 			return err
 		},
 	)
+
+	return err
 }
 
 // LogOut logs out a user
@@ -383,8 +461,55 @@ func (s *Service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
 		return nil, err
 	}
 
+	// Get the database connection
+	db := s.postgresService.DB()
+
+	// Set the tokens in the cache as invalid
+	go func() {
+		// Get the user refresh tokens ID by user ID
+		var userRefreshTokenID int64
+		rows, err := db.Query(
+			internalpostgresqueries.SelectUserRefreshTokensIDByUserID,
+			userID,
+		)
+		if err != nil {
+			return
+		}
+		defer rows.Close()
+
+		// Parse the user refresh tokens ID
+		for rows.Next() {
+			if err := rows.Scan(&userRefreshTokenID); err != nil {
+				return
+			}
+
+			// Revoke the user refresh token from the cache
+			s.RevokeTokenFromCache(gojwttoken.RefreshToken, userRefreshTokenID)
+		}
+
+		// Get the user access tokens ID by user ID
+		var userAccessTokenID int64
+		rows, err = db.Query(
+			internalpostgresqueries.SelectUserAccessTokensIDByUserID,
+			userID,
+		)
+		if err != nil {
+			return
+		}
+
+		// Parse the user access tokens ID
+		for rows.Next() {
+			if err := rows.Scan(&userAccessTokenID); err != nil {
+				return
+			}
+
+			// Revoke the user access token from the cache
+			s.RevokeTokenFromCache(gojwttoken.AccessToken, userAccessTokenID)
+		}
+	}()
+
 	// Run the transaction
-	return &userID, s.PostgresService.RunTransaction(
+	return &userID, s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Revoke the user refresh tokens by the user ID
 			if _, err = tx.Exec(
@@ -454,13 +579,13 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 	}
 
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Run transaction
 	var userTOTPID int64
 	var userEmail, userTOTPSecret string
 	var userTOTPVerifiedAt *time.Time
-	err = s.PostgresService.RunTransaction(
+	err = s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Get the user email by the user ID
 			if err = tx.QueryRow(
@@ -546,7 +671,7 @@ func (s *Service) VerifyTOTP(
 	userID, err := internaljwtclaims.GetSubject(r)
 
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Get the user TOTP ID and secret
 	var userTOTPID int64
@@ -602,7 +727,7 @@ func (s *Service) VerifyTOTP(
 	}
 
 	// Run transaction
-	err = s.PostgresService.RunTransaction(
+	err = s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Update the user TOTP verified at
 			if _, err = tx.Exec(
@@ -636,7 +761,7 @@ func (s *Service) RevokeTOTP(r *http.Request) (*int64, error) {
 	}
 
 	// Run transaction
-	err = s.PostgresService.RunTransaction(
+	err = s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Revoke the user TOTP by the user ID
 			if _, err = tx.Exec(
@@ -677,7 +802,7 @@ func (s *Service) ListRefreshTokens(r *http.Request) (
 	}
 
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Get the user refresh tokens
 	rows, err := db.Query(
@@ -719,7 +844,7 @@ func (s *Service) GetRefreshToken(
 	}
 
 	// Get the database connection
-	db := s.PostgresService.DB()
+	db := s.postgresService.DB()
 
 	// Get the user refresh token
 	var userRefreshToken internalapiv1common.UserRefreshToken

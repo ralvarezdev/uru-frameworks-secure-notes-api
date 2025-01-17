@@ -1,6 +1,7 @@
 package auth
 
 import (
+	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
@@ -24,6 +25,7 @@ type (
 		authenticator      gonethttpmiddlewareauth.Authenticator
 		postgresService    *internalpostgres.Service
 		jwtIssuer          gojwtissuer.Issuer
+		jwtTokenValidator  gojwtcache.TokenValidator
 		service            *Service
 		validator          *Validator
 		logger             *internallogger.Logger
@@ -38,6 +40,7 @@ func NewController(
 	authenticator gonethttpmiddlewareauth.Authenticator,
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
+	jwtTokenValidator gojwtcache.TokenValidator,
 ) *Controller {
 	// Load the validator mappers
 	LoadMappers()
@@ -46,13 +49,15 @@ func NewController(
 		Controller: gonethttproute.Controller{
 			RouterWrapper: baseRouter.NewGroup(BasePath),
 		},
-		handler:         internalhandler.Handler,
-		authenticator:   authenticator,
-		postgresService: postgresService,
-		jwtIssuer:       jwtIssuer,
+		handler:           internalhandler.Handler,
+		authenticator:     authenticator,
+		postgresService:   postgresService,
+		jwtIssuer:         jwtIssuer,
+		jwtTokenValidator: jwtTokenValidator,
 		service: &Service{
-			JwtIssuer:       jwtIssuer,
-			PostgresService: postgresService,
+			jwtIssuer:         jwtIssuer,
+			postgresService:   postgresService,
+			jwtTokenValidator: jwtTokenValidator,
 		},
 		validator:          &Validator{Service: internalvalidator.ValidationsService},
 		logger:             internallogger.Api,

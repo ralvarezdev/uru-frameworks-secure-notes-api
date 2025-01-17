@@ -17,7 +17,7 @@ import (
 type (
 	// Service is the structure for the API V1 service for the user route group
 	Service struct {
-		PostgresService *internalpostgres.Service
+		postgresService *internalpostgres.Service
 	}
 )
 
@@ -47,7 +47,7 @@ func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
 
 	// Run the transaction
 	var userID int64
-	err = s.PostgresService.RunTransaction(
+	err = s.postgresService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Create the new user
 			if err = tx.QueryRow(

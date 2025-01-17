@@ -1,6 +1,7 @@
 package v1
 
 import (
+	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
@@ -28,6 +29,7 @@ type (
 		validatorService   govalidatormappervalidator.Service
 		postgresService    *internalpostgres.Service
 		jwtIssuer          gojwtissuer.Issuer
+		jwtTokenValidator  gojwtcache.TokenValidator
 		service            *Service
 		validator          *Validator
 		logger             *internallogger.Logger
@@ -42,6 +44,7 @@ func NewController(
 	authenticator gonethttpmiddlewareauth.Authenticator,
 	postgresService *internalpostgres.Service,
 	jwtIssuer gojwtissuer.Issuer,
+	jwtTokenValidator gojwtcache.TokenValidator,
 ) *Controller {
 	return &Controller{
 		Controller: gonethttproute.Controller{
@@ -51,6 +54,7 @@ func NewController(
 		authenticator:      authenticator,
 		postgresService:    postgresService,
 		jwtIssuer:          jwtIssuer,
+		jwtTokenValidator:  jwtTokenValidator,
 		service:            &Service{},
 		validator:          &Validator{Service: internalvalidator.ValidationsService},
 		logger:             internallogger.Api,
@@ -74,6 +78,7 @@ func (c *Controller) RegisterGroups() {
 		c.authenticator,
 		c.postgresService,
 		c.jwtIssuer,
+		c.jwtTokenValidator,
 	)
 	noteController := internalrouternote.NewController(
 		c.RouterWrapper,

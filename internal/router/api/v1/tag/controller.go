@@ -38,7 +38,7 @@ func NewController(
 		handler:            internalhandler.Handler,
 		authenticator:      authenticator,
 		postgresService:    postgresService,
-		service:            &Service{PostgresService: postgresService},
+		service:            &Service{postgresService: postgresService},
 		validator:          &Validator{Service: internalvalidator.ValidationsService},
 		logger:             internallogger.Api,
 		jwtValidatorLogger: internallogger.JwtValidator,

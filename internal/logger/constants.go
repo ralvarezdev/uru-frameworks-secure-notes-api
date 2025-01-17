@@ -2,6 +2,7 @@ package logger
 
 import (
 	godatabases "github.com/ralvarezdev/go-databases"
+	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	goloaderenv "github.com/ralvarezdev/go-loader/env"
 	gologger "github.com/ralvarezdev/go-logger"
@@ -39,6 +40,12 @@ var (
 
 	// Api is the logger for the API endpoints
 	Api, _ = NewLogger("API", ModeLogger)
+
+	// CacheTokenValidator is the logger for the cache token validator
+	CacheTokenValidator, _ = gojwtcache.NewLogger(
+		"CACHE TOKEN VALIDATOR",
+		ModeLogger,
+	)
 
 	// JwtValidator is the logger for the JWT validator
 	JwtValidator, _ = gojwtvalidator.NewLogger(

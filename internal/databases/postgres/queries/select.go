@@ -49,7 +49,7 @@ AND
 	user_totps.verified_at IS NOT NULL
 `
 
-	// SelectUserRefreshTokenExpiresAtByID is the query to select the user refresh token expires at by ID
+	// SelectUserRefreshTokenExpiresAtByID is the query to select the user refresh token expiration by ID
 	SelectUserRefreshTokenExpiresAtByID = `
 SELECT
 	user_refresh_tokens.expires_at
@@ -61,7 +61,7 @@ AND
 	user_refresh_tokens.revoked_at IS NULL
 `
 
-	// SelectUserAccessTokenExpiresAtByID is the query to select the user access token expires at by ID
+	// SelectUserAccessTokenExpiresAtByID is the query to select the user access token expiration by ID
 	SelectUserAccessTokenExpiresAtByID = `
 SELECT
 	user_access_tokens.expires_at
@@ -70,6 +70,18 @@ FROM
 WHERE
 	user_access_tokens.id = $1
 AND	
+	user_access_tokens.revoked_at IS NULL
+`
+
+	// SelectUserAccessTokenIDByRefreshTokenID is the query to select the user access token ID by refresh token ID
+	SelectUserAccessTokenIDByRefreshTokenID = `
+SELECT
+	user_access_tokens.id,
+FROM
+	user_access_tokens
+WHERE
+	user_access_tokens.user_refresh_token_id = $1
+AND
 	user_access_tokens.revoked_at IS NULL
 `
 
@@ -102,6 +114,18 @@ AND
 	user_refresh_tokens.revoked_at IS NULL
 `
 
+	// SelectUserRefreshTokensIDByUserID is the query to select the user refresh tokens ID by user ID
+	SelectUserRefreshTokensIDByUserID = `
+SELECT
+	user_refresh_tokens.id
+FROM
+	user_refresh_tokens
+WHERE
+	user_refresh_tokens.user_id = $1
+AND	
+	user_refresh_tokens.revoked_at IS NULL
+`
+
 	// SelectUserRefreshTokenByIDAndUserID is the query to select the user refresh token by ID and user ID
 	SelectUserRefreshTokenByIDAndUserID = `
 SELECT
@@ -116,5 +140,17 @@ AND
 	user_refresh_tokens.user_id = $2
 AND
 	user_refresh_tokens.revoked_at IS NULL
+`
+
+	// SelectUserAccessTokensIDByUserID is the query to select the user access tokens ID by user ID
+	SelectUserAccessTokensIDByUserID = `
+SELECT
+	user_access_tokens.id
+FROM
+	user_access_tokens
+WHERE
+	user_access_tokens.user_id = $1
+AND
+	user_access_tokens.revoked_at IS NULL
 `
 )

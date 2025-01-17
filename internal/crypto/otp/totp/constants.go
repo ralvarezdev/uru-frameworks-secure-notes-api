@@ -46,44 +46,20 @@ var (
 
 // Load loads the TOTP constants
 func Load() {
-	// Get the TOTP period
-	if err := internalloader.Loader.LoadIntVariable(
-		EnvPeriod,
-		&Period,
-	); err != nil {
-		panic(err)
-	}
-
-	// Get the TOTP digits
-	if err := internalloader.Loader.LoadIntVariable(
-		EnvDigits,
-		&Digits,
-	); err != nil {
-		panic(err)
-	}
-
-	// Get the TOTP secret length
-	if err := internalloader.Loader.LoadIntVariable(
-		EnvSecretLength,
-		&SecretLength,
-	); err != nil {
-		panic(err)
-	}
-
-	// Get the TOTP recovery codes length
-	if err := internalloader.Loader.LoadIntVariable(
-		EnvRecoveryCodesLength,
-		&RecoveryCodesLength,
-	); err != nil {
-		panic(err)
-	}
-
-	// Get the TOTP recovery codes count
-	if err := internalloader.Loader.LoadIntVariable(
-		EnvRecoveryCodesCount,
-		&RecoveryCodesCount,
-	); err != nil {
-		panic(err)
+	// Load the TOTP period, digits, secret length, recovery codes length, and recovery codes count
+	for env, variable := range map[string]*int{
+		EnvPeriod:              &Period,
+		EnvDigits:              &Digits,
+		EnvSecretLength:        &SecretLength,
+		EnvRecoveryCodesLength: &RecoveryCodesLength,
+		EnvRecoveryCodesCount:  &RecoveryCodesCount,
+	} {
+		if err := internalloader.Loader.LoadIntVariable(
+			env,
+			variable,
+		); err != nil {
+			panic(err)
+		}
 	}
 
 	// Set the InsertUserTOTPRecoveryCodes query based on the recovery codes count

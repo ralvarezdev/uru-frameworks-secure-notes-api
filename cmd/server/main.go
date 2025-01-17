@@ -16,7 +16,8 @@ import (
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internaljson "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/json"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
-	internalapiv1jwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
+	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
+	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internallistener "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/listener"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
@@ -32,7 +33,8 @@ func init() {
 	flag.Parse()
 
 	// Log the mode flag
-	log.Printf("Running in %s mode...\n", goflagsmode.ModeFlag.Value())
+	mode := goflagsmode.ModeFlag
+	log.Printf("Running in %s mode...\n", mode.Value())
 
 	// Call the load functions
 	internalloader.Load()
@@ -41,8 +43,9 @@ func init() {
 	internalpbkdf2.Load()
 	internalpostgres.Load()
 	internaljwt.Load()
+	internaljwtcache.Load(mode)
 	internallistener.Load()
-	internalvalidator.Load()
+	internalvalidator.Load(mode)
 }
 
 func main() {
@@ -72,15 +75,16 @@ func main() {
 	}
 
 	// Create the JWT claims validator
-	jwtClaimsValidator, _ := internalapiv1jwtclaims.NewDefaultValidator(
-		postgresService, nil,
+	jwtClaimsValidator, _ := internaljwtclaims.NewDefaultValidator(
+		postgresService, internaljwtcache.TokenValidator,
 	)
 
 	// Create the JWT validator with ED25519 public key
+	mode := goflagsmode.ModeFlag
 	jwtValidator, err := gojwtvalidator.NewEd25519Validator(
 		[]byte(internaljwt.Keys[internaljwt.EnvPublicKey]),
 		jwtClaimsValidator,
-		goflagsmode.ModeFlag,
+		mode,
 	)
 	if err != nil {
 		panic(err)
@@ -112,6 +116,7 @@ func main() {
 		authenticator,
 		postgresService,
 		jwtIssuer,
+		internaljwtcache.TokenValidator,
 	)
 	if err != nil {
 		panic(err)
