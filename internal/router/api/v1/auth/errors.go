@@ -8,6 +8,18 @@ import (
 )
 
 var (
+	ErrSignUpUsernameAlreadyRegistered = gonethttpresponse.NewFieldError(
+		"username",
+		"username is already registered",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrSignUpEmailAlreadyRegistered = gonethttpresponse.NewFieldError(
+		"email",
+		"email is already registered",
+		http.StatusBadRequest,
+		nil,
+	)
 	ErrLogInInvalidUsername = gonethttpresponse.NewFieldError(
 		"username",
 		"user not found by username",

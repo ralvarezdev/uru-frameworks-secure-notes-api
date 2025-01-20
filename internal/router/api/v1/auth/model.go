@@ -4,6 +4,31 @@ import (
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 )
 
+// SignUpRequest is the request DTO to sign up
+type SignUpRequest struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	Email     string `json:"email"`
+}
+
+// ChangePasswordRequest is the request DTO to change password
+type ChangePasswordRequest struct {
+	Password string `json:"password"`
+}
+
+// ForgotPasswordRequest is the request DTO to forgot password
+type ForgotPasswordRequest struct {
+	Username string `json:"username"`
+}
+
+// ResetPasswordRequest is the request DTO to reset password
+type ResetPasswordRequest struct {
+	ResetToken string `json:"reset_token"`
+	Password   string `json:"password"`
+}
+
 // LogInRequest is the request DTO to log in
 type LogInRequest struct {
 	Username           string  `json:"username"`

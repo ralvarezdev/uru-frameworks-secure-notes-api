@@ -4,13 +4,11 @@ import (
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
-	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
-	"net/http"
 )
 
 type (
@@ -51,53 +49,7 @@ func NewController(
 }
 
 // RegisterRoutes registers the routes for the API V1 user controller
-func (c *Controller) RegisterRoutes() {
-	c.RegisterRoute(
-		"POST /signup",
-		c.SignUp,
-	)
-}
+func (c *Controller) RegisterRoutes() {}
 
 // RegisterGroups registers the router groups for the API V1 user controller
 func (c *Controller) RegisterGroups() {}
-
-// SignUp signs up a new user
-// @Summary Sign up a new user
-// @Description Creates a new user account with the provided details
-// @Tags api v1 user
-// @Accept json
-// @Produce json
-// @Param request body SignUpRequest true "Sign Up Request"
-// @Success 201 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/user/signup [post]
-func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body and validate the request
-	var body SignUpRequest
-	if !c.handler.DecodeAndValidate(
-		w,
-		r,
-		&body,
-		c.validator.ValidateSignUpRequest,
-	) {
-		return
-	}
-
-	// Sign up the user
-	userID, err := c.service.SignUp(r, &body)
-	if err != nil {
-		c.handler.HandleError(w, err)
-		return
-	}
-
-	// Log the user sign up
-	c.logger.SignUp(*userID)
-
-	// Handle the response
-	c.handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			nil, http.StatusCreated,
-		),
-	)
-}

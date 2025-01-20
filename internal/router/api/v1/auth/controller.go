@@ -68,6 +68,10 @@ func NewController(
 // RegisterRoutes registers the routes for the API V1 auth controller
 func (c *Controller) RegisterRoutes() {
 	c.RegisterRoute(
+		"POST /signup",
+		c.SignUp,
+	)
+	c.RegisterRoute(
 		"POST /login",
 		c.LogIn,
 	)
@@ -131,6 +135,47 @@ func (c *Controller) getRefreshTokenID(
 	return c.handler.ParseWildcard(
 		w, r, "id", refreshTokenID,
 		gostringsconvert.ToInt64,
+	)
+}
+
+// SignUp signs up a new user
+// @Summary Sign up a new user
+// @Description Creates a new user account with the provided details
+// @Tags api v1 user
+// @Accept json
+// @Produce json
+// @Param request body SignUpRequest true "Sign Up Request"
+// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/user/signup [post]
+func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
+	// Decode the request body and validate the request
+	var body SignUpRequest
+	if !c.handler.DecodeAndValidate(
+		w,
+		r,
+		&body,
+		c.validator.ValidateSignUpRequest,
+	) {
+		return
+	}
+
+	// Sign up the user
+	userID, err := c.service.SignUp(r, &body)
+	if err != nil {
+		c.handler.HandleError(w, err)
+		return
+	}
+
+	// Log the user sign up
+	c.logger.SignUp(*userID)
+
+	// Handle the response
+	c.handler.HandleResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil, http.StatusCreated,
+		),
 	)
 }
 

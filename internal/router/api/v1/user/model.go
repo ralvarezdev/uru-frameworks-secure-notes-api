@@ -4,15 +4,6 @@ import (
 	"time"
 )
 
-// SignUpRequest is the request DTO to sign up
-type SignUpRequest struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	Email     string `json:"email"`
-}
-
 // UpdateProfileRequest is the request DTO to update profile
 type UpdateProfileRequest struct {
 	FirstName *string    `json:"first_name,omitempty"`
@@ -36,22 +27,6 @@ type GetMyProfileResponse struct {
 // ChangeUsernameRequest is the request DTO to change username
 type ChangeUsernameRequest struct {
 	Username string `json:"username"`
-}
-
-// ChangePasswordRequest is the request DTO to change password
-type ChangePasswordRequest struct {
-	Password string `json:"password"`
-}
-
-// ForgotPasswordRequest is the request DTO to forgot password
-type ForgotPasswordRequest struct {
-	Username string `json:"username"`
-}
-
-// ResetPasswordRequest is the request DTO to reset password
-type ResetPasswordRequest struct {
-	ResetToken string `json:"reset_token"`
-	Password   string `json:"password"`
 }
 
 // ChangeEmailRequest is the request DTO to change email

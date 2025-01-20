@@ -2,7 +2,6 @@ package claims
 
 import (
 	"database/sql"
-	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	gojwt "github.com/ralvarezdev/go-jwt"
 	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
@@ -10,7 +9,6 @@ import (
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
-	"time"
 )
 
 // DefaultValidator struct
@@ -36,28 +34,34 @@ func (d *DefaultValidator) IsRefreshTokenValid(id string) (bool, error) {
 	db := d.postgresService.DB()
 
 	// Get the refresh token by the ID
-	var expiresAt time.Time
+	var expiresAt sql.NullTime
+	var found, isExpired sql.NullBool
 	if err := db.QueryRow(
-		internalpostgresqueries.SelectUserRefreshTokenExpiresAtByID,
+		internalpostgresqueries.IsRefreshTokenValidProc,
 		id,
-	).Scan(&expiresAt); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
+		nil, nil, nil,
+	).Scan(
+		&expiresAt,
+		&found,
+		&isExpired,
+	); err != nil {
 		return false, err
 	}
 
-	// Check if it is before the expiration time
-	isValid := time.Now().Before(expiresAt)
+	// Check if it was found
+	if !found.Bool {
+		return false, nil
+	}
 
 	// Check if the token validator is not nil
+	isValid := !isExpired.Bool
 	if d.tokenValidator != nil {
 		// Set the refresh token in the cache
 		if err := d.tokenValidator.Set(
 			gojwttoken.RefreshToken,
 			id,
 			isValid,
-			expiresAt,
+			expiresAt.Time,
 		); err != nil {
 			return false, err
 		}
@@ -71,28 +75,33 @@ func (d *DefaultValidator) IsAccessTokenValid(id string) (bool, error) {
 	db := d.postgresService.DB()
 
 	// Get the access token by the ID
-	var expiresAt time.Time
+	var expiresAt sql.NullTime
+	var found, isExpired sql.NullBool
 	if err := db.QueryRow(
-		internalpostgresqueries.SelectUserAccessTokenExpiresAtByID,
-		id,
-	).Scan(&expiresAt); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
+		internalpostgresqueries.IsAccessTokenValidProc,
+		id, nil, nil, nil,
+	).Scan(
+		&expiresAt,
+		&found,
+		&isExpired,
+	); err != nil {
 		return false, err
 	}
 
-	// Check if it is before the expiration time
-	isValid := time.Now().Before(expiresAt)
+	// Check if it was found
+	if !found.Bool {
+		return false, nil
+	}
 
 	// Check if the token validator is not nil
+	isValid := !isExpired.Bool
 	if d.tokenValidator != nil {
 		// Set the access token in the cache
 		if err := d.tokenValidator.Set(
 			gojwttoken.AccessToken,
 			id,
 			isValid,
-			expiresAt,
+			expiresAt.Time,
 		); err != nil {
 			return false, err
 		}

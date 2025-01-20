@@ -5,7 +5,7 @@ import (
 	internalpostgresconstraints "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/constraints"
 )
 
-var (
+const (
 	// CreateUsers is the SQL query to create the users table
 	CreateUsers = `
 CREATE TABLE IF NOT EXISTS users (
@@ -18,21 +18,6 @@ CREATE TABLE IF NOT EXISTS users (
     deleted_at TIMESTAMP
 );
 `
-
-	// CreateUserUsernames is the SQL query to create the user_usernames table
-	CreateUserUsernames = fmt.Sprintf(
-		`
-CREATE TABLE IF NOT EXISTS user_usernames (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_usernames (username) WHERE revoked_at IS NULL;
-`, internalpostgresconstraints.UserUsernamesUniqueUsername,
-	)
 
 	// CreateUserPasswordHashes is the SQL query to create the user_password_hashes table
 	CreateUserPasswordHashes = `
@@ -58,21 +43,6 @@ CREATE TABLE IF NOT EXISTS user_reset_passwords (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
-
-	// CreateUserEmails is the SQL query to create the user_emails table
-	CreateUserEmails = fmt.Sprintf(
-		`
-CREATE TABLE IF NOT EXISTS user_emails (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (email) WHERE revoked_at IS NULL;
-`, internalpostgresconstraints.UserEmailsUniqueEmail,
-	)
 
 	// CreateUserEmailVerifications is the SQL query to create the user_email_verifications table
 	CreateUserEmailVerifications = `
@@ -114,8 +84,8 @@ CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
 );
 `
 
-	// UserFailedLogInAttemptsCreate is the SQL query to create the user_failed_log_in_attempts table
-	UserFailedLogInAttemptsCreate = `
+	// CreateUserFailedLogInAttempts is the SQL query to create the user_failed_log_in_attempts table
+	CreateUserFailedLogInAttempts = `
 CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -226,4 +196,36 @@ CREATE TABLE IF NOT EXISTS note_versions (
     FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
 );
 `
+)
+
+var (
+	// CreateUserUsernames is the SQL query to create the user_usernames table
+	CreateUserUsernames = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_usernames (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    assigned_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_usernames (username) WHERE revoked_at IS NULL;
+`, internalpostgresconstraints.UserUsernamesUniqueUsername,
+	)
+
+	// CreateUserEmails is the SQL query to create the user_emails table
+	CreateUserEmails = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_emails (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    assigned_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (email) WHERE revoked_at IS NULL;
+`, internalpostgresconstraints.UserEmailsUniqueEmail,
+	)
 )
