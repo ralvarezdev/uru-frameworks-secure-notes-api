@@ -15,7 +15,7 @@ require (
 	github.com/ralvarezdev/go-net v0.6.2
 	github.com/ralvarezdev/go-security-headers v0.1.1
 	github.com/ralvarezdev/go-strings v0.1.6
-	github.com/ralvarezdev/go-validator v0.5.14
+	github.com/ralvarezdev/go-validator v0.5.18
 )
 
 require (

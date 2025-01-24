@@ -37,8 +37,8 @@ github.com/ralvarezdev/go-security-headers v0.1.1 h1:tuZ66YhmOb4JJluhJCwo63i4fvZ
 github.com/ralvarezdev/go-security-headers v0.1.1/go.mod h1:DXhZZGyaIAL2Z3WtRr+wQU7wtp2FR1MukoNpdNwfdU0=
 github.com/ralvarezdev/go-strings v0.1.6 h1:NWI+XCipWaOo0vhSNpZz+7Eb4igk/GXD5RaFsk4ZPqY=
 github.com/ralvarezdev/go-strings v0.1.6/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
-github.com/ralvarezdev/go-validator v0.5.14 h1:PZPlW/0hCvUwgvEdX+500Be7BwABIySMHDz6Uw9zLVo=
-github.com/ralvarezdev/go-validator v0.5.14/go.mod h1:q24kfA3gLlcYkMo/W6Ip7JEpWtZGEJBN6Rvn0N1IOF0=
+github.com/ralvarezdev/go-validator v0.5.18 h1:11eP5K4Yv/lwLIhmDmmTGZqQkV92h7ZzD6l0tm9iFtI=
+github.com/ralvarezdev/go-validator v0.5.18/go.mod h1:q24kfA3gLlcYkMo/W6Ip7JEpWtZGEJBN6Rvn0N1IOF0=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
