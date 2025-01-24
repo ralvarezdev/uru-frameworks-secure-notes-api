@@ -19,13 +19,12 @@ BEGIN
 	INSERT INTO users (
 		first_name,
 		last_name, 
-		salt, 
-		joined_at
+		salt
 	) 
 	VALUES (
 		in_first_name, 
 		in_last_name, 
-		in_salt, NOW()
+		in_salt
 	)
 	RETURNING 
 		id INTO out_user_id;
@@ -33,37 +32,31 @@ BEGIN
 	-- Insert into user_usernames table
 	INSERT INTO user_usernames (
 		user_id, 
-		username, 
-		assigned_at
+		username
 	)
 	VALUES (
 		out_user_id, 
-		in_username, 
-		NOW()
+		in_username
 	);
 
 	-- Insert into user_emails table
 	INSERT INTO user_emails (
 		user_id, 
-		email, 
-		assigned_at
+		email
 	)
 	VALUES (
 		out_user_id, 
-		in_email, 
-		NOW()
+		in_email
 	);
 
 	-- Insert into user_password_hashes table
 	INSERT INTO user_password_hashes (
 		user_id, 
-		password_hash, 
-		assigned_at
+		password_hash
 	) 
 	VALUES (
 		out_user_id, 
-		in_password_hash,
-		NOW()
+		in_password_hash
 	);
 EXCEPTION 
 	WHEN OTHERS THEN 
@@ -129,14 +122,12 @@ BEGIN
   		user_id,
   		parent_user_refresh_token_id,
   		ip_address,
-		issued_at,
 		expires_at
 	)
 	VALUES (
 		in_user_id,
 		in_parent_refresh_token_id,
 		in_ip_address,
-		NOW(),
 		in_refresh_expires_at
 	)
 	RETURNING
@@ -146,13 +137,11 @@ BEGIN
 	INSERT INTO user_access_tokens (
 		user_id,
 		user_refresh_token_id,
-		issued_at,
 		expires_at
 	)
 	VALUES (
   		in_user_id,
   		out_refresh_token_id,
-  		NOW(),
   		in_access_expires_at
 	)
 	RETURNING
@@ -350,15 +339,13 @@ BEGIN
 		user_id,
 		ip_address,
 		bad_password,
-		bad_2fa_code,
-		attempted_at
+		bad_2fa_code
 	)
 	VALUES (
 		in_user_id,
 		in_ip_address,
 		in_bad_password,
-		in_bad_2fa_code,
-		NOW()
+		in_bad_2fa_code
 	);
 END;
 $$;
@@ -447,13 +434,11 @@ BEGIN
 		-- Insert into user_totps table
 		INSERT INTO user_totps (
 			user_id,
-			secret,
-			created_at
+			secret
 		)
 		VALUES (
 			in_user_id,
-			in_new_totp_secret,
-			NOW()
+			in_new_totp_secret
 		);
 	END IF;
 END;

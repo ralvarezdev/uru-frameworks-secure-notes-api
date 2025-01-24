@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(50) NOT NULL,
     salt VARCHAR(255) NOT NULL,
     birthdate TIMESTAMP,
-    joined_at TIMESTAMP NOT NULL,
+    joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP
 );
 `
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS user_password_hashes (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS user_reset_passwords (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     reset_token VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS user_email_verifications (
     id BIGSERIAL PRIMARY KEY,
     user_email_id BIGINT NOT NULL,
     verification_token VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
     verified_at TIMESTAMP,
     revoked_at TIMESTAMP,
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS user_phone_numbers (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     phone_number VARCHAR(20) UNIQUE NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
     id BIGSERIAL PRIMARY KEY,
     user_phone_number_id BIGINT NOT NULL,
     verification_code VARCHAR(10) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
     verified_at TIMESTAMP,
     revoked_at TIMESTAMP,
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
     ip_address VARCHAR(15) NOT NULL,
     bad_password BOOLEAN,
     bad_2fa_code BOOLEAN,
-    attempted_at TIMESTAMP NOT NULL,
+    attempted_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS user_refresh_tokens (
     user_id BIGINT NOT NULL,
     parent_user_refresh_token_id BIGINT,
     ip_address VARCHAR(15) NOT NULL,
-    issued_at TIMESTAMP NOT NULL,
+    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS user_access_tokens (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     user_refresh_token_id BIGINT NOT NULL,
-    issued_at TIMESTAMP NOT NULL,
+    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP NOT NULL,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS user_totps (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     secret VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     verified_at TIMESTAMP,
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
     id BIGSERIAL PRIMARY KEY,
     user_totp_id BIGINT NOT NULL,
     code VARCHAR(255) UNIQUE NOT NULL,
-	created_at TIMESTAMP NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_totp_id) REFERENCES user_totps(id) ON DELETE CASCADE
 );
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS notes (
     is_pinned BOOLEAN,
     title VARCHAR(255) NOT NULL,
     color VARCHAR(50),
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS note_tags (
     id BIGSERIAL PRIMARY KEY,
     note_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS note_versions (
     id SERIAL PRIMARY KEY,
     note_id BIGINT NOT NULL,
     encrypted_body TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
 );
 `
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS user_usernames (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     username VARCHAR(50) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS user_emails (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     email VARCHAR(100) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
