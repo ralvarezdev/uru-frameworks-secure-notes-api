@@ -9,7 +9,7 @@ import (
 var (
 	Controller = &controller{}
 	Module     = gonethttpfactory.NewModule(
-		"/note", nil, nil, Controller,
+		"/note", nil, nil, Controller, nil,
 		internalrouteapiv1noteversion.Module,
 		internalrouteapiv1noteversions.Module,
 	)

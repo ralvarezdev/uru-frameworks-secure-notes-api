@@ -5,18 +5,20 @@ import (
 	govalidatorfieldmail "github.com/ralvarezdev/go-validator/struct/field/mail"
 	govalidatormapper "github.com/ralvarezdev/go-validator/struct/mapper"
 	govalidatormappervalidation "github.com/ralvarezdev/go-validator/struct/mapper/validation"
-	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"time"
+)
+
+var (
+	// Mappers to be loaded
+	LogInRequestMapper      *govalidatormapper.Mapper
+	VerifyTOTPRequestMapper *govalidatormapper.Mapper
+	SignUpRequestMapper     *govalidatormapper.Mapper
 )
 
 type (
 	// validator is the structure for API V1 auth validator
-	validator struct {
-		LogInRequestMapper      *govalidatormapper.Mapper
-		VerifyTOTPRequestMapper *govalidatormapper.Mapper
-		SignUpRequestMapper     *govalidatormapper.Mapper
-		govalidatormappervalidator.Service
-	}
+	validator struct{}
 )
 
 // Email validates the email address field
@@ -54,9 +56,9 @@ func (v *validator) SignUp(body *SignUpRequest) func() (
 	interface{},
 	error,
 ) {
-	return v.Validate(
+	return internalvalidator.Service.Validate(
 		body,
-		v.SignUpRequestMapper,
+		SignUpRequestMapper,
 		func(validations *govalidatormappervalidation.StructValidations) (err error) {
 			return v.Email("email", body.Email, validations)
 		},
@@ -68,9 +70,9 @@ func (v *validator) LogIn(body *LogInRequest) func() (
 	interface{},
 	error,
 ) {
-	return v.Validate(
+	return internalvalidator.Service.Validate(
 		body,
-		v.LogInRequestMapper,
+		LogInRequestMapper,
 	)
 }
 
@@ -79,8 +81,8 @@ func (v *validator) VerifyTOTP(body *VerifyTOTPRequest) func() (
 	interface{},
 	error,
 ) {
-	return v.Validate(
+	return internalvalidator.Service.Validate(
 		body,
-		v.VerifyTOTPRequestMapper,
+		VerifyTOTPRequestMapper,
 	)
 }

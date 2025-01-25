@@ -8,6 +8,6 @@ import (
 var (
 	Controller = &controller{}
 	Module     = gonethttpfactory.NewModule(
-		"/", nil, nil, Controller, internalrouterapi.Module,
+		"/", nil, nil, Controller, nil, internalrouterapi.Module,
 	)
 )

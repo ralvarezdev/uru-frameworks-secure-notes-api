@@ -12,7 +12,7 @@ import (
 var (
 	Controller = &controller{}
 	Module     = gonethttpfactory.NewModule(
-		"/v1", nil, nil, Controller,
+		"/v1", nil, nil, Controller, nil,
 		internalrouterapiv1auth.Module,
 		internalrouterapiv1note.Module,
 		internalrouterapiv1notes.Module,

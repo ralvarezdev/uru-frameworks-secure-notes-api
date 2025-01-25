@@ -15,8 +15,6 @@ import (
 type (
 	// controller is the structure for the API V1 auth controller
 	controller struct {
-		Service   *service
-		Validator *validator
 		gonethttpfactory.Controller
 	}
 )
@@ -112,13 +110,13 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 		w,
 		r,
 		&body,
-		c.Validator.SignUp(&body),
+		Validator.SignUp(&body),
 	) {
 		return
 	}
 
 	// Sign up the user
-	userID, err := c.Service.SignUp(r, &body)
+	userID, err := Service.SignUp(r, &body)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -154,13 +152,13 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 		w,
 		r,
 		&body,
-		c.Validator.LogIn(&body),
+		Validator.LogIn(&body),
 	) {
 		return
 	}
 
 	// Log in the user
-	userID, userTokens, err := c.Service.LogIn(r, &body)
+	userID, userTokens, err := Service.LogIn(r, &body)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -193,7 +191,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/auth/refresh-tokens [get]
 func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	// Get the user's refresh tokens
-	userID, userRefreshTokens, err := c.Service.ListRefreshTokens(r)
+	userID, userRefreshTokens, err := Service.ListRefreshTokens(r)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -232,7 +230,7 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the user's refresh token by ID
-	userID, userRefreshToken, err := c.Service.GetRefreshToken(
+	userID, userRefreshToken, err := Service.GetRefreshToken(
 		r,
 		refreshTokenID,
 	)
@@ -278,7 +276,7 @@ func (c *controller) RevokeRefreshToken(
 	}
 
 	// Revoke the user's refresh token
-	err := c.Service.RevokeRefreshToken(r, refreshTokenID)
+	err := Service.RevokeRefreshToken(r, refreshTokenID)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -308,7 +306,7 @@ func (c *controller) RevokeRefreshToken(
 // @Router /api/v1/auth/logout [post]
 func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 	// Log out the user
-	userID, err := c.Service.LogOut(r)
+	userID, err := Service.LogOut(r)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -341,7 +339,7 @@ func (c *controller) RevokeRefreshTokens(
 	r *http.Request,
 ) {
 	// Revoke the user's refresh tokens
-	userID, err := c.Service.RevokeRefreshTokens(r)
+	userID, err := Service.RevokeRefreshTokens(r)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -371,7 +369,7 @@ func (c *controller) RevokeRefreshTokens(
 // @Router /api/v1/auth/refresh-token [post]
 func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Refresh the token
-	userID, userTokens, err := c.Service.RefreshToken(r)
+	userID, userTokens, err := Service.RefreshToken(r)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -407,7 +405,7 @@ func (c *controller) GenerateTOTPUrl(
 	r *http.Request,
 ) {
 	// Generate the TOTP URL
-	userID, totpUrl, err := c.Service.GenerateTOTPUrl(r)
+	userID, totpUrl, err := Service.GenerateTOTPUrl(r)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -445,13 +443,13 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 		w,
 		r,
 		&body,
-		c.Validator.VerifyTOTP(&body),
+		Validator.VerifyTOTP(&body),
 	) {
 		return
 	}
 
 	// Verify the TOTP code
-	userID, recoveryCodes, err := c.Service.VerifyTOTP(r, &body)
+	userID, recoveryCodes, err := Service.VerifyTOTP(r, &body)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -483,7 +481,7 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/auth/totp [delete]
 func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
 	// Revoke the user's TOTP
-	userID, err := c.Service.RevokeTOTP(r)
+	userID, err := Service.RevokeTOTP(r)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return

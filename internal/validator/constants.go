@@ -13,14 +13,14 @@ var (
 	// JSONGenerator is the mapper JSON generator
 	JSONGenerator govalidatormapper.Generator
 
-	// ValidationsValidator is the mapper validations validator
-	ValidationsValidator govalidatormappervalidator.Validator
+	// Validator is the mapper validations validator
+	Validator govalidatormappervalidator.Validator
 
-	// ValidationsParser is the mapper validations parser
-	ValidationsParser govalidatormapperparser.Parser
+	// Parser is the mapper validations parser
+	Parser govalidatormapperparser.Parser
 
-	// ValidationsService is the mapper validations service
-	ValidationsService govalidatormappervalidator.Service
+	// Service is the mapper validations service
+	Service govalidatormappervalidator.Service
 )
 
 // Load initializes the validator constants
@@ -28,18 +28,18 @@ func Load(mode *goflagsmode.Flag) {
 	// Added the logger to the constants if the debug mode is enabled
 	if mode != nil && mode.IsDebug() {
 		JSONGenerator = govalidatormapper.NewJSONGenerator(internallogger.MapperGenerator)
-		ValidationsValidator = govalidatormappervalidator.NewDefaultValidator(
+		Validator = govalidatormappervalidator.NewDefaultValidator(
 			internallogger.MapperValidator,
 		)
-		ValidationsParser = govalidatormapperparserjson.NewParser(internallogger.MapperParser)
+		Parser = govalidatormapperparserjson.NewParser(internallogger.MapperParser)
 	} else {
 		JSONGenerator = govalidatormapper.NewJSONGenerator(nil)
-		ValidationsValidator = govalidatormappervalidator.NewDefaultValidator(nil)
-		ValidationsParser = govalidatormapperparserjson.NewParser(nil)
+		Validator = govalidatormappervalidator.NewDefaultValidator(nil)
+		Parser = govalidatormapperparserjson.NewParser(nil)
 	}
 
-	ValidationsService, _ = govalidatormappervalidator.NewDefaultService(
-		ValidationsParser,
-		ValidationsValidator,
+	Service, _ = govalidatormappervalidator.NewDefaultService(
+		Parser,
+		Validator,
 	)
 }

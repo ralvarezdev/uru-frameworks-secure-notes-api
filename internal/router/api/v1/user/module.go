@@ -7,6 +7,6 @@ import (
 var (
 	Controller = &controller{}
 	Module     = gonethttpfactory.NewModule(
-		"/user", nil, nil, Controller,
+		"/user", nil, nil, Controller, nil,
 	)
 )
