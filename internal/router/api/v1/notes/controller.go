@@ -1,52 +1,15 @@
 package notes
 
 import (
-	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
-	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
-	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
-	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
+	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 )
 
 type (
-	// Controller is the structure for the API V1 notes controller
-	Controller struct {
-		handler            gonethttphandler.Handler
-		authenticator      gonethttpmiddlewareauth.Authenticator
-		postgresService    *internalpostgres.Service
-		service            *Service
-		validator          *Validator
-		logger             *internallogger.Logger
-		jwtValidatorLogger *gojwtvalidator.Logger
-		gonethttproute.Controller
+	// controller is the structure for the API V1 notes controller
+	controller struct {
+		gonethttpfactory.Controller
 	}
 )
 
-// NewController creates a new API V1 notes controller
-func NewController(
-	baseRouter gonethttproute.RouterWrapper,
-	authenticator gonethttpmiddlewareauth.Authenticator,
-	postgresService *internalpostgres.Service,
-) *Controller {
-	return &Controller{
-		Controller: gonethttproute.Controller{
-			RouterWrapper: baseRouter.NewGroup(BasePath),
-		},
-		handler:            internalhandler.Handler,
-		authenticator:      authenticator,
-		postgresService:    postgresService,
-		service:            &Service{postgresService: postgresService},
-		validator:          &Validator{Service: internalvalidator.ValidationsService},
-		logger:             internallogger.Api,
-		jwtValidatorLogger: internallogger.JwtValidator,
-	}
-}
-
 // RegisterRoutes registers the routes for the API V1 notes controller
-func (c *Controller) RegisterRoutes() {}
-
-// RegisterGroups registers the router groups for the API V1 notes controller
-func (c *Controller) RegisterGroups() {}
+func (c *controller) RegisterRoutes() {}

@@ -7,10 +7,9 @@ import (
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
 	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	godatabasessql "github.com/ralvarezdev/go-databases/sql"
-	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
-	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
@@ -18,6 +17,7 @@ import (
 	internalpostgresconstraints "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/constraints"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
+	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	"net/http"
@@ -26,11 +26,9 @@ import (
 )
 
 type (
-	// Service is the structure for the API V1 service for the auth route group
-	Service struct {
-		jwtIssuer         gojwtissuer.Issuer
-		jwtTokenValidator gojwtcache.TokenValidator
-		postgresService   *internalpostgres.Service
+	// service is the structure for the API V1 service for the auth route group
+	service struct {
+		gonethttpfactory.ServiceWrapper
 	}
 
 	// TokenInfo struct for the cache
@@ -42,13 +40,13 @@ type (
 )
 
 // SetTokenToCache sets the token to the cache
-func (s *Service) SetTokenToCache(
+func (s *service) SetTokenToCache(
 	token gojwttoken.Token,
 	id int64,
 	expiresAt time.Time,
 	isValid bool,
 ) {
-	_ = s.jwtTokenValidator.Set(
+	_ = internaljwtcache.TokenValidator.Set(
 		token,
 		strconv.FormatInt(id, 10),
 		isValid,
@@ -57,27 +55,24 @@ func (s *Service) SetTokenToCache(
 }
 
 // RevokeTokenFromCache revokes the token from the cache
-func (s *Service) RevokeTokenFromCache(
+func (s *service) RevokeTokenFromCache(
 	token gojwttoken.Token,
 	id int64,
 ) {
-	_ = s.jwtTokenValidator.Revoke(
+	_ = internaljwtcache.TokenValidator.Revoke(
 		token,
 		strconv.FormatInt(id, 10),
 	)
 }
 
 // RegisterFailedLoginAttempt registers a failed login attempt
-func (s *Service) RegisterFailedLoginAttempt(
+func (s *service) RegisterFailedLoginAttempt(
 	userID int64,
 	ipAddress string,
 	badPassword, bad2FACode bool,
 ) error {
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Insert the failed login attempt
-	_, err := db.Exec(
+	_, err := internalpostgres.DB.Exec(
 		internalpostgresqueries.RegisterFailedLoginAttemptProc,
 		userID,
 		ipAddress,
@@ -88,7 +83,7 @@ func (s *Service) RegisterFailedLoginAttempt(
 }
 
 // ValidatePassword validates a password
-func (s *Service) ValidatePassword(
+func (s *service) ValidatePassword(
 	userID int64,
 	hash, password, ipAddress string,
 ) (bool, error) {
@@ -113,7 +108,7 @@ func (s *Service) ValidatePassword(
 }
 
 // ValidateTOTPCode validates a TOTP code
-func (s *Service) ValidateTOTPCode(
+func (s *service) ValidateTOTPCode(
 	userID int64,
 	totpSecret,
 	totpCode,
@@ -145,17 +140,14 @@ func (s *Service) ValidateTOTPCode(
 }
 
 // ValidateTOTPRecoveryCode validates a TOTP recovery code
-func (s *Service) ValidateTOTPRecoveryCode(
+func (s *service) ValidateTOTPRecoveryCode(
 	userID int64,
 	totpID int64,
 	totpRecoveryCode string,
 	ipAddress string,
 ) (bool, error) {
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Revoke the TOTP recovery code
-	result, err := db.Exec(
+	result, err := internalpostgres.DB.Exec(
 		internalpostgresqueries.RevokeTOTPRecoveryCodeProc,
 		totpID,
 		totpRecoveryCode,
@@ -184,7 +176,7 @@ func (s *Service) ValidateTOTPRecoveryCode(
 }
 
 // GenerateTokensInfo generates the user tokens info
-func (s *Service) GenerateTokensInfo() (*TokenInfo, *TokenInfo) {
+func (s *service) GenerateTokensInfo() (*TokenInfo, *TokenInfo) {
 	// Get the current time
 	currentTime := time.Now().UTC()
 
@@ -201,7 +193,7 @@ func (s *Service) GenerateTokensInfo() (*TokenInfo, *TokenInfo) {
 }
 
 // GenerateTokens generates user refresh token and user access token
-func (s *Service) GenerateTokens(
+func (s *service) GenerateTokens(
 	userID int64,
 	userTokensInfo ...*TokenInfo,
 ) (*map[gojwttoken.Token]string, error) {
@@ -225,7 +217,7 @@ func (s *Service) GenerateTokens(
 		)
 
 		// Issue the user tokens
-		rawToken, err := s.jwtIssuer.IssueToken(userTokenClaims)
+		rawToken, err := internaljwt.Issuer.IssueToken(userTokenClaims)
 		if err != nil {
 			return nil, err
 		}
@@ -236,16 +228,13 @@ func (s *Service) GenerateTokens(
 }
 
 // SignUp signs up a user
-func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
+func (s *service) SignUp(r *http.Request, body *SignUpRequest) (
 	*int64,
 	error,
 ) {
 	if body == nil {
 		return nil, gonethttp.ErrNilRequestBody
 	}
-
-	// Get the database connection
-	db := s.postgresService.DB()
 
 	// Hash the password
 	passwordHash, err := gocryptobcrypt.HashPassword(
@@ -264,7 +253,7 @@ func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
 
 	// Run the SQL function to sign up the user
 	var userID sql.NullInt64
-	if err = db.QueryRow(
+	if err = internalpostgres.DB.QueryRow(
 		internalpostgresqueries.SignUpProc,
 		body.FirstName,
 		body.LastName,
@@ -291,7 +280,7 @@ func (s *Service) SignUp(r *http.Request, body *SignUpRequest) (
 }
 
 // LogIn logs in a user
-func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
+func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	*int64,
 	*map[gojwttoken.Token]string,
 	error,
@@ -300,9 +289,6 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	if requestBody == nil {
 		return nil, nil, gonethttp.ErrNilRequestBody
 	}
-
-	// Get the database connection
-	db := s.postgresService.DB()
 
 	// Get the current time in UTC
 	currentTime := time.Now().UTC()
@@ -314,7 +300,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	var userID, userTOTPID sql.NullInt64
 	var passwordHash, userTOTPSecret sql.NullString
 	totpIsActive := true
-	if err := db.QueryRow(
+	if err := internalpostgres.DB.QueryRow(
 		internalpostgresqueries.PreLogInProc,
 		requestBody.Username,
 		nil,
@@ -399,7 +385,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 
 	// Call the refresh token stored procedure
 	var userAccessTokenID, userRefreshTokenID sql.NullInt64
-	if err = db.QueryRow(
+	if err = internalpostgres.DB.QueryRow(
 		internalpostgresqueries.GenerateTokensProc,
 		userID,
 		nil,
@@ -431,7 +417,7 @@ func (s *Service) LogIn(r *http.Request, requestBody *LogInRequest) (
 }
 
 // RevokeRefreshToken revokes a user refresh token
-func (s *Service) RevokeRefreshToken(
+func (s *service) RevokeRefreshToken(
 	r *http.Request,
 	userRefreshTokenID int64,
 ) error {
@@ -441,14 +427,11 @@ func (s *Service) RevokeRefreshToken(
 		return err
 	}
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Set the tokens in the cache as invalid
 	go func() {
 		// Get the user access token ID by the user refresh token ID
 		var userAccessTokenID sql.NullInt64
-		if err := db.QueryRow(
+		if err := internalpostgres.DB.QueryRow(
 			internalpostgresqueries.GetAccessTokenByRefreshTokenIDProc,
 			userRefreshTokenID,
 			nil,
@@ -468,7 +451,7 @@ func (s *Service) RevokeRefreshToken(
 	}()
 
 	// Call the revoke tokens by ID stored procedure
-	_, err = db.Exec(
+	_, err = internalpostgres.DB.Exec(
 		internalpostgresqueries.RevokeTokensByIDProc,
 		userID,
 		userRefreshTokenID,
@@ -477,7 +460,7 @@ func (s *Service) RevokeRefreshToken(
 }
 
 // LogOut logs out a user
-func (s *Service) LogOut(r *http.Request) (*int64, error) {
+func (s *service) LogOut(r *http.Request) (*int64, error) {
 	// Get the user refresh token ID from the request
 	userRefreshTokenID, err := internaljwtclaims.GetID(r)
 	if err != nil {
@@ -492,21 +475,18 @@ func (s *Service) LogOut(r *http.Request) (*int64, error) {
 }
 
 // RevokeRefreshTokens revokes all user refresh tokens
-func (s *Service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
+func (s *service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Set the tokens in the cache as invalid
 	go func() {
 		// Get the user refresh tokens and user access tokens ID by user ID
 		var userRefreshTokenID, userAccessTokenID int64
-		rows, err := db.Query(
+		rows, err := internalpostgres.DB.Query(
 			internalpostgresqueries.ListUserTokensFn,
 			userID,
 		)
@@ -531,7 +511,7 @@ func (s *Service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
 	}()
 
 	// Call the revoke tokens stored procedure
-	_, err = db.Exec(
+	_, err = internalpostgres.DB.Exec(
 		internalpostgresqueries.RevokeTokensProc,
 		userID,
 	)
@@ -542,7 +522,7 @@ func (s *Service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
 }
 
 // RefreshToken refreshes a user token
-func (s *Service) RefreshToken(r *http.Request) (
+func (s *service) RefreshToken(r *http.Request) (
 	*int64,
 	*map[gojwttoken.Token]string,
 	error,
@@ -557,9 +537,6 @@ func (s *Service) RefreshToken(r *http.Request) (
 		return nil, nil, err
 	}
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Get the client IP
 	clientIP := gonethttp.GetClientIP(r)
 
@@ -568,7 +545,7 @@ func (s *Service) RefreshToken(r *http.Request) (
 
 	// Call the refresh token stored procedure
 	var userRefreshTokenID, userAccessTokenID sql.NullInt64
-	if err = db.QueryRow(
+	if err = internalpostgres.DB.QueryRow(
 		internalpostgresqueries.RefreshTokenProc,
 		userID,
 		oldUserRefreshTokenID,
@@ -600,15 +577,12 @@ func (s *Service) RefreshToken(r *http.Request) (
 }
 
 // GenerateTOTPUrl generates a TOTP URL
-func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
+func (s *service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	// Get the database connection
-	db := s.postgresService.DB()
 
 	// Generate the TOTP secret
 	totpSecret, err := gocryptototp.NewSecret(internaltotp.SecretLength)
@@ -620,7 +594,7 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 	var userTOTPID sql.NullInt64
 	var userEmail, userTOTPSecret sql.NullString
 	var userTOTPVerifiedAt sql.NullTime
-	if err = db.QueryRow(
+	if err = internalpostgres.DB.QueryRow(
 		internalpostgresqueries.GenerateTOTPUrlProc,
 		userID,
 		totpSecret,
@@ -652,7 +626,7 @@ func (s *Service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 }
 
 // VerifyTOTP verifies a TOTP secret
-func (s *Service) VerifyTOTP(
+func (s *service) VerifyTOTP(
 	r *http.Request,
 	requestBody *VerifyTOTPRequest,
 ) (*int64, *[]string, error) {
@@ -667,14 +641,11 @@ func (s *Service) VerifyTOTP(
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Get the user TOTP ID and secret
 	var userTOTPID sql.NullInt64
 	var userTOTPSecret sql.NullString
 	var userTOTPVerifiedAt sql.NullTime
-	if err = db.QueryRow(
+	if err = internalpostgres.DB.QueryRow(
 		internalpostgresqueries.GetUserTOTPProc,
 		userID,
 		nil, nil, nil,
@@ -731,7 +702,7 @@ func (s *Service) VerifyTOTP(
 	}
 
 	// Run transaction
-	err = s.postgresService.RunTransaction(
+	err = internalpostgres.DBService.RunTransaction(
 		func(tx *sql.Tx) error {
 			// Update the user TOTP verified at
 			if _, err = tx.Exec(
@@ -757,18 +728,15 @@ func (s *Service) VerifyTOTP(
 }
 
 // RevokeTOTP revokes a TOTP secret
-func (s *Service) RevokeTOTP(r *http.Request) (*int64, error) {
+func (s *service) RevokeTOTP(r *http.Request) (*int64, error) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Run the SQL function to get the user TOTP ID by the user ID
-	_, err = db.Exec(
+	_, err = internalpostgres.DB.Exec(
 		internalpostgresqueries.RevokeTOTPProc,
 		userID,
 	)
@@ -779,7 +747,7 @@ func (s *Service) RevokeTOTP(r *http.Request) (*int64, error) {
 }
 
 // ListRefreshTokens lists all user refresh tokens
-func (s *Service) ListRefreshTokens(r *http.Request) (
+func (s *service) ListRefreshTokens(r *http.Request) (
 	*int64,
 	*[]*internalapiv1common.UserRefreshTokenWithID,
 	error,
@@ -790,11 +758,8 @@ func (s *Service) ListRefreshTokens(r *http.Request) (
 		return nil, nil, err
 	}
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Run the SQL function to list the user refresh tokens by the user ID
-	rows, err := db.Query(
+	rows, err := internalpostgres.DB.Query(
 		internalpostgresqueries.ListUserRefreshTokensFn,
 		userID,
 	)
@@ -822,7 +787,7 @@ func (s *Service) ListRefreshTokens(r *http.Request) (
 }
 
 // GetRefreshToken gets a user refresh token
-func (s *Service) GetRefreshToken(
+func (s *service) GetRefreshToken(
 	r *http.Request,
 	userRefreshTokenID int64,
 ) (*int64, *internalapiv1common.UserRefreshToken, error) {
@@ -832,12 +797,9 @@ func (s *Service) GetRefreshToken(
 		return nil, nil, err
 	}
 
-	// Get the database connection
-	db := s.postgresService.DB()
-
 	// Run the SQL function to get the user refresh token by the ID and user ID
 	var userRefreshToken internalapiv1common.UserRefreshToken
-	if err = db.QueryRow(
+	if err = internalpostgres.DB.QueryRow(
 		internalpostgresqueries.GetUserRefreshTokenByIDFn,
 		userRefreshTokenID,
 		userID,

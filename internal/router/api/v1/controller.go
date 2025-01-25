@@ -1,117 +1,25 @@
 package v1
 
 import (
-	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
-	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
-	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
-	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
+	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
-	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	govalidatormappervalidator "github.com/ralvarezdev/go-validator/struct/mapper/validator"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
-	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalrouterauth "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/auth"
-	internalrouternote "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note"
-	internalrouternotes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
-	internalroutertag "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/tag"
-	internalrouteruser "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/user"
-	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
 )
 
 type (
-	// Controller is the structure for the API V1 controller
-	Controller struct {
-		handler            gonethttphandler.Handler
-		authenticator      gonethttpmiddlewareauth.Authenticator
-		validatorService   govalidatormappervalidator.Service
-		postgresService    *internalpostgres.Service
-		jwtIssuer          gojwtissuer.Issuer
-		jwtTokenValidator  gojwtcache.TokenValidator
-		service            *Service
-		validator          *Validator
-		logger             *internallogger.Logger
-		jwtValidatorLogger *gojwtvalidator.Logger
-		gonethttproute.Controller
+	// controller is the structure for the API V1 controller
+	controller struct {
+		gonethttpfactory.Controller
 	}
 )
 
-// NewController creates a new API V1 controller
-func NewController(
-	baseRouter gonethttproute.RouterWrapper,
-	authenticator gonethttpmiddlewareauth.Authenticator,
-	postgresService *internalpostgres.Service,
-	jwtIssuer gojwtissuer.Issuer,
-	jwtTokenValidator gojwtcache.TokenValidator,
-) *Controller {
-	return &Controller{
-		Controller: gonethttproute.Controller{
-			RouterWrapper: baseRouter.NewGroup(BasePath),
-		},
-		handler:            internalhandler.Handler,
-		authenticator:      authenticator,
-		postgresService:    postgresService,
-		jwtIssuer:          jwtIssuer,
-		jwtTokenValidator:  jwtTokenValidator,
-		service:            &Service{},
-		validator:          &Validator{Service: internalvalidator.ValidationsService},
-		logger:             internallogger.Api,
-		jwtValidatorLogger: internallogger.JwtValidator,
-	}
-}
-
 // RegisterRoutes registers the routes for the API V1 controller
-func (c *Controller) RegisterRoutes() {
+func (c *controller) RegisterRoutes() {
 	c.RegisterRoute(
 		"GET /ping",
 		c.Ping,
 	)
-}
-
-// RegisterGroups registers the router groups for the API V1 controller
-func (c *Controller) RegisterGroups() {
-	// Create the controllers
-	authController := internalrouterauth.NewController(
-		c.RouterWrapper,
-		c.authenticator,
-		c.postgresService,
-		c.jwtIssuer,
-		c.jwtTokenValidator,
-	)
-	noteController := internalrouternote.NewController(
-		c.RouterWrapper,
-		c.authenticator,
-		c.postgresService,
-	)
-	notesController := internalrouternotes.NewController(
-		c.RouterWrapper,
-		c.authenticator,
-		c.postgresService,
-	)
-	tagController := internalroutertag.NewController(
-		c.RouterWrapper,
-		c.authenticator,
-		c.postgresService,
-	)
-	userController := internalrouteruser.NewController(
-		c.RouterWrapper,
-		c.authenticator,
-		c.postgresService,
-	)
-
-	// Register the controllers routes
-	for _, controller := range []gonethttproute.ControllerWrapper{
-		authController,
-		noteController,
-		notesController,
-		tagController,
-		userController,
-	} {
-		controller.RegisterRoutes()
-		controller.RegisterGroups()
-	}
 }
 
 // Ping pings the service
@@ -122,9 +30,9 @@ func (c *Controller) RegisterGroups() {
 // @Produce json
 // @Success 200 {object} BasicResponse
 // @Router /api/v1/ping [get]
-func (c *Controller) Ping(w http.ResponseWriter, r *http.Request) {
+func (c *controller) Ping(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewSuccessResponse(
 			nil, http.StatusOK,
 		),

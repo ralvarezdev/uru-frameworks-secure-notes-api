@@ -12,10 +12,10 @@ require (
 	github.com/ralvarezdev/go-jwt v0.4.8
 	github.com/ralvarezdev/go-loader v0.2.13
 	github.com/ralvarezdev/go-logger v0.4.5
-	github.com/ralvarezdev/go-net v0.6.2
+	github.com/ralvarezdev/go-net v0.6.16
 	github.com/ralvarezdev/go-security-headers v0.1.1
 	github.com/ralvarezdev/go-strings v0.1.6
-	github.com/ralvarezdev/go-validator v0.5.18
+	github.com/ralvarezdev/go-validator v0.5.21
 )
 
 require (

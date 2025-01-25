@@ -1,8 +1,10 @@
 package postgres
 
 import (
+	"database/sql"
 	godatabasessql "github.com/ralvarezdev/go-databases/sql"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"time"
 )
 
@@ -38,6 +40,12 @@ var (
 
 	// Config is the Postgres configuration
 	Config *godatabasessql.Config
+
+	// DB is the Postgres database
+	DB *sql.DB
+
+	// DBService is the Postgres service
+	DBService *Service
 )
 
 // Load loads the Postgres constants
@@ -71,9 +79,30 @@ func Load() {
 	// Create the Postgres DSN
 	DataSourceName = Uri + "/" + DatabaseName + "?sslmode=require"
 
+	// Create the Postgres configuration
 	Config = godatabasessql.NewConfig(
 		MaxOpenConnections,
 		MaxIdleConnections,
 		time.Hour,
 	)
+
+	// Connect to the Postgres database
+	db, err := Config.Connect(
+		"pgx",
+		DataSourceName,
+	)
+	if err != nil {
+		panic(err)
+	}
+	DB = db
+	internallogger.Postgres.ConnectedToDatabase()
+
+	// Create the Postgres database service
+	dbService, err := NewService(
+		db,
+	)
+	if err != nil {
+		panic(err)
+	}
+	DBService = dbService
 }

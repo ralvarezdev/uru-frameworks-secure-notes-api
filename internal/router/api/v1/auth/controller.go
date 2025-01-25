@@ -1,72 +1,28 @@
 package auth
 
 import (
-	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
-	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
-	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttphandler "github.com/ralvarezdev/go-net/http/handler"
-	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
+	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
-	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
-	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
-	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"net/http"
 )
 
 type (
-	// Controller is the structure for the API V1 auth controller
-	Controller struct {
-		handler            gonethttphandler.Handler
-		authenticator      gonethttpmiddlewareauth.Authenticator
-		postgresService    *internalpostgres.Service
-		jwtIssuer          gojwtissuer.Issuer
-		jwtTokenValidator  gojwtcache.TokenValidator
-		service            *Service
-		validator          *Validator
-		logger             *internallogger.Logger
-		jwtValidatorLogger *gojwtvalidator.Logger
-		gonethttproute.Controller
+	// controller is the structure for the API V1 auth controller
+	controller struct {
+		Service   *service
+		Validator *validator
+		gonethttpfactory.Controller
 	}
 )
 
-// NewController creates a new API V1 auth controller
-func NewController(
-	baseRouter gonethttproute.RouterWrapper,
-	authenticator gonethttpmiddlewareauth.Authenticator,
-	postgresService *internalpostgres.Service,
-	jwtIssuer gojwtissuer.Issuer,
-	jwtTokenValidator gojwtcache.TokenValidator,
-) *Controller {
-	// Load the validator mappers
-	LoadMappers()
-
-	return &Controller{
-		Controller: gonethttproute.Controller{
-			RouterWrapper: baseRouter.NewGroup(BasePath),
-		},
-		handler:           internalhandler.Handler,
-		authenticator:     authenticator,
-		postgresService:   postgresService,
-		jwtIssuer:         jwtIssuer,
-		jwtTokenValidator: jwtTokenValidator,
-		service: &Service{
-			jwtIssuer:         jwtIssuer,
-			postgresService:   postgresService,
-			jwtTokenValidator: jwtTokenValidator,
-		},
-		validator:          &Validator{Service: internalvalidator.ValidationsService},
-		logger:             internallogger.Api,
-		jwtValidatorLogger: internallogger.JwtValidator,
-	}
-}
-
 // RegisterRoutes registers the routes for the API V1 auth controller
-func (c *Controller) RegisterRoutes() {
+func (c *controller) RegisterRoutes() {
 	c.RegisterRoute(
 		"POST /signup",
 		c.SignUp,
@@ -78,61 +34,61 @@ func (c *Controller) RegisterRoutes() {
 	c.RegisterRoute(
 		"POST /refresh-token",
 		c.RefreshToken,
-		c.authenticator.Authenticate(gojwtinterception.RefreshToken),
+		internaljwt.Authenticate(gojwtinterception.RefreshToken),
 	)
 	c.RegisterRoute(
 		"POST /logout",
 		c.LogOut,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"GET /refresh-token/{id}",
 		c.GetRefreshToken,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"GET /refresh-tokens",
 		c.ListRefreshTokens,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"DELETE /refresh-token/{id}",
 		c.RevokeRefreshToken,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"DELETE /refresh-tokens",
 		c.RevokeRefreshTokens,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"POST /totp/generate",
 		c.GenerateTOTPUrl,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"POST /totp/verify",
 		c.VerifyTOTP,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 	c.RegisterRoute(
 		"DELETE /totp",
 		c.RevokeTOTP,
-		c.authenticator.Authenticate(gojwtinterception.AccessToken),
+		internaljwt.Authenticate(gojwtinterception.AccessToken),
 	)
 }
 
 // RegisterGroups registers the router groups for the API V1 auth controller
-func (c *Controller) RegisterGroups() {}
+func (c *controller) RegisterGroups() {}
 
 // getRefreshTokenID gets the refresh token ID from the path
-func (c *Controller) getRefreshTokenID(
+func (c *controller) getRefreshTokenID(
 	w http.ResponseWriter,
 	r *http.Request,
 	refreshTokenID *int64,
 ) bool {
 	// Get the refresh token ID from the path
-	return c.handler.ParseWildcard(
+	return internalhandler.Handler.ParseWildcard(
 		w, r, "id", refreshTokenID,
 		gostringsconvert.ToInt64,
 	)
@@ -149,30 +105,30 @@ func (c *Controller) getRefreshTokenID(
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/user/signup [post]
-func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
+func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
 	var body SignUpRequest
-	if !c.handler.DecodeAndValidate(
+	if !internalhandler.Handler.Parse(
 		w,
 		r,
 		&body,
-		c.validator.ValidateSignUpRequest,
+		c.Validator.SignUp(&body),
 	) {
 		return
 	}
 
 	// Sign up the user
-	userID, err := c.service.SignUp(r, &body)
+	userID, err := c.Service.SignUp(r, &body)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the user sign up
-	c.logger.SignUp(*userID)
+	internallogger.Api.SignUp(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil, http.StatusCreated,
 		),
@@ -191,30 +147,30 @@ func (c *Controller) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} gonethttpresponse.JSendFailResponse
 // @Failure 500 {object} gonethttpresponse.JSendErrorResponse
 // @Router /api/v1/auth/login [post]
-func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
+func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
-	var requestBody LogInRequest
-	if !c.handler.DecodeAndValidate(
+	var body LogInRequest
+	if !internalhandler.Handler.Parse(
 		w,
 		r,
-		&requestBody,
-		c.validator.ValidateLogInRequest,
+		&body,
+		c.Validator.LogIn(&body),
 	) {
 		return
 	}
 
 	// Log in the user
-	userID, userTokens, err := c.service.LogIn(r, &requestBody)
+	userID, userTokens, err := c.Service.LogIn(r, &body)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful login
-	c.logger.LogIn(*userID)
+	internallogger.Api.LogIn(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			RefreshTokenResponse{
 				RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
@@ -235,19 +191,19 @@ func (c *Controller) LogIn(w http.ResponseWriter, r *http.Request) {
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-tokens [get]
-func (c *Controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
+func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	// Get the user's refresh tokens
-	userID, userRefreshTokens, err := c.service.ListRefreshTokens(r)
+	userID, userRefreshTokens, err := c.Service.ListRefreshTokens(r)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful fetch of the user's refresh tokens
-	c.logger.ListRefreshTokens(*userID)
+	internallogger.Api.ListRefreshTokens(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			ListRefreshTokensResponse{
 				RefreshTokens: *userRefreshTokens,
@@ -268,7 +224,7 @@ func (c *Controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-token/{id} [get]
-func (c *Controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
+func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Get the refresh token ID from the path
 	var refreshTokenID int64
 	if !c.getRefreshTokenID(w, r, &refreshTokenID) {
@@ -276,20 +232,20 @@ func (c *Controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the user's refresh token by ID
-	userID, userRefreshToken, err := c.service.GetRefreshToken(
+	userID, userRefreshToken, err := c.Service.GetRefreshToken(
 		r,
 		refreshTokenID,
 	)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful fetch of the user's refresh token
-	c.logger.GetRefreshToken(*userID, refreshTokenID)
+	internallogger.Api.GetRefreshToken(*userID, refreshTokenID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			GetRefreshTokenResponse{
 				RefreshToken: userRefreshToken,
@@ -311,7 +267,7 @@ func (c *Controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-token/{id} [delete]
-func (c *Controller) RevokeRefreshToken(
+func (c *controller) RevokeRefreshToken(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -322,17 +278,17 @@ func (c *Controller) RevokeRefreshToken(
 	}
 
 	// Revoke the user's refresh token
-	err := c.service.RevokeRefreshToken(r, refreshTokenID)
+	err := c.Service.RevokeRefreshToken(r, refreshTokenID)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful token revocation
-	c.logger.RevokeRefreshToken(refreshTokenID)
+	internallogger.Api.RevokeRefreshToken(refreshTokenID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil,
 			http.StatusOK,
@@ -350,19 +306,19 @@ func (c *Controller) RevokeRefreshToken(
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/logout [post]
-func (c *Controller) LogOut(w http.ResponseWriter, r *http.Request) {
+func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 	// Log out the user
-	userID, err := c.service.LogOut(r)
+	userID, err := c.Service.LogOut(r)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful logout
-	c.logger.LogOut(*userID)
+	internallogger.Api.LogOut(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil,
 			http.StatusOK,
@@ -380,22 +336,22 @@ func (c *Controller) LogOut(w http.ResponseWriter, r *http.Request) {
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-tokens [delete]
-func (c *Controller) RevokeRefreshTokens(
+func (c *controller) RevokeRefreshTokens(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
 	// Revoke the user's refresh tokens
-	userID, err := c.service.RevokeRefreshTokens(r)
+	userID, err := c.Service.RevokeRefreshTokens(r)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful token revocation
-	c.logger.RevokeRefreshTokens(*userID)
+	internallogger.Api.RevokeRefreshTokens(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil,
 			http.StatusOK,
@@ -413,19 +369,19 @@ func (c *Controller) RevokeRefreshTokens(
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-token [post]
-func (c *Controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
+func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Refresh the token
-	userID, userTokens, err := c.service.RefreshToken(r)
+	userID, userTokens, err := c.Service.RefreshToken(r)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful token refresh
-	c.logger.RefreshToken(*userID)
+	internallogger.Api.RefreshToken(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			RefreshTokenResponse{
 				RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
@@ -446,22 +402,22 @@ func (c *Controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/generate [post]
-func (c *Controller) GenerateTOTPUrl(
+func (c *controller) GenerateTOTPUrl(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
 	// Generate the TOTP URL
-	userID, totpUrl, err := c.service.GenerateTOTPUrl(r)
+	userID, totpUrl, err := c.Service.GenerateTOTPUrl(r)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful TOTP URL generation
-	c.logger.GenerateTOTPUrl(*userID)
+	internallogger.Api.GenerateTOTPUrl(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			GenerateTOTPUrlResponse{
 				TOTPUrl: *totpUrl,
@@ -482,30 +438,30 @@ func (c *Controller) GenerateTOTPUrl(
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/verify [post]
-func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
+func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 	// Decode the request body and validate the request
-	var requestBody VerifyTOTPRequest
-	if !c.handler.DecodeAndValidate(
+	var body VerifyTOTPRequest
+	if !internalhandler.Handler.Parse(
 		w,
 		r,
-		&requestBody,
-		c.validator.ValidateVerifyTOTPRequest,
+		&body,
+		c.Validator.VerifyTOTP(&body),
 	) {
 		return
 	}
 
 	// Verify the TOTP code
-	userID, recoveryCodes, err := c.service.VerifyTOTP(r, &requestBody)
+	userID, recoveryCodes, err := c.Service.VerifyTOTP(r, &body)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful TOTP verification
-	c.logger.VerifyTOTP(*userID)
+	internallogger.Api.VerifyTOTP(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			VerifyTOTPResponse{
 				RecoveryCodes: *recoveryCodes,
@@ -525,19 +481,19 @@ func (c *Controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 // @Success 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp [delete]
-func (c *Controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
+func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
 	// Revoke the user's TOTP
-	userID, err := c.service.RevokeTOTP(r)
+	userID, err := c.Service.RevokeTOTP(r)
 	if err != nil {
-		c.handler.HandleError(w, err)
+		internalhandler.Handler.HandleError(w, err)
 		return
 	}
 
 	// Log the successful TOTP revocation
-	c.logger.RevokeTOTP(*userID)
+	internallogger.Api.RevokeTOTP(*userID)
 
 	// Handle the response
-	c.handler.HandleResponse(
+	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil,
 			http.StatusOK,
