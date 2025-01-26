@@ -1,7 +1,7 @@
 package v1
 
 import (
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
+	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalrouterapiv1auth "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/auth"
 	internalrouterapiv1note "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note"
 	internalrouterapiv1notes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
@@ -11,12 +11,21 @@ import (
 
 var (
 	Controller = &controller{}
-	Module     = gonethttpfactory.NewModule(
-		"/v1", nil, nil, Controller, nil,
-		internalrouterapiv1auth.Module,
-		internalrouterapiv1note.Module,
-		internalrouterapiv1notes.Module,
-		internalrouterapiv1tag.Module,
-		internalrouterapiv1user.Module,
-	)
+	Module     = &gonethttp.Module{
+		Path:       "/v1",
+		Controller: Controller,
+		Submodules: gonethttp.NewSubmodules(
+			internalrouterapiv1auth.Module,
+			internalrouterapiv1note.Module,
+			internalrouterapiv1notes.Module,
+			internalrouterapiv1tag.Module,
+			internalrouterapiv1user.Module,
+		),
+		RegisterRoutesFn: func(m *gonethttp.Module) {
+			m.RegisterRoute(
+				"GET /ping",
+				Controller.Ping,
+			)
+		},
+	}
 )

@@ -1,12 +1,13 @@
 package notes
 
 import (
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
+	gonethttp "github.com/ralvarezdev/go-net/http"
 )
 
 var (
 	Controller = &controller{}
-	Module     = gonethttpfactory.NewModule(
-		"/notes", nil, nil, Controller, nil,
-	)
+	Module     = &gonethttp.Module{
+		Path:       "/notes",
+		Controller: Controller,
+	}
 )

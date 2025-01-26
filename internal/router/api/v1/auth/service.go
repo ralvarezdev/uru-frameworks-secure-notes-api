@@ -9,7 +9,6 @@ import (
 	godatabasessql "github.com/ralvarezdev/go-databases/sql"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttp "github.com/ralvarezdev/go-net/http"
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
@@ -27,9 +26,7 @@ import (
 
 type (
 	// service is the structure for the API V1 service for the auth route group
-	service struct {
-		gonethttpfactory.ServiceWrapper
-	}
+	service struct{}
 
 	// TokenInfo struct for the cache
 	TokenInfo struct {

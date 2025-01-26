@@ -1,7 +1,6 @@
 package v1
 
 import (
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	"net/http"
@@ -9,18 +8,8 @@ import (
 
 type (
 	// controller is the structure for the API V1 controller
-	controller struct {
-		gonethttpfactory.Controller
-	}
+	controller struct{}
 )
-
-// RegisterRoutes registers the routes for the API V1 controller
-func (c *controller) RegisterRoutes() {
-	c.RegisterRoute(
-		"GET /ping",
-		c.Ping,
-	)
-}
 
 // Ping pings the service
 // @Summary Ping the service

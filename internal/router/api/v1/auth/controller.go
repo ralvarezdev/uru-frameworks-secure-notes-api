@@ -2,82 +2,17 @@ package auth
 
 import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
-	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
-	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
 type (
 	// controller is the structure for the API V1 auth controller
-	controller struct {
-		gonethttpfactory.Controller
-	}
+	controller struct{}
 )
-
-// RegisterRoutes registers the routes for the API V1 auth controller
-func (c *controller) RegisterRoutes() {
-	c.RegisterRoute(
-		"POST /signup",
-		c.SignUp,
-	)
-	c.RegisterRoute(
-		"POST /login",
-		c.LogIn,
-	)
-	c.RegisterRoute(
-		"POST /refresh-token",
-		c.RefreshToken,
-		internaljwt.Authenticate(gojwtinterception.RefreshToken),
-	)
-	c.RegisterRoute(
-		"POST /logout",
-		c.LogOut,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"GET /refresh-token/{id}",
-		c.GetRefreshToken,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"GET /refresh-tokens",
-		c.ListRefreshTokens,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"DELETE /refresh-token/{id}",
-		c.RevokeRefreshToken,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"DELETE /refresh-tokens",
-		c.RevokeRefreshTokens,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"POST /totp/generate",
-		c.GenerateTOTPUrl,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"POST /totp/verify",
-		c.VerifyTOTP,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-	c.RegisterRoute(
-		"DELETE /totp",
-		c.RevokeTOTP,
-		internaljwt.Authenticate(gojwtinterception.AccessToken),
-	)
-}
-
-// RegisterGroups registers the router groups for the API V1 auth controller
-func (c *controller) RegisterGroups() {}
 
 // getRefreshTokenID gets the refresh token ID from the path
 func (c *controller) getRefreshTokenID(

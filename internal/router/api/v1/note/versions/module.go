@@ -1,12 +1,13 @@
 package versions
 
 import (
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
+	gonethttp "github.com/ralvarezdev/go-net/http"
 )
 
 var (
 	Controller = &controller{}
-	Module     = gonethttpfactory.NewModule(
-		"/versions", nil, nil, Controller, nil,
-	)
+	Module     = &gonethttp.Module{
+		Path:       "/versions",
+		Controller: Controller,
+	}
 )

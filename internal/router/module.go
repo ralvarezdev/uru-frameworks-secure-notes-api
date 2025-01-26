@@ -1,13 +1,17 @@
 package router
 
 import (
-	gonethttpfactory "github.com/ralvarezdev/go-net/http/factory"
+	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalrouterapi "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api"
 )
 
 var (
 	Controller = &controller{}
-	Module     = gonethttpfactory.NewModule(
-		"/", nil, nil, Controller, nil, internalrouterapi.Module,
-	)
+	Module     = &gonethttp.Module{
+		Path:       "/",
+		Controller: Controller,
+		Submodules: gonethttp.NewSubmodules(
+			internalrouterapi.Module,
+		),
+	}
 )
