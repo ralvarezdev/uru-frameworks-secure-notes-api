@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/ralvarezdev/go-jwt/token/interception"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
+	gonethttpmiddlewareerrorhandler "github.com/ralvarezdev/go-net/http/middleware/error_handler"
 	gonethttpmiddlewarevalidator "github.com/ralvarezdev/go-net/http/middleware/validator"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
@@ -11,6 +12,9 @@ import (
 )
 
 var (
+	// HandleError is the API error handler middleware function
+	HandleError func(next http.Handler) http.Handler
+
 	// Authenticate is the API authenticator middleware function
 	Authenticate func(interception interception.Interception) func(next http.Handler) http.Handler
 
@@ -22,6 +26,10 @@ var (
 
 // Load loads the API middlewares
 func Load() {
+	// Create API error handler middleware
+	errorHandler, _ := gonethttpmiddlewareerrorhandler.NewMiddleware(internalhandler.Handler)
+	HandleError = errorHandler.HandleError
+
 	// Create API authenticator middleware
 	authenticator, _ := gonethttpmiddlewareauth.NewMiddleware(
 		internaljwt.Validator,

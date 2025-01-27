@@ -29,10 +29,10 @@ github.com/ralvarezdev/go-loader v0.2.13 h1:82p3yY9XeqX+2qlOiRP+i1OhFZGFPrSgjM3+
 github.com/ralvarezdev/go-loader v0.2.13/go.mod h1:fGguSUbUIfTDQZW3tHaI5DaJYfPijLxpC5xy0MkevxY=
 github.com/ralvarezdev/go-logger v0.4.5 h1:Lw7DdZUb4YSQDA7J9nv79soojw1eFHVVzO8wdE9d+Qg=
 github.com/ralvarezdev/go-logger v0.4.5/go.mod h1:vq47onxpED19/o3dh5/YbBKK0eZhqJENPgACYkqNNi8=
-github.com/ralvarezdev/go-net v0.7.5 h1:FcKnWyna/Y8WsnT65HS+J9O8S9MQWJjI65GqcSRBHls=
-github.com/ralvarezdev/go-net v0.7.5/go.mod h1:cQFC/UeJnw7rwoZNVSYWYVN1akXfcINe8CiIC3T/XyU=
-github.com/ralvarezdev/go-reflect v0.2.1 h1:Q200FruGvc8INRRpnmvK+iRKTnCslRAWnwGAj1fXMak=
-github.com/ralvarezdev/go-reflect v0.2.1/go.mod h1:jv3EqQfUixWtNeJd/Rnzf0IDcYZ1z3GApRdAGQHdHZQ=
+github.com/ralvarezdev/go-net v0.7.10 h1:bBsoBLOAspoizxY6jMD7T2crQ4vS9HjOe3PKaLYL3C8=
+github.com/ralvarezdev/go-net v0.7.10/go.mod h1:6BUQ5FwlRylgP2RPByKmPTxQqz1UjHI4PRU2k5ZajOU=
+github.com/ralvarezdev/go-reflect v0.2.3 h1:WXtgMbZ1LFKjyzi2W3JetgQCJcT/N2erDv12ZZaaLBI=
+github.com/ralvarezdev/go-reflect v0.2.3/go.mod h1:jv3EqQfUixWtNeJd/Rnzf0IDcYZ1z3GApRdAGQHdHZQ=
 github.com/ralvarezdev/go-security-headers v0.1.1 h1:tuZ66YhmOb4JJluhJCwo63i4fvZfmm4mfPUcya9tT/c=
 github.com/ralvarezdev/go-security-headers v0.1.1/go.mod h1:DXhZZGyaIAL2Z3WtRr+wQU7wtp2FR1MukoNpdNwfdU0=
 github.com/ralvarezdev/go-strings v0.1.6 h1:NWI+XCipWaOo0vhSNpZz+7Eb4igk/GXD5RaFsk4ZPqY=

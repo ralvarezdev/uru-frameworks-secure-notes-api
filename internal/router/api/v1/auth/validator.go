@@ -52,7 +52,7 @@ func (v *validator) SignUp(
 	interface{},
 	error,
 ) {
-	return internalvalidator.Service.Validate(
+	return internalvalidator.Validate(
 		body,
 		mapper,
 		func(validations *govalidatormappervalidation.StructValidations) (err error) {
@@ -69,7 +69,7 @@ func (v *validator) LogIn(
 	interface{},
 	error,
 ) {
-	return internalvalidator.Service.Validate(
+	return internalvalidator.Validate(
 		body,
 		mapper,
 	)
@@ -83,7 +83,7 @@ func (v *validator) VerifyTOTP(
 	interface{},
 	error,
 ) {
-	return internalvalidator.Service.Validate(
+	return internalvalidator.Validate(
 		body,
 		mapper,
 	)

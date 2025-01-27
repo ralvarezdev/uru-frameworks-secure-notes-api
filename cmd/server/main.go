@@ -60,6 +60,7 @@ func main() {
 			"",
 			goflagsmode.ModeFlag,
 			internallogger.Router,
+			internalmiddleware.HandleError,
 			gosecurityheadersnethttp.Handler,
 		),
 	); err != nil {

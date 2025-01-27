@@ -44,11 +44,7 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*SignUpRequest)
 
 	// Sign up the user
-	userID, err := Service.SignUp(r, body)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID := Service.SignUp(r, body)
 
 	// Log the user sign up
 	internallogger.Api.SignUp(*userID)
@@ -78,11 +74,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID, userTokens, err := Service.LogIn(r, body)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID, userTokens := Service.LogIn(r, body)
 
 	// Log the successful login
 	internallogger.Api.LogIn(*userID)
@@ -111,11 +103,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/auth/refresh-tokens [get]
 func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	// Get the user's refresh tokens
-	userID, userRefreshTokens, err := Service.ListRefreshTokens(r)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID, userRefreshTokens := Service.ListRefreshTokens(r)
 
 	// Log the successful fetch of the user's refresh tokens
 	internallogger.Api.ListRefreshTokens(*userID)
@@ -150,14 +138,10 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the user's refresh token by ID
-	userID, userRefreshToken, err := Service.GetRefreshToken(
+	userID, userRefreshToken := Service.GetRefreshToken(
 		r,
 		refreshTokenID,
 	)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
 
 	// Log the successful fetch of the user's refresh token
 	internallogger.Api.GetRefreshToken(*userID, refreshTokenID)
@@ -196,11 +180,7 @@ func (c *controller) RevokeRefreshToken(
 	}
 
 	// Revoke the user's refresh token
-	err := Service.RevokeRefreshToken(r, refreshTokenID)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	Service.RevokeRefreshToken(r, refreshTokenID)
 
 	// Log the successful token revocation
 	internallogger.Api.RevokeRefreshToken(refreshTokenID)
@@ -226,11 +206,7 @@ func (c *controller) RevokeRefreshToken(
 // @Router /api/v1/auth/logout [post]
 func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 	// Log out the user
-	userID, err := Service.LogOut(r)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID := Service.LogOut(r)
 
 	// Log the successful logout
 	internallogger.Api.LogOut(*userID)
@@ -259,11 +235,7 @@ func (c *controller) RevokeRefreshTokens(
 	r *http.Request,
 ) {
 	// Revoke the user's refresh tokens
-	userID, err := Service.RevokeRefreshTokens(r)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID := Service.RevokeRefreshTokens(r)
 
 	// Log the successful token revocation
 	internallogger.Api.RevokeRefreshTokens(*userID)
@@ -289,11 +261,7 @@ func (c *controller) RevokeRefreshTokens(
 // @Router /api/v1/auth/refresh-token [post]
 func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Refresh the token
-	userID, userTokens, err := Service.RefreshToken(r)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID, userTokens := Service.RefreshToken(r)
 
 	// Log the successful token refresh
 	internallogger.Api.RefreshToken(*userID)
@@ -325,11 +293,7 @@ func (c *controller) GenerateTOTPUrl(
 	r *http.Request,
 ) {
 	// Generate the TOTP URL
-	userID, totpUrl, err := Service.GenerateTOTPUrl(r)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID, totpUrl := Service.GenerateTOTPUrl(r)
 
 	// Log the successful TOTP URL generation
 	internallogger.Api.GenerateTOTPUrl(*userID)
@@ -361,11 +325,7 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*VerifyTOTPRequest)
 
 	// Verify the TOTP code
-	userID, recoveryCodes, err := Service.VerifyTOTP(r, body)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID, recoveryCodes := Service.VerifyTOTP(r, body)
 
 	// Log the successful TOTP verification
 	internallogger.Api.VerifyTOTP(*userID)
@@ -393,11 +353,7 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/auth/totp [delete]
 func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
 	// Revoke the user's TOTP
-	userID, err := Service.RevokeTOTP(r)
-	if err != nil {
-		internalhandler.Handler.HandleError(w, err)
-		return
-	}
+	userID := Service.RevokeTOTP(r)
 
 	// Log the successful TOTP revocation
 	internallogger.Api.RevokeTOTP(*userID)
