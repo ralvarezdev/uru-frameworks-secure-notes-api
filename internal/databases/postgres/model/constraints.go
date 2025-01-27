@@ -1,4 +1,4 @@
-package constraints
+package model
 
 const (
 	// UserUsernamesUniqueUsername is the constraint name for the unique username constraint on the user_usernames table

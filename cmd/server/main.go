@@ -16,6 +16,7 @@ import (
 	internallistener "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/listener"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
+	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalrouter "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 	"log"
@@ -37,10 +38,11 @@ func init() {
 	internaltotp.Load()
 	internalpbkdf2.Load()
 	internalpostgres.Load()
-	internaljwt.Load()
 	internaljwtcache.Load(mode)
+	internaljwt.Load()
 	internallistener.Load()
 	internalvalidator.Load(mode)
+	internalmiddleware.Load()
 }
 
 func main() {

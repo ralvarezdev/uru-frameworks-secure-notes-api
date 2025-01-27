@@ -1,4 +1,4 @@
-package queries
+package model
 
 var (
 	// InsertUserTOTPRecoveryCodes is the SQL query to insert the user TOTP recovery codes

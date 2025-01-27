@@ -1,4 +1,4 @@
-package queries
+package model
 
 const (
 	// CreateGetUserRefreshTokenByIDFn is the SQL query to create the get user refresh token by ID function

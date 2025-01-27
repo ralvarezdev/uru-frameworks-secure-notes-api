@@ -1,4 +1,4 @@
-package queries
+package model
 
 var (
 	// SignUpProc is the query to call the sign-up stored procedure

@@ -1,4 +1,4 @@
-package queries
+package model
 
 const (
 	// CreateSignUpProc is the query to create the sign-up stored procedure

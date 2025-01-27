@@ -3,18 +3,14 @@ package jwt
 import (
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
-	"github.com/ralvarezdev/go-jwt/token/interception"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
 	gonethttpjwtvalidator "github.com/ralvarezdev/go-net/http/jwt/validator"
-	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
-	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internaljson "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/json"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	"net/http"
 	"time"
 )
 
@@ -39,11 +35,14 @@ var (
 	// Durations are the JWT tokens duration
 	Durations = make(map[gojwttoken.Token]time.Duration)
 
+	// Validator is the JWT validator
+	Validator gojwtvalidator.Validator
+
 	// Issuer is the JWT issuer
 	Issuer gojwtissuer.Issuer
 
-	// Authenticate is the API authenticator middleware function
-	Authenticate func(interception interception.Interception) func(next http.Handler) http.Handler
+	// ValidatorFailHandler is the JWT validator fail handler
+	ValidatorFailHandler gonethttpjwtvalidator.FailHandler
 )
 
 // Load loads the JWT constants
@@ -89,6 +88,7 @@ func Load() {
 	if err != nil {
 		panic(err)
 	}
+	Validator = validator
 
 	// Create the JWT issuer with ED25519 private key
 	issuer, err := gojwtissuer.NewEd25519Issuer(
@@ -101,12 +101,5 @@ func Load() {
 
 	// Create the JWT validator handler
 	validatorFailHandler, _ := gonethttpjwtvalidator.NewDefaultFailHandler(internaljson.Encoder)
-
-	// Create API authenticator middleware
-	authenticator, _ := gonethttpmiddlewareauth.NewMiddleware(
-		validator,
-		internalhandler.Handler,
-		validatorFailHandler,
-	)
-	Authenticate = authenticator.Authenticate
+	ValidatorFailHandler = validatorFailHandler
 }

@@ -1,4 +1,4 @@
-package queries
+package model
 
 var (
 	// GetUserRefreshTokenByIDFn is the SQL query to get a refresh token by ID

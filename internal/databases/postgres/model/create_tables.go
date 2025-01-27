@@ -1,8 +1,7 @@
-package queries
+package model
 
 import (
 	"fmt"
-	internalpostgresconstraints "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/constraints"
 )
 
 const (
@@ -211,7 +210,7 @@ CREATE TABLE IF NOT EXISTS user_usernames (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_usernames (username) WHERE revoked_at IS NULL;
-`, internalpostgresconstraints.UserUsernamesUniqueUsername,
+`, UserUsernamesUniqueUsername,
 	)
 
 	// CreateUserEmails is the SQL query to create the user_emails table
@@ -226,6 +225,6 @@ CREATE TABLE IF NOT EXISTS user_emails (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (email) WHERE revoked_at IS NULL;
-`, internalpostgresconstraints.UserEmailsUniqueEmail,
+`, UserEmailsUniqueEmail,
 	)
 )

@@ -8,7 +8,7 @@ import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
-	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
+	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
 // DefaultValidator struct

@@ -9,13 +9,6 @@ import (
 	"time"
 )
 
-var (
-	// Mappers to be loaded
-	LogInRequestMapper      *govalidatormapper.Mapper
-	VerifyTOTPRequestMapper *govalidatormapper.Mapper
-	SignUpRequestMapper     *govalidatormapper.Mapper
-)
-
 type (
 	// validator is the structure for API V1 auth validator
 	validator struct{}
@@ -52,13 +45,16 @@ func (v *validator) Birthdate(
 }
 
 // SignUp validates the SignUpRequest
-func (v *validator) SignUp(body *SignUpRequest) func() (
+func (v *validator) SignUp(
+	body *SignUpRequest,
+	mapper *govalidatormapper.Mapper,
+) func() (
 	interface{},
 	error,
 ) {
 	return internalvalidator.Service.Validate(
 		body,
-		SignUpRequestMapper,
+		mapper,
 		func(validations *govalidatormappervalidation.StructValidations) (err error) {
 			return v.Email("email", body.Email, validations)
 		},
@@ -66,23 +62,29 @@ func (v *validator) SignUp(body *SignUpRequest) func() (
 }
 
 // LogIn validates the LogInRequest
-func (v *validator) LogIn(body *LogInRequest) func() (
+func (v *validator) LogIn(
+	body *LogInRequest,
+	mapper *govalidatormapper.Mapper,
+) func() (
 	interface{},
 	error,
 ) {
 	return internalvalidator.Service.Validate(
 		body,
-		LogInRequestMapper,
+		mapper,
 	)
 }
 
 // VerifyTOTP validates the VerifyTOTPRequest
-func (v *validator) VerifyTOTP(body *VerifyTOTPRequest) func() (
+func (v *validator) VerifyTOTP(
+	body *VerifyTOTPRequest,
+	mapper *govalidatormapper.Mapper,
+) func() (
 	interface{},
 	error,
 ) {
 	return internalvalidator.Service.Validate(
 		body,
-		VerifyTOTPRequestMapper,
+		mapper,
 	)
 }

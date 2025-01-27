@@ -2,7 +2,7 @@ package totp
 
 import (
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
-	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
+	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	"strconv"
 )

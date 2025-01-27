@@ -2,6 +2,7 @@ package auth
 
 import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
+	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
@@ -39,19 +40,11 @@ func (c *controller) getRefreshTokenID(
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/user/signup [post]
 func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body and validate the request
-	var body SignUpRequest
-	if !internalhandler.Handler.Parse(
-		w,
-		r,
-		&body,
-		Validator.SignUp(&body),
-	) {
-		return
-	}
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*SignUpRequest)
 
 	// Sign up the user
-	userID, err := Service.SignUp(r, &body)
+	userID, err := Service.SignUp(r, body)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -81,19 +74,11 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} gonethttpresponse.JSendErrorResponse
 // @Router /api/v1/auth/login [post]
 func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body and validate the request
-	var body LogInRequest
-	if !internalhandler.Handler.Parse(
-		w,
-		r,
-		&body,
-		Validator.LogIn(&body),
-	) {
-		return
-	}
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID, userTokens, err := Service.LogIn(r, &body)
+	userID, userTokens, err := Service.LogIn(r, body)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return
@@ -372,19 +357,11 @@ func (c *controller) GenerateTOTPUrl(
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/verify [post]
 func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
-	// Decode the request body and validate the request
-	var body VerifyTOTPRequest
-	if !internalhandler.Handler.Parse(
-		w,
-		r,
-		&body,
-		Validator.VerifyTOTP(&body),
-	) {
-		return
-	}
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*VerifyTOTPRequest)
 
 	// Verify the TOTP code
-	userID, recoveryCodes, err := Service.VerifyTOTP(r, &body)
+	userID, recoveryCodes, err := Service.VerifyTOTP(r, body)
 	if err != nil {
 		internalhandler.Handler.HandleError(w, err)
 		return

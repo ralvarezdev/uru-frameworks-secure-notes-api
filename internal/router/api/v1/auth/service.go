@@ -13,8 +13,7 @@ import (
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
-	internalpostgresconstraints "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/constraints"
-	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/queries"
+	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
@@ -70,7 +69,7 @@ func (s *service) RegisterFailedLoginAttempt(
 ) error {
 	// Insert the failed login attempt
 	_, err := internalpostgres.DB.Exec(
-		internalpostgresqueries.RegisterFailedLoginAttemptProc,
+		internalpostgresmodel.RegisterFailedLoginAttemptProc,
 		userID,
 		ipAddress,
 		badPassword,
@@ -145,7 +144,7 @@ func (s *service) ValidateTOTPRecoveryCode(
 ) (bool, error) {
 	// Revoke the TOTP recovery code
 	result, err := internalpostgres.DB.Exec(
-		internalpostgresqueries.RevokeTOTPRecoveryCodeProc,
+		internalpostgresmodel.RevokeTOTPRecoveryCodeProc,
 		totpID,
 		totpRecoveryCode,
 	)
@@ -251,7 +250,7 @@ func (s *service) SignUp(r *http.Request, body *SignUpRequest) (
 	// Run the SQL function to sign up the user
 	var userID sql.NullInt64
 	if err = internalpostgres.DB.QueryRow(
-		internalpostgresqueries.SignUpProc,
+		internalpostgresmodel.SignUpProc,
 		body.FirstName,
 		body.LastName,
 		salt,
@@ -266,10 +265,10 @@ func (s *service) SignUp(r *http.Request, body *SignUpRequest) (
 		if !isUniqueViolation {
 			return nil, err
 		}
-		if constraintName == internalpostgresconstraints.UserEmailsUniqueEmail {
+		if constraintName == internalpostgresmodel.UserEmailsUniqueEmail {
 			return nil, ErrSignUpEmailAlreadyRegistered
 		}
-		if constraintName == internalpostgresconstraints.UserUsernamesUniqueUsername {
+		if constraintName == internalpostgresmodel.UserUsernamesUniqueUsername {
 			return nil, ErrSignUpUsernameAlreadyRegistered
 		}
 	}
@@ -298,7 +297,7 @@ func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	var passwordHash, userTOTPSecret sql.NullString
 	totpIsActive := true
 	if err := internalpostgres.DB.QueryRow(
-		internalpostgresqueries.PreLogInProc,
+		internalpostgresmodel.PreLogInProc,
 		requestBody.Username,
 		nil,
 		nil,
@@ -383,7 +382,7 @@ func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	// Call the refresh token stored procedure
 	var userAccessTokenID, userRefreshTokenID sql.NullInt64
 	if err = internalpostgres.DB.QueryRow(
-		internalpostgresqueries.GenerateTokensProc,
+		internalpostgresmodel.GenerateTokensProc,
 		userID,
 		nil,
 		clientIP,
@@ -429,7 +428,7 @@ func (s *service) RevokeRefreshToken(
 		// Get the user access token ID by the user refresh token ID
 		var userAccessTokenID sql.NullInt64
 		if err := internalpostgres.DB.QueryRow(
-			internalpostgresqueries.GetAccessTokenByRefreshTokenIDProc,
+			internalpostgresmodel.GetAccessTokenByRefreshTokenIDProc,
 			userRefreshTokenID,
 			nil,
 		).Scan(
@@ -449,7 +448,7 @@ func (s *service) RevokeRefreshToken(
 
 	// Call the revoke tokens by ID stored procedure
 	_, err = internalpostgres.DB.Exec(
-		internalpostgresqueries.RevokeTokensByIDProc,
+		internalpostgresmodel.RevokeTokensByIDProc,
 		userID,
 		userRefreshTokenID,
 	)
@@ -484,7 +483,7 @@ func (s *service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
 		// Get the user refresh tokens and user access tokens ID by user ID
 		var userRefreshTokenID, userAccessTokenID int64
 		rows, err := internalpostgres.DB.Query(
-			internalpostgresqueries.ListUserTokensFn,
+			internalpostgresmodel.ListUserTokensFn,
 			userID,
 		)
 		if err != nil {
@@ -509,7 +508,7 @@ func (s *service) RevokeRefreshTokens(r *http.Request) (*int64, error) {
 
 	// Call the revoke tokens stored procedure
 	_, err = internalpostgres.DB.Exec(
-		internalpostgresqueries.RevokeTokensProc,
+		internalpostgresmodel.RevokeTokensProc,
 		userID,
 	)
 	if err != nil {
@@ -543,7 +542,7 @@ func (s *service) RefreshToken(r *http.Request) (
 	// Call the refresh token stored procedure
 	var userRefreshTokenID, userAccessTokenID sql.NullInt64
 	if err = internalpostgres.DB.QueryRow(
-		internalpostgresqueries.RefreshTokenProc,
+		internalpostgresmodel.RefreshTokenProc,
 		userID,
 		oldUserRefreshTokenID,
 		clientIP,
@@ -592,7 +591,7 @@ func (s *service) GenerateTOTPUrl(r *http.Request) (*int64, *string, error) {
 	var userEmail, userTOTPSecret sql.NullString
 	var userTOTPVerifiedAt sql.NullTime
 	if err = internalpostgres.DB.QueryRow(
-		internalpostgresqueries.GenerateTOTPUrlProc,
+		internalpostgresmodel.GenerateTOTPUrlProc,
 		userID,
 		totpSecret,
 		nil, nil, nil, nil,
@@ -643,7 +642,7 @@ func (s *service) VerifyTOTP(
 	var userTOTPSecret sql.NullString
 	var userTOTPVerifiedAt sql.NullTime
 	if err = internalpostgres.DB.QueryRow(
-		internalpostgresqueries.GetUserTOTPProc,
+		internalpostgresmodel.GetUserTOTPProc,
 		userID,
 		nil, nil, nil,
 	).Scan(
@@ -703,7 +702,7 @@ func (s *service) VerifyTOTP(
 		func(tx *sql.Tx) error {
 			// Update the user TOTP verified at
 			if _, err = tx.Exec(
-				internalpostgresqueries.VerifyTOTPProc,
+				internalpostgresmodel.VerifyTOTPProc,
 				userTOTPID,
 			); err != nil {
 				return err
@@ -711,7 +710,7 @@ func (s *service) VerifyTOTP(
 
 			// Insert the user TOTP recovery codes
 			_, err = tx.Exec(
-				internalpostgresqueries.InsertUserTOTPRecoveryCodes,
+				internalpostgresmodel.InsertUserTOTPRecoveryCodes,
 				insertTOTPRecoveryCodesArgs...,
 			)
 			return err
@@ -734,7 +733,7 @@ func (s *service) RevokeTOTP(r *http.Request) (*int64, error) {
 
 	// Run the SQL function to get the user TOTP ID by the user ID
 	_, err = internalpostgres.DB.Exec(
-		internalpostgresqueries.RevokeTOTPProc,
+		internalpostgresmodel.RevokeTOTPProc,
 		userID,
 	)
 	if err != nil {
@@ -757,7 +756,7 @@ func (s *service) ListRefreshTokens(r *http.Request) (
 
 	// Run the SQL function to list the user refresh tokens by the user ID
 	rows, err := internalpostgres.DB.Query(
-		internalpostgresqueries.ListUserRefreshTokensFn,
+		internalpostgresmodel.ListUserRefreshTokensFn,
 		userID,
 	)
 	if err != nil {
@@ -797,7 +796,7 @@ func (s *service) GetRefreshToken(
 	// Run the SQL function to get the user refresh token by the ID and user ID
 	var userRefreshToken internalapiv1common.UserRefreshToken
 	if err = internalpostgres.DB.QueryRow(
-		internalpostgresqueries.GetUserRefreshTokenByIDFn,
+		internalpostgresmodel.GetUserRefreshTokenByIDFn,
 		userRefreshTokenID,
 		userID,
 	).Scan(
