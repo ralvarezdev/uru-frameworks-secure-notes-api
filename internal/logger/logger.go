@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
 	gologgermode "github.com/ralvarezdev/go-logger/mode"
 	gologgermodenamed "github.com/ralvarezdev/go-logger/mode/named"
 )
@@ -27,6 +28,27 @@ func (l *Logger) ServerStarted(port string) {
 	l.logger.Info(
 		"server started",
 		"port: "+port,
+	)
+}
+
+// PoolStat logs the pool stat
+func (l *Logger) PoolStat(
+	stat *pgxpool.Stat,
+) {
+	l.logger.Info(
+		"pool stat",
+		fmt.Sprintf("total connections: %d", stat.TotalConns()),
+		fmt.Sprintf("new conns count: %d", stat.NewConnsCount()),
+		fmt.Sprintf("acquire count: %d", stat.AcquireCount()),
+		fmt.Sprintf("acquired connections: %d", stat.AcquiredConns()),
+		fmt.Sprintf("max connections: %d", stat.MaxConns()),
+		fmt.Sprintf("idle connections: %d", stat.IdleConns()),
+		fmt.Sprintf("constructing conns: %d", stat.ConstructingConns()),
+		fmt.Sprintf("max idle destroy count: %d", stat.MaxIdleDestroyCount()),
+		fmt.Sprintf(
+			"max lifetime destroy count: %d",
+			stat.MaxLifetimeDestroyCount(),
+		),
 	)
 }
 

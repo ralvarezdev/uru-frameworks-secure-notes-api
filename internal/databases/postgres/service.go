@@ -1,41 +1,41 @@
 package postgres
 
 import (
-	"database/sql"
-	godatabasessqlservice "github.com/ralvarezdev/go-databases/sql/service"
+	"github.com/jackc/pgx/v5/pgxpool"
+	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
 type (
 	// Service is the Postgres service struct
 	Service struct {
-		godatabasessqlservice.Service
+		godatabasespgxpool.Service
 	}
 )
 
 // NewService creates a new Postgres service
-func NewService(db *sql.DB) (
+func NewService(pool *pgxpool.Pool) (
 	*Service,
 	error,
 ) {
 	// Create the default service
-	defaultService, err := godatabasessqlservice.NewDefaultService(db)
+	service, err := godatabasespgxpool.NewDefaultService(pool)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create the instance
 	instance := &Service{
-		Service: defaultService,
+		Service: service,
 	}
 
 	// Migrate the database
-	/**/
-	err = instance.Migrate()
-	if err != nil {
-		return nil, err
-	}
-	/**/
+	/*
+		err = instance.Migrate()
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	return instance, nil
 }

@@ -1,9 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
-	_ "github.com/jackc/pgx/v5/stdlib"
+	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
 	gosecurityheadersnethttp "github.com/ralvarezdev/go-security-headers/net/http"
@@ -37,7 +36,7 @@ func init() {
 	internalbcrypt.Load()
 	internaltotp.Load()
 	internalpbkdf2.Load()
-	internalpostgres.Load()
+	internalpostgres.Load(mode)
 	internaljwtcache.Load(mode)
 	internaljwt.Load()
 	internallistener.Load()
@@ -46,13 +45,10 @@ func init() {
 }
 
 func main() {
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-			panic(err)
-		}
+	defer func(handler godatabasespgxpool.PoolHandler) {
+		handler.Disconnect()
 		internallogger.Postgres.DisconnectedFromDatabase()
-	}(internalpostgres.DB)
+	}(internalpostgres.PoolHandler)
 
 	// Create the main router module
 	if err := internalrouter.Module.Create(

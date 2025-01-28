@@ -76,7 +76,7 @@ func Load() {
 
 	// Create the JWT claims validator
 	claimsValidator, _ := internaljwtclaims.NewDefaultValidator(
-		internalpostgres.DBService, internaljwtcache.TokenValidator,
+		internalpostgres.PoolService, internaljwtcache.TokenValidator,
 	)
 
 	// Create the JWT validator with ED25519 public key

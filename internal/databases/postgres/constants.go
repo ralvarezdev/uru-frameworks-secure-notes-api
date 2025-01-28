@@ -1,19 +1,18 @@
 package postgres
 
 import (
-	"database/sql"
-	godatabasessql "github.com/ralvarezdev/go-databases/sql"
+	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/pgxpool"
+	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
+	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"time"
 )
 
 const (
-	// EnvUri is the key of the default URI for the Postgres database
-	EnvUri = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRES_HOST"
-
-	// EnvDatabaseName is the key of the default database name for the Postgres database
-	EnvDatabaseName = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRES_NAME"
+	// EnvDSN is the key of the DSN for the Postgres database
+	EnvDSN = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRES_DSN"
 
 	// EnvMaxOpenConnections is the key of the maximum number of open connections for the Postgres database
 	EnvMaxOpenConnections = "URU_FRAMEWORKS_SECURE_NOTES_POSTGRES_MAX_OPEN_CONNECTIONS"
@@ -23,14 +22,8 @@ const (
 )
 
 var (
-	// Uri is the default URI for the Postgres database
-	Uri string
-
-	// DatabaseName is the default database name for the Postgres database
-	DatabaseName string
-
-	// DataSourceName is the Postgres DSN
-	DataSourceName string
+	// DSN is the DSN for the Postgres database
+	DSN string
 
 	// MaxOpenConnections is the maximum number of open connections for the Postgres database
 	MaxOpenConnections int
@@ -38,29 +31,21 @@ var (
 	// MaxIdleConnections is the maximum number of idle connections for the Postgres database
 	MaxIdleConnections int
 
-	// Config is the Postgres configuration
-	Config *godatabasessql.Config
+	// PoolHandler is the Postgres pool handler
+	PoolHandler godatabasespgxpool.PoolHandler
 
-	// DB is the Postgres database
-	DB *sql.DB
-
-	// DBService is the Postgres service
-	DBService *Service
+	// PoolService is the Postgres pool service
+	PoolService *Service
 )
 
 // Load loads the Postgres constants
-func Load() {
-	// Load the default URI and database name for the Postgres database
-	for key, variable := range map[string]*string{
-		EnvUri:          &Uri,
-		EnvDatabaseName: &DatabaseName,
-	} {
-		if err := internalloader.Loader.LoadVariable(
-			key,
-			variable,
-		); err != nil {
-			panic(err)
-		}
+func Load(mode *goflagsmode.Flag) {
+	// Load the DSN for the Postgres database
+	if err := internalloader.Loader.LoadVariable(
+		EnvDSN,
+		&DSN,
+	); err != nil {
+		panic(err)
 	}
 
 	// Load the maximum number of open and idle connections for the Postgres database
@@ -76,33 +61,49 @@ func Load() {
 		}
 	}
 
-	// Create the Postgres DSN
-	DataSourceName = Uri + "/" + DatabaseName + "?sslmode=require"
-
-	// Create the Postgres configuration
-	Config = godatabasessql.NewConfig(
+	// Create the Postgres pool configuration
+	config, err := godatabasespgxpool.NewPoolConfig(
+		DSN,
 		MaxOpenConnections,
 		MaxIdleConnections,
 		time.Hour,
+		time.Hour,
+		5*time.Minute,
+		5*time.Minute,
 	)
 
-	// Connect to the Postgres database
-	db, err := Config.Connect(
-		"pgx",
-		DataSourceName,
-	)
+	// Create the Postgres database pool handler
+	poolHandler, err := godatabasespgxpool.NewDefaultPoolHandler(config)
 	if err != nil {
 		panic(err)
 	}
-	DB = db
+	PoolHandler = poolHandler
+
+	// Connect to the Postgres database
+	pool, err := poolHandler.Connect()
+	if err != nil {
+		panic(err)
+	}
 	internallogger.Postgres.ConnectedToDatabase()
 
 	// Create the Postgres database service
-	dbService, err := NewService(
-		db,
+	service, err := NewService(
+		pool,
 	)
 	if err != nil {
 		panic(err)
 	}
-	DBService = dbService
+	PoolService = service
+
+	// Check if the mode is debug
+	if !mode.IsDebug() {
+		return
+	}
+
+	// Set ticker for the Postgres database
+	service.SetStatTicker(
+		10*time.Second, func(stat *pgxpool.Stat) {
+			internallogger.Api.PoolStat(stat)
+		},
+	)
 }

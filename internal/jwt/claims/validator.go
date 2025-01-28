@@ -23,21 +23,18 @@ func NewDefaultValidator(
 	tokenValidator gojwtcache.TokenValidator,
 ) (*DefaultValidator, error) {
 	return &DefaultValidator{
-		postgresService: postgresService,
-		tokenValidator:  tokenValidator,
+		postgresService,
+		tokenValidator,
 	}, nil
 }
 
 // IsRefreshTokenValid checks if the refresh token is valid
 func (d *DefaultValidator) IsRefreshTokenValid(id string) (bool, error) {
-	// Get the database connection
-	db := d.postgresService.DB()
-
 	// Get the refresh token by the ID
 	var expiresAt sql.NullTime
 	var found, isExpired sql.NullBool
-	if err := db.QueryRow(
-		internalpostgresqueries.IsRefreshTokenValidProc,
+	if err := d.postgresService.QueryRow(
+		&internalpostgresqueries.IsRefreshTokenValidProc,
 		id,
 		nil, nil, nil,
 	).Scan(
@@ -71,14 +68,11 @@ func (d *DefaultValidator) IsRefreshTokenValid(id string) (bool, error) {
 
 // IsAccessTokenValid checks if the access token is valid
 func (d *DefaultValidator) IsAccessTokenValid(id string) (bool, error) {
-	// Get the database connection
-	db := d.postgresService.DB()
-
 	// Get the access token by the ID
 	var expiresAt sql.NullTime
 	var found, isExpired sql.NullBool
-	if err := db.QueryRow(
-		internalpostgresqueries.IsAccessTokenValidProc,
+	if err := d.postgresService.QueryRow(
+		&internalpostgresqueries.IsAccessTokenValidProc,
 		id, nil, nil, nil,
 	).Scan(
 		&expiresAt,
