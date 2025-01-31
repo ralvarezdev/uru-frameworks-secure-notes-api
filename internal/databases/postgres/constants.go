@@ -49,13 +49,13 @@ func Load(mode *goflagsmode.Flag) {
 	}
 
 	// Load the maximum number of open and idle connections for the Postgres database
-	for key, variable := range map[string]*int{
+	for key, dest := range map[string]*int{
 		EnvMaxOpenConnections: &MaxOpenConnections,
 		EnvMaxIdleConnections: &MaxIdleConnections,
 	} {
 		if err := internalloader.Loader.LoadIntVariable(
 			key,
-			variable,
+			dest,
 		); err != nil {
 			panic(err)
 		}

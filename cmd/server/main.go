@@ -44,6 +44,19 @@ func init() {
 	internalmiddleware.Load()
 }
 
+// @Title           Secure Notes REST API
+// @Version         1.0
+// @Description     This is the REST API for the Secure Notes application.
+
+// @License.name  GPL-3.0
+// @License.url   http://www.gnu.org/licenses/gpl-3.0.html
+
+// @BasePath  /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	defer func(handler godatabasespgxpool.PoolHandler) {
 		handler.Disconnect()

@@ -4,7 +4,7 @@ import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
-	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
+	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
@@ -14,19 +14,6 @@ type (
 	// controller is the structure for the API V1 auth controller
 	controller struct{}
 )
-
-// getRefreshTokenID gets the refresh token ID from the path
-func (c *controller) getRefreshTokenID(
-	w http.ResponseWriter,
-	r *http.Request,
-	refreshTokenID *int64,
-) bool {
-	// Get the refresh token ID from the path
-	return internalhandler.Handler.ParseWildcard(
-		w, r, "id", refreshTokenID,
-		gostringsconvert.ToInt64,
-	)
-}
 
 // SignUp signs up a new user
 // @Summary Sign up a new user
@@ -64,7 +51,7 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param request body LogInRequest true "Log In Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailResponse
 // @Failure 401 {object} gonethttpresponse.JSendFailResponse
 // @Failure 500 {object} gonethttpresponse.JSendErrorResponse
@@ -98,7 +85,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-tokens [get]
 func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
@@ -125,26 +112,24 @@ func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param id path string true "Refresh Token ID"
+// @Param request body GetRefreshTokenRequest true "Get Refresh Token Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/refresh-token/{id} [get]
+// @Router /api/v1/auth/refresh-token/{token_id} [get]
 func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
-	// Get the refresh token ID from the path
-	var refreshTokenID int64
-	if !c.getRefreshTokenID(w, r, &refreshTokenID) {
-		return
-	}
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*GetRefreshTokenRequest)
 
 	// Get the user's refresh token by ID
 	userID, userRefreshToken := Service.GetRefreshToken(
 		r,
-		refreshTokenID,
+		body.RefreshTokenID,
 	)
 
 	// Log the successful fetch of the user's refresh token
-	internallogger.Api.GetRefreshToken(*userID, refreshTokenID)
+	internallogger.Api.GetRefreshToken(*userID, body.RefreshTokenID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -164,26 +149,24 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param id path string true "Refresh Token ID"
+// @Param request body RevokeRefreshTokenRequest true "Revoke Refresh Token Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/refresh-token/{id} [delete]
+// @Router /api/v1/auth/refresh-token/{token_id} [delete]
 func (c *controller) RevokeRefreshToken(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// Get the refresh token ID from the path
-	var refreshTokenID int64
-	if !c.getRefreshTokenID(w, r, &refreshTokenID) {
-		return
-	}
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*RevokeRefreshTokenRequest)
 
 	// Revoke the user's refresh token
-	Service.RevokeRefreshToken(r, refreshTokenID)
+	Service.RevokeRefreshToken(r, body.RefreshTokenID)
 
 	// Log the successful token revocation
-	internallogger.Api.RevokeRefreshToken(refreshTokenID)
+	internallogger.Api.RevokeRefreshToken(body.RefreshTokenID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -201,7 +184,7 @@ func (c *controller) RevokeRefreshToken(
 // @Accept json
 // @Produce json
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/logout [post]
 func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
@@ -227,7 +210,7 @@ func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-tokens [delete]
 func (c *controller) RevokeRefreshTokens(
@@ -255,8 +238,8 @@ func (c *controller) RevokeRefreshTokens(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-token [post]
 func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -284,8 +267,8 @@ func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/generate [post]
 func (c *controller) GenerateTOTPUrl(
@@ -317,7 +300,8 @@ func (c *controller) GenerateTOTPUrl(
 // @Produce json
 // @Param request body VerifyTOTPRequest
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/verify [post]
 func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
@@ -348,7 +332,7 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Success 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp [delete]
 func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
@@ -364,5 +348,59 @@ func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
 			nil,
 			http.StatusOK,
 		),
+	)
+}
+
+// ChangePassword changes a user's password
+// @Summary Change a user's password
+// @Description Changes a user's password
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body ChangePasswordRequest
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/password [put]
+func (c *controller) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// ForgotPassword sends a password reset email
+// @Summary Send a password reset email
+// @Description Sends a password reset email
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body ForgotPasswordRequest
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/password/forgot [post]
+func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// ResetPassword resets a user's password
+// @Summary Reset a user's password
+// @Description Resets a user's password
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body ResetPasswordRequest
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/password/reset [post]
+func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
 	)
 }

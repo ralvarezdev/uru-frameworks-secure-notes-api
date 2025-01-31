@@ -34,15 +34,9 @@ type ChangeEmailRequest struct {
 	Email string `json:"email"`
 }
 
-// SendEmailVerificationTokenRequest is the request DTO to send email verification token
-type SendEmailVerificationTokenRequest struct {
-	Email string `json:"email"`
-}
-
 // VerifyEmailRequest is the request DTO to verify email
 type VerifyEmailRequest struct {
-	Email             string `json:"email"`
-	VerificationToken string `json:"verification_token"`
+	Token string `json:"token"`
 }
 
 // ChangePhoneNumberRequest is the request DTO to change phone number
@@ -50,15 +44,9 @@ type ChangePhoneNumberRequest struct {
 	PhoneNumber string `json:"phone_number"`
 }
 
-// SendPhoneNumberVerificationCodeRequest is the request DTO to send phone number verification code
-type SendPhoneNumberVerificationCodeRequest struct {
-	PhoneNumber string `json:"phone_number"`
-}
-
 // VerifyPhoneNumberRequest is the request DTO to verify phone number
 type VerifyPhoneNumberRequest struct {
-	PhoneNumber      string `json:"phone_number"`
-	VerificationCode string `json:"verification_code"`
+	Token string `json:"token"`
 }
 
 // DeleteUserRequest is the request DTO to delete a user

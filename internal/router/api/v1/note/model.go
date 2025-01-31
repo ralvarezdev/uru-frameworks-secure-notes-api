@@ -35,6 +35,11 @@ type GetNoteResponse struct {
 	Note internalapiv1common.Note `json:"note"`
 }
 
+// ListNoteTagsRequest is the request DTO to list note tags
+type ListNoteTagsRequest struct {
+	NoteID int64 `json:"note_id"`
+}
+
 // ListNoteTagsResponse is the response DTO to list note tags
 type ListNoteTagsResponse struct {
 	NoteTags []internalapiv1common.TagWithID `json:"note_tags"`

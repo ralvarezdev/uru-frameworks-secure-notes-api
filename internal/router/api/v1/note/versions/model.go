@@ -9,11 +9,6 @@ type ListNoteVersionsResponse struct {
 	NoteVersionsID []string `json:"note_versions_id"`
 }
 
-// ListLastNoteVersionsWithContentResponse is the response DTO to list last note versions with their content
-type ListLastNoteVersionsWithContentResponse struct {
-	NoteVersions []internalapiv1common.NoteVersionWithID `json:"note_versions"`
-}
-
 // SyncNoteVersionsRequest is the request DTO to sync note versions
 type SyncNoteVersionsRequest struct {
 	NoteID               uint   `json:"note_id"`

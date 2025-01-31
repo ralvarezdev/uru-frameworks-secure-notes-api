@@ -21,7 +21,6 @@ func Load() {
 			if goflagsmode.ModeFlag != nil && goflagsmode.ModeFlag.IsProd() {
 				return nil
 			}
-
 			return godotenv.Load()
 		},
 		internallogger.Environment,

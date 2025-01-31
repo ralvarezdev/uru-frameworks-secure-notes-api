@@ -47,7 +47,7 @@ var (
 // Load loads the TOTP constants
 func Load() {
 	// Load the TOTP period, digits, secret length, recovery codes length, and recovery codes count
-	for env, variable := range map[string]*int{
+	for env, dest := range map[string]*int{
 		EnvPeriod:              &Period,
 		EnvDigits:              &Digits,
 		EnvSecretLength:        &SecretLength,
@@ -56,7 +56,7 @@ func Load() {
 	} {
 		if err := internalloader.Loader.LoadIntVariable(
 			env,
-			variable,
+			dest,
 		); err != nil {
 			panic(err)
 		}

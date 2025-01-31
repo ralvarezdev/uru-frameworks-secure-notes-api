@@ -1,4 +1,4 @@
-package version
+package tags
 
 import (
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
@@ -11,7 +11,7 @@ var (
 	Service    = &service{}
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
-		Path:       "/version",
+		Path:       "/tags",
 		Service:    Service,
 		Controller: Controller,
 		Middlewares: &[]func(http.Handler) http.Handler{
@@ -19,32 +19,8 @@ var (
 		},
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterRoute(
-				"POST /",
-				Controller.CreateNoteVersion,
-				internalmiddleware.Validate(
-					&CreateNoteVersionRequest{},
-				),
-			)
-			m.RegisterRoute(
-				"PUT /",
-				Controller.UpdateNoteVersion,
-				internalmiddleware.Validate(
-					&UpdateNoteVersionRequest{},
-				),
-			)
-			m.RegisterRoute(
-				"DELETE /",
-				Controller.DeleteNoteVersion,
-				internalmiddleware.Validate(
-					&DeleteNoteVersionRequest{},
-				),
-			)
-			m.RegisterRoute(
 				"GET /",
-				Controller.GetNoteVersion,
-				internalmiddleware.Validate(
-					&GetNoteVersionRequest{},
-				),
+				Controller.ListTags,
 			)
 		},
 	}

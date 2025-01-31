@@ -3,17 +3,17 @@ package auth
 import (
 	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	govalidatormappervalidation "github.com/ralvarezdev/go-validator/struct/mapper/validation"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
 
 var (
 	Service    = &service{}
-	Validator  = &validator{}
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
 		Path:       "/auth",
 		Service:    Service,
-		Validator:  Validator,
 		Controller: Controller,
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterRoute(
@@ -21,7 +21,16 @@ var (
 				Controller.SignUp,
 				internalmiddleware.Validate(
 					&SignUpRequest{},
-					Validator.SignUp,
+					func(
+						body *SignUpRequest,
+						validations *govalidatormappervalidation.StructValidations,
+					) {
+						internalvalidator.Service.Email(
+							"email",
+							body.Email,
+							validations,
+						)
+					},
 				),
 			)
 			m.RegisterRoute(
@@ -29,7 +38,6 @@ var (
 				Controller.LogIn,
 				internalmiddleware.Validate(
 					&LogInRequest{},
-					Validator.LogIn,
 				),
 			)
 			m.RegisterRoute(
@@ -43,7 +51,7 @@ var (
 				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
 			)
 			m.RegisterRoute(
-				"GET /refresh-token/{id}",
+				"GET /refresh-token/{token_id}",
 				Controller.GetRefreshToken,
 				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
 			)
@@ -53,7 +61,7 @@ var (
 				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
 			)
 			m.RegisterRoute(
-				"DELETE /refresh-token/{id}",
+				"DELETE /refresh-token/{token_id}",
 				Controller.RevokeRefreshToken,
 				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
 			)
@@ -73,13 +81,34 @@ var (
 				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
 				internalmiddleware.Validate(
 					&VerifyTOTPRequest{},
-					Validator.VerifyTOTP,
 				),
 			)
 			m.RegisterRoute(
 				"DELETE /totp",
 				Controller.RevokeTOTP,
 				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
+			)
+			m.RegisterRoute(
+				"PUT /password",
+				Controller.ChangePassword,
+				internalmiddleware.Authenticate(gojwtinterception.AccessToken),
+				internalmiddleware.Validate(
+					&ChangePasswordRequest{},
+				),
+			)
+			m.RegisterRoute(
+				"POST /password/forgot",
+				Controller.ForgotPassword,
+				internalmiddleware.Validate(
+					&ForgotPasswordRequest{},
+				),
+			)
+			m.RegisterRoute(
+				"POST /password/reset",
+				Controller.ResetPassword,
+				internalmiddleware.Validate(
+					&ResetPasswordRequest{},
+				),
 			)
 		},
 	}

@@ -20,7 +20,8 @@ var (
 
 	// Validate is the API request validator middleware function
 	Validate func(
-		body, createValidatorFn interface{},
+		body interface{},
+		auxiliaryValidatorFns ...interface{},
 	) func(next http.Handler) http.Handler
 )
 
@@ -41,6 +42,7 @@ func Load() {
 	// Create API request validator middleware
 	validator, _ := gonethttpmiddlewarevalidator.NewMiddleware(
 		internalhandler.Handler,
+		internalvalidator.Service,
 		internalvalidator.JSONGenerator,
 	)
 	Validate = validator.Validate

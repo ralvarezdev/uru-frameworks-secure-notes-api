@@ -11,17 +11,18 @@ type CreateTagRequest struct {
 
 // UpdateTagRequest is the request DTO to update a tag
 type UpdateTagRequest struct {
-	Name *string `json:"name,omitempty"`
+	TagID int64   `json:"tag_id"`
+	Name  *string `json:"name,omitempty"`
 }
 
 // DeleteTagRequest is the request DTO to delete a tag
 type DeleteTagRequest struct {
-	NoteTagID string `json:"tag_id"`
+	TagID int64 `json:"tag_id"`
 }
 
 // GetTagRequest is the request DTO to get a tag
 type GetTagRequest struct {
-	NoteTagID string `json:"tag_id"`
+	TagID int64 `json:"tag_id"`
 }
 
 // GetTagResponse is the response DTO to get a tag
