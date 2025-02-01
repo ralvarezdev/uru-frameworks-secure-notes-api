@@ -5,7 +5,7 @@ import (
 	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	gosecurityheadersnethttp "github.com/ralvarezdev/go-security-headers/net/http"
+	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
@@ -33,6 +33,7 @@ func init() {
 
 	// Call the load functions
 	internalloader.Load()
+	internalaes.Load()
 	internalbcrypt.Load()
 	internaltotp.Load()
 	internalpbkdf2.Load()
@@ -63,16 +64,17 @@ func main() {
 		internallogger.Postgres.DisconnectedFromDatabase()
 	}(internalpostgres.PoolHandler)
 
+	// Create the main router
+	router, err := gonethttproute.NewBaseRouter(
+		goflagsmode.ModeFlag,
+		internallogger.Router,
+	)
+	if err != nil {
+		panic(err)
+	}
+
 	// Create the main router module
-	if err := internalrouter.Module.Create(
-		gonethttproute.NewRouter(
-			"",
-			goflagsmode.ModeFlag,
-			internallogger.Router,
-			internalmiddleware.HandleError,
-			gosecurityheadersnethttp.Handler,
-		),
-	); err != nil {
+	if err = internalrouter.Module.Create(router); err != nil {
 		panic(err)
 	}
 

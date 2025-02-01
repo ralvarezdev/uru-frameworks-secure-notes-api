@@ -7,6 +7,7 @@ CREATE OR REPLACE PROCEDURE sign_up(
 	IN in_first_name VARCHAR,
 	IN in_last_name VARCHAR,
 	IN in_salt VARCHAR,
+	IN in_encrypted_key TEXT, 
 	IN in_username VARCHAR,
 	IN in_email VARCHAR,
 	IN in_password_hash VARCHAR,
@@ -18,13 +19,15 @@ BEGIN
 	-- Insert into users table
 	INSERT INTO users (
 		first_name,
-		last_name, 
-		salt
+		last_name,
+		salt,
+		encrypted_key
 	) 
 	VALUES (
 		in_first_name, 
 		in_last_name, 
-		in_salt
+		in_salt,
+		in_encrypted_key
 	)
 	RETURNING 
 		id INTO out_user_id;
@@ -101,7 +104,6 @@ BEGIN
 END;
 $$;
 `
-	// CreateRevokeTOTPProc is the query to create the revoke TOTP stored procedure
 
 	// CreateGenerateTokensProc is the query to create the generate tokens stored procedure
 	CreateGenerateTokensProc = `
@@ -266,10 +268,12 @@ $$;
 
 	// CreatePreLogInProc is the query to create the pre-log in stored procedure
 	CreatePreLogInProc = `
-CREATE OR REPLACE PROCEDURE pre_login(
+CREATE OR REPLACE PROCEDURE pre_log_in(
 	IN in_username VARCHAR,
 	OUT out_user_id BIGINT,
 	OUT out_password_hash VARCHAR,
+	OUT out_salt VARCHAR,
+	OUT out_encrypted_key TEXT,
 	OUT out_totp_id BIGINT,
 	OUT out_totp_secret VARCHAR
 )
@@ -279,9 +283,13 @@ BEGIN
 	-- Select the user ID and password hash by username
 	SELECT
 		users.id,
+		users.salt,
+		users.encrypted_key,
 		user_password_hashes.password_hash
 	INTO
 		out_user_id,
+		out_salt,	
+		out_encrypted_key,	
 		out_password_hash
 	FROM
 		users

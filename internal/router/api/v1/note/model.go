@@ -13,7 +13,7 @@ type CreateNoteRequest struct {
 
 // UpdateNoteRequest is the request DTO to update a note
 type UpdateNoteRequest struct {
-	NoteID     uint     `json:"note_id"`
+	NoteID     int64    `json:"note_id"`
 	IsPinned   *bool    `json:"is_pinned,omitempty"`
 	Title      *string  `json:"title,omitempty"`
 	NoteTagsID []string `json:"note_tags_id,omitempty"`
@@ -22,12 +22,12 @@ type UpdateNoteRequest struct {
 
 // DeleteNoteRequest is the request DTO to delete a note
 type DeleteNoteRequest struct {
-	NoteID uint `json:"note_id"`
+	NoteID int64 `json:"note_id"`
 }
 
 // GetNoteRequest is the request DTO to get a note
 type GetNoteRequest struct {
-	NoteID uint `json:"note_id"`
+	NoteID int64 `json:"note_id"`
 }
 
 // GetNoteResponse is the response DTO to get a note

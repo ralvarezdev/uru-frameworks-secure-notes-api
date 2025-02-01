@@ -2,15 +2,20 @@ package auth
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"github.com/jackc/pgx/v5"
+	gocryptoaes "github.com/ralvarezdev/go-crypto/aes"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
+	gocryptopbdkf2 "github.com/ralvarezdev/go-crypto/pbkdf2"
 	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
@@ -20,6 +25,7 @@ import (
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -242,6 +248,27 @@ func (s *service) SignUp(r *http.Request, body *SignUpRequest) *int64 {
 		panic(err)
 	}
 
+	// Derive the password with the salt
+	derivedKey := gocryptopbdkf2.DeriveKey(
+		body.Password,
+		[]byte(salt),
+		internalpbkdf2.Iterations,
+		internalpbkdf2.KeyLength,
+		sha256.New,
+	)
+
+	// Generate a random key for the AES-256 encryption
+	key := make([]byte, internalaes.KeySize)
+	if _, err := io.ReadFull(rand.Reader, key); err != nil {
+		panic(err)
+	}
+
+	// Encrypt the key with the derived key
+	encryptedKey, err := gocryptoaes.Encrypt(key, derivedKey)
+	if err != nil {
+		panic(err)
+	}
+
 	// Run the SQL function to sign up the user
 	var userID sql.NullInt64
 	if err = internalpostgres.PoolService.QueryRow(
@@ -249,6 +276,7 @@ func (s *service) SignUp(r *http.Request, body *SignUpRequest) *int64 {
 		body.FirstName,
 		body.LastName,
 		salt,
+		encryptedKey,
 		body.Username,
 		body.Email,
 		passwordHash,
@@ -273,6 +301,7 @@ func (s *service) SignUp(r *http.Request, body *SignUpRequest) *int64 {
 // LogIn logs in a user
 func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	*int64,
+	*string, *string,
 	*map[gojwttoken.Token]string,
 ) {
 	// Check if the request body is nil
@@ -288,7 +317,7 @@ func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 
 	// Get the user ID and password hash by the username, and the user TOTP ID and secret if it is active
 	var userID, userTOTPID sql.NullInt64
-	var passwordHash, userTOTPSecret sql.NullString
+	var userPasswordHash, userSalt, userEncryptedKey, userTOTPSecret sql.NullString
 	totpIsActive := true
 	if err := internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.PreLogInProc,
@@ -297,9 +326,12 @@ func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 		nil,
 		nil,
 		nil,
+		nil, nil,
 	).Scan(
 		&userID,
-		&passwordHash,
+		&userPasswordHash,
+		&userSalt,
+		&userEncryptedKey,
 		&userTOTPID,
 		&userTOTPSecret,
 	); err != nil {
@@ -312,7 +344,7 @@ func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 	// Validate the password
 	if !s.ValidatePassword(
 		userID.Int64,
-		passwordHash.String,
+		userPasswordHash.String,
 		requestBody.Password,
 		clientIP,
 	) {
@@ -388,7 +420,7 @@ func (s *service) LogIn(r *http.Request, requestBody *LogInRequest) (
 		userRefreshTokenInfo,
 		userAccessTokenInfo,
 	)
-	return &(userID.Int64), userTokens
+	return &(userID.Int64), &(userSalt.String), &(userEncryptedKey.String), userTokens
 }
 
 // RevokeRefreshToken revokes a user refresh token

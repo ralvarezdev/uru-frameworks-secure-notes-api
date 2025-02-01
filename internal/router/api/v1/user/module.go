@@ -1,7 +1,6 @@
 package user
 
 import (
-	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	"net/http"
@@ -11,56 +10,58 @@ var (
 	Service    = &service{}
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
-		Path:       "/user",
+		Pattern:    "/user",
 		Service:    Service,
 		Controller: Controller,
-		Middlewares: &[]func(http.Handler) http.Handler{
-			internalmiddleware.Authenticate(gojwtinterception.AccessToken),
+		BeforeLoadFn: func(m *gonethttp.Module) {
+			m.Middlewares = &[]func(http.Handler) http.Handler{
+				internalmiddleware.AuthenticateAccessToken,
+			}
 		},
 		RegisterRoutesFn: func(m *gonethttp.Module) {
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"PUT /profile",
 				Controller.UpdateProfile,
 				internalmiddleware.Validate(&UpdateProfileRequest{}),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"GET /profile",
 				Controller.GetMyProfile,
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"PUT /username",
 				Controller.ChangeUsername,
 				internalmiddleware.Validate(&ChangeUsernameRequest{}),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"PUT /email",
 				Controller.ChangeEmail,
 				internalmiddleware.Validate(&ChangeEmailRequest{}),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"POST /email/send-verification",
 				Controller.SendEmailVerificationToken,
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"POST /email/verify",
 				Controller.VerifyEmail,
 				internalmiddleware.Validate(&VerifyEmailRequest{}),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"PUT /phone-number",
 				Controller.ChangePhoneNumber,
 				internalmiddleware.Validate(&ChangePhoneNumberRequest{}),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"POST /phone-number/send-verification",
 				Controller.SendPhoneNumberVerificationCode,
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"POST /phone-number/verify",
 				Controller.VerifyPhoneNumber,
 				internalmiddleware.Validate(&VerifyPhoneNumberRequest{}),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"DELETE /",
 				Controller.DeleteUser,
 				internalmiddleware.Validate(&DeleteUserRequest{}),

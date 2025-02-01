@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     salt VARCHAR(255) NOT NULL,
+	encrypted_key TEXT NOT NULL,
     birthdate TIMESTAMP,
     joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP

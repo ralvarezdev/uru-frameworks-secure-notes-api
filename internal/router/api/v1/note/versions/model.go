@@ -11,8 +11,8 @@ type ListNoteVersionsResponse struct {
 
 // SyncNoteVersionsRequest is the request DTO to sync note versions
 type SyncNoteVersionsRequest struct {
-	NoteID               uint   `json:"note_id"`
-	LoadedNoteVersionsID []uint `json:"loaded_note_versions_id"`
+	NoteID               int64   `json:"note_id"`
+	LoadedNoteVersionsID []int64 `json:"loaded_note_versions_id"`
 }
 
 // SyncNoteVersionsResponse is the response DTO to sync note versions

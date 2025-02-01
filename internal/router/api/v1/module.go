@@ -13,7 +13,7 @@ import (
 var (
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
-		Path:       "/v1",
+		Pattern:    "/v1",
 		Controller: Controller,
 		Submodules: gonethttp.NewSubmodules(
 			internalrouterapiv1auth.Module,
@@ -24,7 +24,7 @@ var (
 			internalrouterapiv1user.Module,
 		),
 		RegisterRoutesFn: func(m *gonethttp.Module) {
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"GET /ping",
 				Controller.Ping,
 			)

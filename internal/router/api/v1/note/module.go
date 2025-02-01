@@ -1,7 +1,6 @@
 package note
 
 import (
-	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalrouteapiv1noteversion "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/version"
@@ -13,46 +12,48 @@ var (
 	Service    = &service{}
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
-		Path:       "/note",
+		Pattern:    "/note",
 		Service:    Service,
 		Controller: Controller,
-		Middlewares: &[]func(http.Handler) http.Handler{
-			internalmiddleware.Authenticate(gojwtinterception.AccessToken),
+		BeforeLoadFn: func(m *gonethttp.Module) {
+			m.Middlewares = &[]func(http.Handler) http.Handler{
+				internalmiddleware.AuthenticateAccessToken,
+			}
 		},
 		Submodules: gonethttp.NewSubmodules(
 			internalrouteapiv1noteversion.Module,
 			internalrouteapiv1noteversions.Module,
 		),
 		RegisterRoutesFn: func(m *gonethttp.Module) {
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"POST /",
 				Controller.CreateNote,
 				internalmiddleware.Validate(
 					&CreateNoteRequest{},
 				),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"PUT /",
 				Controller.UpdateNote,
 				internalmiddleware.Validate(
 					&UpdateNoteRequest{},
 				),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"DELETE /",
 				Controller.DeleteNote,
 				internalmiddleware.Validate(
 					&DeleteNoteRequest{},
 				),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"GET /",
 				Controller.GetNote,
 				internalmiddleware.Validate(
 					&GetNoteRequest{},
 				),
 			)
-			m.RegisterRoute(
+			m.RegisterExactRoute(
 				"GET /tags",
 				Controller.ListNoteTags,
 				internalmiddleware.Validate(

@@ -15,8 +15,11 @@ var (
 	// HandleError is the API error handler middleware function
 	HandleError func(next http.Handler) http.Handler
 
-	// Authenticate is the API authenticator middleware function
-	Authenticate func(interception interception.Interception) func(next http.Handler) http.Handler
+	// AuthenticateAccessToken is the API authenticator middleware function
+	AuthenticateAccessToken func(next http.Handler) http.Handler
+
+	// AuthenticateRefreshToken is the API authenticator middleware function
+	AuthenticateRefreshToken func(next http.Handler) http.Handler
 
 	// Validate is the API request validator middleware function
 	Validate func(
@@ -37,7 +40,8 @@ func Load() {
 		internalhandler.Handler,
 		internaljwt.ValidatorFailHandler,
 	)
-	Authenticate = authenticator.Authenticate
+	AuthenticateAccessToken = authenticator.Authenticate(interception.AccessToken)
+	AuthenticateRefreshToken = authenticator.Authenticate(interception.RefreshToken)
 
 	// Create API request validator middleware
 	validator, _ := gonethttpmiddlewarevalidator.NewMiddleware(

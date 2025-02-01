@@ -8,7 +8,7 @@ import (
 var (
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
-		Path:       "/api",
+		Pattern:    "/api",
 		Controller: Controller,
 		Submodules: gonethttp.NewSubmodules(internalrouterapiv1.Module),
 	}

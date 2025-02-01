@@ -2,7 +2,7 @@ package model
 
 var (
 	// SignUpProc is the query to call the sign-up stored procedure
-	SignUpProc = "CALL sign_up($1, $2, $3, $4, $5, $6, $7)"
+	SignUpProc = "CALL sign_up($1, $2, $3, $4, $5, $6, $7, $8)"
 
 	// RevokeTOTPProc is the query to call the revoke TOTP stored procedure
 	RevokeTOTPProc = "CALL revoke_totp($1)"
@@ -23,7 +23,7 @@ var (
 	GetAccessTokenByRefreshTokenIDProc = "CALL get_access_token_by_refresh_token_id($1, $2)"
 
 	// PreLogInProc is the query to call the pre-login stored procedure
-	PreLogInProc = "CALL pre_login($1, $2, $3, $4, $5);"
+	PreLogInProc = "CALL pre_log_in($1, $2, $3, $4, $5, $6, $7);"
 
 	// RegisterFailedLoginAttemptProc is the query to call the register failed login attempt stored procedure
 	RegisterFailedLoginAttemptProc = "CALL register_failed_login_attempt($1, $2, $3, $4)"

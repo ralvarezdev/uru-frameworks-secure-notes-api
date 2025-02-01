@@ -17,8 +17,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/ralvarezdev/go-cache v0.1.2 h1:OkFimEChOm3YXlBe4tOjeDnbqvPumJMNf8Xo4WAQp2c=
 github.com/ralvarezdev/go-cache v0.1.2/go.mod h1:uxdoDOgKOj0tQReWRA7rc1RtiFPhg8tfzVK6nJJ7QKo=
-github.com/ralvarezdev/go-crypto v0.5.5 h1:S3U0p3JPlKKP2uxdgzyiJJr5eSvuIn+YWgytPRgBYgs=
-github.com/ralvarezdev/go-crypto v0.5.5/go.mod h1:Tt4L848z9T1hizZUgOvyoLdXId9Zu8lKx92YfTldemI=
+github.com/ralvarezdev/go-crypto v0.6.0 h1:ZxwpCrIVeCIsiZyXJCh18+l386UHFUg6/yGmBKwyg0E=
+github.com/ralvarezdev/go-crypto v0.6.0/go.mod h1:Tt4L848z9T1hizZUgOvyoLdXId9Zu8lKx92YfTldemI=
 github.com/ralvarezdev/go-databases v0.5.6 h1:7RaLQ9lAJSX5QPArEwZYbz6fEAl+/xq+jwvighOGNsI=
 github.com/ralvarezdev/go-databases v0.5.6/go.mod h1:wNnYvx5JG6ajKLWW1r1s2Qarh5cwx5aiJ7FZqBx85Uk=
 github.com/ralvarezdev/go-flags v0.3.2 h1:l3f62CD5NysLAJH5XqSRGiakU/dn4pTGdX4yaBlAmMw=
@@ -29,8 +29,8 @@ github.com/ralvarezdev/go-loader v0.2.14 h1:x7jcOWKfzZ8bKN3CCq0s0H+zPww4v/zK/YMX
 github.com/ralvarezdev/go-loader v0.2.14/go.mod h1:ECONwy/0yobzhBHzz7Cz/yYvS81fPRgi1j3/nEimQNo=
 github.com/ralvarezdev/go-logger v0.4.6 h1:eZalm0WAdNuhzbaVh5D7gC6AFztdpqE/GQfjH2pipyE=
 github.com/ralvarezdev/go-logger v0.4.6/go.mod h1:zxuMDHqtV2eoJYtmo219lima0ZSk4p/AGj/cCc390P8=
-github.com/ralvarezdev/go-net v0.7.18 h1:v4w1RyYVKZ1K9e/C3FDDg8xa66KDR2G+8PoQSI/SGHI=
-github.com/ralvarezdev/go-net v0.7.18/go.mod h1:YbVBvlb5l0wdzBRLNpdpII64LdM7tfedNK5IxP/eDaA=
+github.com/ralvarezdev/go-net v0.7.29 h1:T2/mE8uVvxL/kvYxIKHZajIEjzJ5SXFoZMQNXbKsFWc=
+github.com/ralvarezdev/go-net v0.7.29/go.mod h1:YbVBvlb5l0wdzBRLNpdpII64LdM7tfedNK5IxP/eDaA=
 github.com/ralvarezdev/go-reflect v0.2.4 h1:PLyzbrdNvUiRzpxSHuI9b7hJEhFes22gjNLZkbjn5AQ=
 github.com/ralvarezdev/go-reflect v0.2.4/go.mod h1:jv3EqQfUixWtNeJd/Rnzf0IDcYZ1z3GApRdAGQHdHZQ=
 github.com/ralvarezdev/go-security-headers v0.1.1 h1:tuZ66YhmOb4JJluhJCwo63i4fvZfmm4mfPUcya9tT/c=

@@ -61,7 +61,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID, userTokens := Service.LogIn(r, body)
+	userID, userSalt, userEncryptedKey, userTokens := Service.LogIn(r, body)
 
 	// Log the successful login
 	internallogger.Api.LogIn(*userID)
@@ -69,7 +69,9 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
-			RefreshTokenResponse{
+			LogInResponse{
+				Salt:         *userSalt,
+				EncryptedKey: *userEncryptedKey,
 				RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
 				AccessToken:  (*userTokens)[gojwttoken.AccessToken],
 			},
