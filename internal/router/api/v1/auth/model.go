@@ -21,20 +21,6 @@ type LogInRequest struct {
 	IsTOTPRecoveryCode *bool   `json:"is_totp_recovery_code,omitempty"`
 }
 
-// LogInResponse is the response DTO to log in
-type LogInResponse struct {
-	RefreshToken string `json:"refresh_token"`
-	AccessToken  string `json:"access_token"`
-	Salt         string `json:"salt"`
-	EncryptedKey string `json:"encrypted_key"`
-}
-
-// RefreshTokenResponse is the response DTO to refresh token
-type RefreshTokenResponse struct {
-	RefreshToken string `json:"refresh_token"`
-	AccessToken  string `json:"access_token"`
-}
-
 // GenerateTOTPUrlResponse is the response DTO to generate TOTP URL
 type GenerateTOTPUrlResponse struct {
 	TOTPUrl string `json:"totp_url"`

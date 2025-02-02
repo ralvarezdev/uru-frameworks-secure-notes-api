@@ -3,29 +3,33 @@ package claims
 import (
 	"github.com/golang-jwt/jwt/v5"
 	gojwtnethttpctx "github.com/ralvarezdev/go-jwt/net/http/context"
-	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	"net/http"
 	"strconv"
 	"time"
 )
 
 type (
-	// Claims is the structure for the JWT claims
-	Claims struct {
-		IsRefreshToken bool `json:"irt"`
+	// AccessTokenClaims is the structure for the JWT claims
+	AccessTokenClaims struct {
+		ParentRefreshTokenID string `json:"prt,omitempty"`
+		jwt.RegisteredClaims
+	}
+
+	// RefreshTokenClaims is the structure for the JWT claims
+	RefreshTokenClaims struct {
 		jwt.RegisteredClaims
 	}
 )
 
-// NewClaims creates a new JWT claims
-func NewClaims(
-	token gojwttoken.Token,
+// NewAccessTokenClaims creates a new JWT access token claims
+func NewAccessTokenClaims(
 	id int64,
 	subject string,
 	issuedAt, expiresAt time.Time,
-) *Claims {
-	return &Claims{
-		IsRefreshToken: token == gojwttoken.RefreshToken,
+	parentRefreshTokenID int64,
+) *AccessTokenClaims {
+	return &AccessTokenClaims{
+		ParentRefreshTokenID: strconv.FormatInt(parentRefreshTokenID, 10),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        strconv.FormatInt(id, 10),
 			Subject:   subject,
@@ -40,17 +44,15 @@ func NewRefreshTokenClaims(
 	id int64,
 	subject string,
 	issuedAt, expiresAt time.Time,
-) *Claims {
-	return NewClaims(gojwttoken.RefreshToken, id, subject, issuedAt, expiresAt)
-}
-
-// NewAccessTokenClaims creates a new JWT access token claims
-func NewAccessTokenClaims(
-	id int64,
-	subject string,
-	issuedAt, expiresAt time.Time,
-) *Claims {
-	return NewClaims(gojwttoken.AccessToken, id, subject, issuedAt, expiresAt)
+) *RefreshTokenClaims {
+	return &RefreshTokenClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        strconv.FormatInt(id, 10),
+			Subject:   subject,
+			IssuedAt:  jwt.NewNumericDate(issuedAt),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+		},
+	}
 }
 
 // ParseInt64 parses the string to int64
@@ -92,4 +94,22 @@ func GetID(r *http.Request) (int64, error) {
 
 	// Parse the ID
 	return ParseInt64(id)
+}
+
+// GetParentRefreshTokenID returns the parent refresh token ID
+func GetParentRefreshTokenID(r *http.Request) (int64, error) {
+	// Get the claims from the request
+	tokenClaims, err := gojwtnethttpctx.GetCtxTokenClaims(r)
+	if err != nil {
+		return 0, err
+	}
+
+	// Get the parent refresh token ID from the token claims
+	parentRefreshTokenID, ok := (*tokenClaims)["prt"].(string)
+	if !ok {
+		return 0, ErrInvalidParentRefreshTokenIDClaim
+	}
+
+	// Parse the parent refresh token ID
+	return ParseInt64(parentRefreshTokenID)
 }

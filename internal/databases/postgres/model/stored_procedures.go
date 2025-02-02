@@ -11,7 +11,7 @@ var (
 	GenerateTokensProc = "CALL generate_tokens($1, $2, $3, $4, $5, $6, $7)"
 
 	// RevokeTokensByIDProc is the query to call the revoke tokens by ID stored procedure
-	RevokeTokensByIDProc = "CALL revoke_tokens_by_id($1, 2$)"
+	RevokeTokensByIDProc = "CALL revoke_tokens_by_id($1, $2)"
 
 	// RefreshTokenProc is the query to call the refresh token stored procedure
 	RefreshTokenProc = "CALL refresh_token($1, $2, $3, $4, $5, $6, $7)"

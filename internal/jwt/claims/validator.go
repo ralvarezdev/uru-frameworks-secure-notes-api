@@ -6,7 +6,6 @@ import (
 	gojwt "github.com/ralvarezdev/go-jwt"
 	gojwtcache "github.com/ralvarezdev/go-jwt/cache"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
-	gojwtinterception "github.com/ralvarezdev/go-jwt/token/interception"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
@@ -106,40 +105,16 @@ func (d *DefaultValidator) IsAccessTokenValid(id string) (bool, error) {
 // ValidateClaims validates the claims
 func (d *DefaultValidator) ValidateClaims(
 	claims *jwt.MapClaims,
-	interception gojwtinterception.Interception,
+	token gojwttoken.Token,
 ) (bool, error) {
-	// Check if is a refresh token
-	isRefreshToken, ok := (*claims)[gojwt.IsRefreshTokenClaim].(bool)
-	if !ok {
-		return false, ErrIsRefreshTokenClaimNotValid
-	}
-
 	// Get the JWT Identifier
 	jti, ok := (*claims)[gojwt.IdClaim].(string)
 	if !ok {
-		return false, ErrIdClaimNotValid
-	}
-
-	// Check if it must be refresh token
-	if !isRefreshToken && interception == gojwtinterception.RefreshToken {
-		return false, ErrMustBeRefreshToken
-	}
-
-	// Check if it must be access token
-	if isRefreshToken && interception == gojwtinterception.AccessToken {
-		return false, ErrMustBeAccessToken
+		return false, ErrInvalidIDClaim
 	}
 
 	// Check if the token validator is not nil
 	if d.tokenValidator != nil {
-		// Check if it is a refresh token
-		var token gojwttoken.Token
-		if isRefreshToken {
-			token = gojwttoken.RefreshToken
-		} else {
-			token = gojwttoken.AccessToken
-		}
-
 		// Check if the token is valid
 		isValid, err := d.tokenValidator.IsValid(token, jti)
 		if err == nil {
@@ -148,7 +123,7 @@ func (d *DefaultValidator) ValidateClaims(
 	}
 
 	// Validate the token
-	if isRefreshToken {
+	if token == gojwttoken.RefreshToken {
 		// Check if the refresh token is valid
 		return d.IsRefreshTokenValid(
 			jti,

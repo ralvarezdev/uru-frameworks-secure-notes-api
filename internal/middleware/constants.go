@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"github.com/ralvarezdev/go-jwt/token/interception"
+	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttpmiddlewareauth "github.com/ralvarezdev/go-net/http/middleware/auth"
 	gonethttpmiddlewareerrorhandler "github.com/ralvarezdev/go-net/http/middleware/error_handler"
 	gonethttpmiddlewarevalidator "github.com/ralvarezdev/go-net/http/middleware/validator"
+	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
@@ -38,10 +39,15 @@ func Load() {
 	authenticator, _ := gonethttpmiddlewareauth.NewMiddleware(
 		internaljwt.Validator,
 		internalhandler.Handler,
-		internaljwt.ValidatorFailHandler,
 	)
-	AuthenticateAccessToken = authenticator.Authenticate(interception.AccessToken)
-	AuthenticateRefreshToken = authenticator.Authenticate(interception.RefreshToken)
+	AuthenticateAccessToken = authenticator.AuthenticateFromCookie(
+		gojwttoken.AccessToken,
+		internalcookie.AccessToken.Name,
+	)
+	AuthenticateRefreshToken = authenticator.AuthenticateFromCookie(
+		gojwttoken.RefreshToken,
+		internalcookie.RefreshToken.Name,
+	)
 
 	// Create API request validator middleware
 	validator, _ := gonethttpmiddlewarevalidator.NewMiddleware(

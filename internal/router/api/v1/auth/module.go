@@ -50,9 +50,12 @@ var (
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
-				"GET /refresh-token/{token_id}",
+				"GET /refresh-token",
 				Controller.GetRefreshToken,
 				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Validate(
+					&GetRefreshTokenRequest{},
+				),
 			)
 			m.RegisterExactRoute(
 				"GET /refresh-tokens",
@@ -60,9 +63,12 @@ var (
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
-				"DELETE /refresh-token/{token_id}",
+				"DELETE /refresh-token",
 				Controller.RevokeRefreshToken,
 				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Validate(
+					&RevokeRefreshTokenRequest{},
+				),
 			)
 			m.RegisterExactRoute(
 				"DELETE /refresh-tokens",

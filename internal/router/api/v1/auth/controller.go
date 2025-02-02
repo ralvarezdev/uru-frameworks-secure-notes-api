@@ -1,7 +1,6 @@
 package auth
 
 import (
-	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
@@ -31,7 +30,7 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*SignUpRequest)
 
 	// Sign up the user
-	userID := Service.SignUp(r, body)
+	userID := Service.SignUp(body)
 
 	// Log the user sign up
 	internallogger.Api.SignUp(*userID)
@@ -61,7 +60,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID, userSalt, userEncryptedKey, userTokens := Service.LogIn(r, body)
+	userID := Service.LogIn(w, r, body)
 
 	// Log the successful login
 	internallogger.Api.LogIn(*userID)
@@ -69,12 +68,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
-			LogInResponse{
-				Salt:         *userSalt,
-				EncryptedKey: *userEncryptedKey,
-				RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
-				AccessToken:  (*userTokens)[gojwttoken.AccessToken],
-			},
+			nil,
 			http.StatusCreated,
 		),
 	)
@@ -119,7 +113,7 @@ func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/refresh-token/{token_id} [get]
+// @Router /api/v1/auth/refresh-token [get]
 func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
 	body, _ := gonethttpctx.GetCtxBody(r).(*GetRefreshTokenRequest)
@@ -156,7 +150,7 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/refresh-token/{token_id} [delete]
+// @Router /api/v1/auth/refresh-token [delete]
 func (c *controller) RevokeRefreshToken(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -165,7 +159,7 @@ func (c *controller) RevokeRefreshToken(
 	body, _ := gonethttpctx.GetCtxBody(r).(*RevokeRefreshTokenRequest)
 
 	// Revoke the user's refresh token
-	Service.RevokeRefreshToken(r, body.RefreshTokenID)
+	Service.RevokeRefreshToken(w, r, body.RefreshTokenID)
 
 	// Log the successful token revocation
 	internallogger.Api.RevokeRefreshToken(body.RefreshTokenID)
@@ -191,7 +185,7 @@ func (c *controller) RevokeRefreshToken(
 // @Router /api/v1/auth/logout [post]
 func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 	// Log out the user
-	userID := Service.LogOut(r)
+	userID := Service.LogOut(w, r)
 
 	// Log the successful logout
 	internallogger.Api.LogOut(*userID)
@@ -220,7 +214,7 @@ func (c *controller) RevokeRefreshTokens(
 	r *http.Request,
 ) {
 	// Revoke the user's refresh tokens
-	userID := Service.RevokeRefreshTokens(r)
+	userID := Service.RevokeRefreshTokens(w, r)
 
 	// Log the successful token revocation
 	internallogger.Api.RevokeRefreshTokens(*userID)
@@ -246,7 +240,7 @@ func (c *controller) RevokeRefreshTokens(
 // @Router /api/v1/auth/refresh-token [post]
 func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Refresh the token
-	userID, userTokens := Service.RefreshToken(r)
+	userID := Service.RefreshToken(w, r)
 
 	// Log the successful token refresh
 	internallogger.Api.RefreshToken(*userID)
@@ -254,10 +248,7 @@ func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
-			RefreshTokenResponse{
-				RefreshToken: (*userTokens)[gojwttoken.RefreshToken],
-				AccessToken:  (*userTokens)[gojwttoken.AccessToken],
-			},
+			nil,
 			http.StatusCreated,
 		),
 	)

@@ -5,9 +5,7 @@ import (
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttpjwtvalidator "github.com/ralvarezdev/go-net/http/jwt/validator"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
-	internaljson "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/json"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
@@ -40,9 +38,6 @@ var (
 
 	// Issuer is the JWT issuer
 	Issuer gojwtissuer.Issuer
-
-	// ValidatorFailHandler is the JWT validator fail handler
-	ValidatorFailHandler gonethttpjwtvalidator.FailHandler
 )
 
 // Load loads the JWT constants
@@ -98,8 +93,4 @@ func Load() {
 		panic(err)
 	}
 	Issuer = issuer
-
-	// Create the JWT validator handler
-	validatorFailHandler, _ := gonethttpjwtvalidator.NewDefaultFailHandler(internaljson.Encoder)
-	ValidatorFailHandler = validatorFailHandler
 }
