@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	gocryptoaes "github.com/ralvarezdev/go-crypto/aes"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
@@ -18,16 +19,19 @@ import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
+	internaltoken "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/token"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
+	internalmailersend "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/mailersend"
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	"io"
 	"net/http"
@@ -299,6 +303,11 @@ func (s *service) ClearCookies(w http.ResponseWriter) {
 	}
 }
 
+// GenerateEmailVerificationToken generates an email verification token
+func (s *service) GenerateEmailVerificationToken() (uuid.UUID, time.Time) {
+	return uuid.New(), time.Now().UTC().Add(internaltoken.EmailVerificationTokenDuration)
+}
+
 // SignUp signs up a user
 func (s *service) SignUp(body *SignUpRequest) *int64 {
 	if body == nil {
@@ -341,6 +350,9 @@ func (s *service) SignUp(body *SignUpRequest) *int64 {
 		panic(err)
 	}
 
+	// Generate the email verification token and its expiration time
+	emailVerificationToken, emailVerificationTokenExpiresAt := s.GenerateEmailVerificationToken()
+
 	// Run the SQL function to sign up the user
 	var userID sql.NullInt64
 	if err = internalpostgres.PoolService.QueryRow(
@@ -352,6 +364,8 @@ func (s *service) SignUp(body *SignUpRequest) *int64 {
 		body.Username,
 		body.Email,
 		passwordHash,
+		emailVerificationToken,
+		emailVerificationTokenExpiresAt,
 		nil,
 	).Scan(
 		&userID,
@@ -369,6 +383,11 @@ func (s *service) SignUp(body *SignUpRequest) *int64 {
 	}
 
 	// Send email verification
+	go internalmailersend.SendVerificationEmail(
+		body.FirstName+" "+body.LastName,
+		body.Email,
+		internal.VerifyEmailURL+"/"+emailVerificationToken.String(),
+	)
 
 	return &(userID.Int64)
 }

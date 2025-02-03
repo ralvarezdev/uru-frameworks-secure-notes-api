@@ -34,34 +34,6 @@ var (
 				internalmiddleware.Validate(&ChangeUsernameRequest{}),
 			)
 			m.RegisterExactRoute(
-				"PUT /email",
-				Controller.ChangeEmail,
-				internalmiddleware.Validate(&ChangeEmailRequest{}),
-			)
-			m.RegisterExactRoute(
-				"POST /email/send-verification",
-				Controller.SendEmailVerificationToken,
-			)
-			m.RegisterExactRoute(
-				"POST /email/verify",
-				Controller.VerifyEmail,
-				internalmiddleware.Validate(&VerifyEmailRequest{}),
-			)
-			m.RegisterExactRoute(
-				"PUT /phone-number",
-				Controller.ChangePhoneNumber,
-				internalmiddleware.Validate(&ChangePhoneNumberRequest{}),
-			)
-			m.RegisterExactRoute(
-				"POST /phone-number/send-verification",
-				Controller.SendPhoneNumberVerificationCode,
-			)
-			m.RegisterExactRoute(
-				"POST /phone-number/verify",
-				Controller.VerifyPhoneNumber,
-				internalmiddleware.Validate(&VerifyPhoneNumberRequest{}),
-			)
-			m.RegisterExactRoute(
 				"DELETE /",
 				Controller.DeleteUser,
 				internalmiddleware.Validate(&DeleteUserRequest{}),

@@ -11,10 +11,14 @@ CREATE OR REPLACE PROCEDURE sign_up(
 	IN in_username VARCHAR,
 	IN in_email VARCHAR,
 	IN in_password_hash VARCHAR,
+	IN in_email_verification_token VARCHAR,
+	IN in_email_verification_expires_at TIMESTAMP,
 	OUT out_user_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+	out_user_email_id BIGINT;
 BEGIN
 	-- Insert into users table
 	INSERT INTO users (
@@ -50,7 +54,9 @@ BEGIN
 	VALUES (
 		out_user_id, 
 		in_email
-	);
+	) 
+	RETURNING
+		id INTO out_user_email_id;
 
 	-- Insert into user_password_hashes table
 	INSERT INTO user_password_hashes (
@@ -61,6 +67,18 @@ BEGIN
 		out_user_id, 
 		in_password_hash
 	);
+
+	-- Insert into user_email_verifications table
+	INSERT INTO user_email_verifications (
+		user_email_id,
+		verification_token,
+		expires_at
+	)
+	VALUES (
+		out_user_email_id,
+		in_email_verification_token,
+		in_email_verification_expires_at
+	);		
 EXCEPTION 
 	WHEN OTHERS THEN 
 		RAISE;

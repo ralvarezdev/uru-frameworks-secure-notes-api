@@ -2,7 +2,7 @@ package model
 
 var (
 	// SignUpProc is the query to call the sign-up stored procedure
-	SignUpProc = "CALL sign_up($1, $2, $3, $4, $5, $6, $7, $8)"
+	SignUpProc = "CALL sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 
 	// RevokeTOTPProc is the query to call the revoke TOTP stored procedure
 	RevokeTOTPProc = "CALL revoke_totp($1)"

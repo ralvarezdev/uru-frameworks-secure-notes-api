@@ -1,9 +1,5 @@
 package listener
 
-import (
-	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-)
-
 const (
 	// EnvPort is the key of the default port for the server
 	EnvPort = "PORT"
@@ -16,8 +12,8 @@ var (
 
 // Load loads the listener constants
 func Load() {
-	// Get the default port for the server
-	if err := internalloader.Loader.LoadVariable(
+	// Load the port
+	if err := Loader.LoadVariable(
 		EnvPort,
 		&Port,
 	); err != nil {

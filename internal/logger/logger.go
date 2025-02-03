@@ -140,3 +140,18 @@ func (l *Logger) RevokeTOTP(id int64) {
 		fmt.Sprintf("user id: %d", id),
 	)
 }
+
+// SentVerificationEmail logs that the verification email was sent successfully
+func (l *Logger) SentVerificationEmail(email string) {
+	l.logger.Info(
+		"sent verification email to: " + email,
+	)
+}
+
+// FailedToSendVerificationEmail logs the failed to send verification email event
+func (l *Logger) FailedToSendVerificationEmail(email string, err error) {
+	l.logger.Error(
+		"failed to send verification email to: "+email,
+		err,
+	)
+}

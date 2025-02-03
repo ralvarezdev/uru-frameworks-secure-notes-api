@@ -5,16 +5,19 @@ import (
 	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
 	internaltotp "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/otp/totp"
 	internalpbkdf2 "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/pbkdf2"
+	internaltoken "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/token"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internallistener "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/listener"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
+	internalmailersend "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/mailersend"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalrouter "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
@@ -33,16 +36,19 @@ func init() {
 
 	// Call the load functions
 	internalloader.Load()
+	internal.Load()
 	internalaes.Load()
 	internalbcrypt.Load()
 	internaltotp.Load()
 	internalpbkdf2.Load()
+	internaltoken.Load()
 	internalpostgres.Load(mode)
 	internaljwtcache.Load(mode)
 	internaljwt.Load()
 	internallistener.Load()
 	internalvalidator.Load(mode)
 	internalmiddleware.Load()
+	internalmailersend.Load()
 }
 
 // @Title           Secure Notes REST API

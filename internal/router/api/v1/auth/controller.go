@@ -17,14 +17,14 @@ type (
 // SignUp signs up a new user
 // @Summary Sign up a new user
 // @Description Creates a new user account with the provided details
-// @Tags api v1 user
+// @Tags api v1 auth
 // @Accept json
 // @Produce json
 // @Param request body SignUpRequest true "Sign Up Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/user/signup [post]
+// @Router /api/v1/auth/signup [post]
 func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
 	body, _ := gonethttpctx.GetCtxBody(r).(*SignUpRequest)
@@ -393,6 +393,132 @@ func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/password/reset [post]
 func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// ChangeEmail changes the email of the authenticated user
+// @Summary Changes the email of the authenticated user
+// @Description Changes the email of the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body ChangeEmailRequest true "Change Email Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/email [put]
+func (c *controller) ChangeEmail(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// SendEmailVerificationToken sends an email verification token to the authenticated user
+// @Summary Sends an email verification token to the authenticated user
+// @Description Sends an email verification token to the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/email/send-verification [post]
+func (c *controller) SendEmailVerificationToken(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// VerifyEmail verifies the email of the authenticated user
+// @Summary Verifies the email of the authenticated user
+// @Description Verifies the email of the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param token_id path string true "Token ID"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/email/verify/{token_id} [post]
+func (c *controller) VerifyEmail(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Get the token ID from the URL
+	tokenID := gonethttp
+
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// ChangePhoneNumber changes the phone number of the authenticated user
+// @Summary Changes the phone number of the authenticated user
+// @Description Changes the phone number of the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body ChangePhoneNumberRequest true "Change Phone Number Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/phone-number [put]
+func (c *controller) ChangePhoneNumber(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// SendPhoneNumberVerificationCode sends a phone number verification code to the authenticated user
+// @Summary Sends a phone number verification code to the authenticated user
+// @Description Sends a phone number verification code to the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/phone-number/send-verification [post]
+func (c *controller) SendPhoneNumberVerificationCode(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// VerifyPhoneNumber verifies the phone number of the authenticated user
+// @Summary Verifies the phone number of the authenticated user
+// @Description Verifies the phone number of the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body VerifyPhoneNumberRequest true "Verify Phone Number Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/phone-number/verify [post]
+func (c *controller) VerifyPhoneNumber(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
 	)

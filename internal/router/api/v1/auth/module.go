@@ -115,6 +115,33 @@ var (
 					&ResetPasswordRequest{},
 				),
 			)
+			m.RegisterExactRoute(
+				"PUT /email",
+				Controller.ChangeEmail,
+				internalmiddleware.Validate(&ChangeEmailRequest{}),
+			)
+			m.RegisterExactRoute(
+				"POST /email/send-verification",
+				Controller.SendEmailVerificationToken,
+			)
+			m.RegisterExactRoute(
+				"POST /email/verify/{token_id}",
+				Controller.VerifyEmail,
+			)
+			m.RegisterExactRoute(
+				"PUT /phone-number",
+				Controller.ChangePhoneNumber,
+				internalmiddleware.Validate(&ChangePhoneNumberRequest{}),
+			)
+			m.RegisterExactRoute(
+				"POST /phone-number/send-verification",
+				Controller.SendPhoneNumberVerificationCode,
+			)
+			m.RegisterExactRoute(
+				"POST /phone-number/verify",
+				Controller.VerifyPhoneNumber,
+				internalmiddleware.Validate(&VerifyPhoneNumberRequest{}),
+			)
 		},
 	}
 )

@@ -29,26 +29,6 @@ type ChangeUsernameRequest struct {
 	Username string `json:"username"`
 }
 
-// ChangeEmailRequest is the request DTO to change email
-type ChangeEmailRequest struct {
-	Email string `json:"email"`
-}
-
-// VerifyEmailRequest is the request DTO to verify email
-type VerifyEmailRequest struct {
-	Token string `json:"token"`
-}
-
-// ChangePhoneNumberRequest is the request DTO to change phone number
-type ChangePhoneNumberRequest struct {
-	PhoneNumber string `json:"phone_number"`
-}
-
-// VerifyPhoneNumberRequest is the request DTO to verify phone number
-type VerifyPhoneNumberRequest struct {
-	Token string `json:"token"`
-}
-
 // DeleteUserRequest is the request DTO to delete a user
 type DeleteUserRequest struct {
 	Password string `json:"password"`
