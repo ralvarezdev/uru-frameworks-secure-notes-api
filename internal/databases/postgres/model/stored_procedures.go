@@ -48,4 +48,22 @@ var (
 
 	// VerifyTOTPProc is the query to call verify TOTP stored procedure
 	VerifyTOTPProc = "CALL verify_totp($1)"
+
+	// SendEmailVerificationTokenProc is the query to call the send email verification token stored procedure
+	SendEmailVerificationTokenProc = "CALL send_email_verification_token($1, $2, $3)"
+
+	// GetUserEmailIDProc is the query to call the get user email ID stored procedure
+	GetUserEmailIDProc = "CALL get_user_email_id($1, $2)"
+
+	// VerifyEmailProc is the query to call the verify email stored procedure
+	VerifyEmailProc = "CALL verify_email($1, $2)"
+
+	// IsUserEmailVerifiedProc is the query to call the is user email verified stored procedure
+	IsUserEmailVerifiedProc = "CALL is_user_email_verified($1, $2, $3, $4, $5)"
+
+	// RevokeEmailProc is the query to call the revoke email stored procedure
+	RevokeEmailProc = "CALL revoke_email($1)"
+
+	// ChangeEmailProc is the query to call the change email stored procedure
+	ChangeEmailProc = "CALL change_email($1, $2, $3, $4, $5, $6)"
 )

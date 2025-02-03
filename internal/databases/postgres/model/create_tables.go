@@ -58,18 +58,6 @@ CREATE TABLE IF NOT EXISTS user_email_verifications (
 );
 `
 
-	// CreateUserPhoneNumbers is the SQL query to create the user_phone_numbers table
-	CreateUserPhoneNumbers = `
-CREATE TABLE IF NOT EXISTS user_phone_numbers (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    phone_number VARCHAR(20) UNIQUE NOT NULL,
-    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-`
-
 	// CreateUserPhoneNumberVerifications is the SQL query to create the user_phone_number_verifications table
 	CreateUserPhoneNumberVerifications = `
 CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
@@ -131,7 +119,7 @@ CREATE TABLE IF NOT EXISTS user_access_tokens (
 CREATE TABLE IF NOT EXISTS user_totps (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    secret VARCHAR(255) UNIQUE NOT NULL,
+    secret VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     verified_at TIMESTAMP,
     revoked_at TIMESTAMP,
@@ -144,20 +132,10 @@ CREATE TABLE IF NOT EXISTS user_totps (
 CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
     id BIGSERIAL PRIMARY KEY,
     user_totp_id BIGINT NOT NULL,
-    code VARCHAR(255) UNIQUE NOT NULL,
+    code VARCHAR(255) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_totp_id) REFERENCES user_totps(id) ON DELETE CASCADE
-);
-`
-
-	// CreateTags is the SQL query to create the tags table
-	CreateTags = `
-CREATE TABLE IF NOT EXISTS tags (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
 
@@ -227,5 +205,33 @@ CREATE TABLE IF NOT EXISTS user_emails (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (email) WHERE revoked_at IS NULL;
 `, UserEmailsUniqueEmail,
+	)
+
+	// CreateUserPhoneNumbers is the SQL query to create the user_phone_numbers table
+	CreateUserPhoneNumbers = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_phone_numbers (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_phone_numbers (phone_number) WHERE revoked_at IS NULL;
+`, UserPhoneNumbersUniquePhoneNumber,
+	)
+
+	// CreateTags is the SQL query to create the tags table
+	CreateTags = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS tags (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON tags (user_id, name);
+`, UserTagsUniqueName,
 	)
 )

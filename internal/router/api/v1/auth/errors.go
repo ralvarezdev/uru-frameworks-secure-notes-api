@@ -89,4 +89,22 @@ var (
 		http.StatusNotFound,
 		nil,
 	)
+	ErrVerifyEmailTokenNotFound = gonethttpresponse.NewFieldError(
+		"token_id",
+		"email verification token not found",
+		http.StatusNotFound,
+		nil,
+	)
+	ErrSendEmailVerificationTokenAlreadyVerified = gonethttpresponse.NewFieldError(
+		"email",
+		"email is already verified",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrChangeEmailAlreadyRegistered = gonethttpresponse.NewFieldError(
+		"email",
+		"email is already registered",
+		http.StatusBadRequest,
+		nil,
+	)
 )

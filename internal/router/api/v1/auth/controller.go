@@ -4,6 +4,7 @@ import (
 	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
+	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
@@ -33,7 +34,7 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	userID := Service.SignUp(body)
 
 	// Log the user sign up
-	internallogger.Api.SignUp(*userID)
+	internallogger.Api.SignUp(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -63,7 +64,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	userID := Service.LogIn(w, r, body)
 
 	// Log the successful login
-	internallogger.Api.LogIn(*userID)
+	internallogger.Api.LogIn(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -89,7 +90,7 @@ func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	userID, userRefreshTokens := Service.ListRefreshTokens(r)
 
 	// Log the successful fetch of the user's refresh tokens
-	internallogger.Api.ListRefreshTokens(*userID)
+	internallogger.Api.ListRefreshTokens(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -125,7 +126,7 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	)
 
 	// Log the successful fetch of the user's refresh token
-	internallogger.Api.GetRefreshToken(*userID, body.RefreshTokenID)
+	internallogger.Api.GetRefreshToken(userID, body.RefreshTokenID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -188,7 +189,7 @@ func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 	userID := Service.LogOut(w, r)
 
 	// Log the successful logout
-	internallogger.Api.LogOut(*userID)
+	internallogger.Api.LogOut(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -217,7 +218,7 @@ func (c *controller) RevokeRefreshTokens(
 	userID := Service.RevokeRefreshTokens(w, r)
 
 	// Log the successful token revocation
-	internallogger.Api.RevokeRefreshTokens(*userID)
+	internallogger.Api.RevokeRefreshTokens(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -243,7 +244,7 @@ func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	userID := Service.RefreshToken(w, r)
 
 	// Log the successful token refresh
-	internallogger.Api.RefreshToken(*userID)
+	internallogger.Api.RefreshToken(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -272,7 +273,7 @@ func (c *controller) GenerateTOTPUrl(
 	userID, totpUrl := Service.GenerateTOTPUrl(r)
 
 	// Log the successful TOTP URL generation
-	internallogger.Api.GenerateTOTPUrl(*userID)
+	internallogger.Api.GenerateTOTPUrl(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -305,7 +306,7 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 	userID, recoveryCodes := Service.VerifyTOTP(r, body)
 
 	// Log the successful TOTP verification
-	internallogger.Api.VerifyTOTP(*userID)
+	internallogger.Api.VerifyTOTP(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -333,7 +334,107 @@ func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
 	userID := Service.RevokeTOTP(r)
 
 	// Log the successful TOTP revocation
-	internallogger.Api.RevokeTOTP(*userID)
+	internallogger.Api.RevokeTOTP(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
+	)
+}
+
+// ChangeEmail changes the email of the authenticated user
+// @Summary Changes the email of the authenticated user
+// @Description Changes the email of the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param request body ChangeEmailRequest true "Change Email Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/email [put]
+func (c *controller) ChangeEmail(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Send the email verification token
+	userID := Service.SendEmailVerificationToken(r)
+
+	// Log the successful email verification token request
+	internallogger.Api.SendEmailVerificationToken(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
+	)
+}
+
+// SendEmailVerificationToken sends an email verification token to the authenticated user
+// @Summary Sends an email verification token to the authenticated user
+// @Description Sends an email verification token to the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/email/send-verification [post]
+func (c *controller) SendEmailVerificationToken(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Send the email verification token
+	userID := Service.SendEmailVerificationToken(r)
+
+	// Log the successful email verification token request
+	internallogger.Api.SendEmailVerificationToken(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
+	)
+}
+
+// VerifyEmail verifies the email of the authenticated user
+// @Summary Verifies the email of the authenticated user
+// @Description Verifies the email of the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Param token_id path string true "Token ID"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/email/verify/{token_id} [post]
+func (c *controller) VerifyEmail(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Get the token ID from the URL
+	var tokenID string
+	if !internalhandler.Handler.ParseWildcard(
+		w, r, "token_id", &tokenID,
+		gostringsconvert.ToString,
+	) {
+		return
+	}
+
+	// Verify the email
+	userID := Service.VerifyEmail(tokenID)
+
+	// Log the successful email verification
+	internallogger.Api.VerifyEmail(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -393,70 +494,6 @@ func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/password/reset [post]
 func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
-
-// ChangeEmail changes the email of the authenticated user
-// @Summary Changes the email of the authenticated user
-// @Description Changes the email of the authenticated user
-// @Tags api v1 auth
-// @Accept json
-// @Produce json
-// @Param request body ChangeEmailRequest true "Change Email Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/email [put]
-func (c *controller) ChangeEmail(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
-
-// SendEmailVerificationToken sends an email verification token to the authenticated user
-// @Summary Sends an email verification token to the authenticated user
-// @Description Sends an email verification token to the authenticated user
-// @Tags api v1 auth
-// @Accept json
-// @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/email/send-verification [post]
-func (c *controller) SendEmailVerificationToken(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
-
-// VerifyEmail verifies the email of the authenticated user
-// @Summary Verifies the email of the authenticated user
-// @Description Verifies the email of the authenticated user
-// @Tags api v1 auth
-// @Accept json
-// @Produce json
-// @Param token_id path string true "Token ID"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/email/verify/{token_id} [post]
-func (c *controller) VerifyEmail(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	// Get the token ID from the URL
-	tokenID := gonethttp
-
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
 	)

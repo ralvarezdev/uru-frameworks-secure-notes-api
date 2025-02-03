@@ -141,6 +141,14 @@ func (l *Logger) RevokeTOTP(id int64) {
 	)
 }
 
+// SendEmailVerificationToken logs the send email verification token event
+func (l *Logger) SendEmailVerificationToken(id int64) {
+	l.logger.Info(
+		"user requested email verification token",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
 // SentVerificationEmail logs that the verification email was sent successfully
 func (l *Logger) SentVerificationEmail(email string) {
 	l.logger.Info(
@@ -153,5 +161,43 @@ func (l *Logger) FailedToSendVerificationEmail(email string, err error) {
 	l.logger.Error(
 		"failed to send verification email to: "+email,
 		err,
+	)
+}
+
+// VerifyEmail logs the verify email event
+func (l *Logger) VerifyEmail(id int64) {
+	l.logger.Info(
+		"user verified email",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// FailedToSendResetPasswordEmail logs the failed to send reset password email event
+func (l *Logger) FailedToSendResetPasswordEmail(email string, err error) {
+	l.logger.Error(
+		"failed to send reset password email to: "+email,
+		err,
+	)
+}
+
+// SentResetPasswordEmail logs that the reset password email was sent successfully
+func (l *Logger) SentResetPasswordEmail(email string) {
+	l.logger.Info(
+		"sent reset password email to: " + email,
+	)
+}
+
+// FailedToSendWelcomeEmail logs the failed to send welcome email event
+func (l *Logger) FailedToSendWelcomeEmail(email string, err error) {
+	l.logger.Error(
+		"failed to send welcome email to: "+email,
+		err,
+	)
+}
+
+// SentWelcomeEmail logs that the welcome email was sent successfully
+func (l *Logger) SentWelcomeEmail(email string) {
+	l.logger.Info(
+		"sent welcome email to: " + email,
 	)
 }

@@ -63,6 +63,8 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateGetUserRefreshTokenByIDFn,
 		internalpostgresmodel.CreateListUserRefreshTokensFn,
 		internalpostgresmodel.CreateListUserTokensFn,
+		internalpostgresmodel.CreateGetUserEmailIDProc,
+		internalpostgresmodel.CreateSendEmailVerificationTokenProc,
 		internalpostgresmodel.CreateSignUpProc,
 		internalpostgresmodel.CreateRevokeTOTPProc,
 		internalpostgresmodel.CreateGenerateTokensProc,
@@ -79,5 +81,9 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateIsAccessTokenValidProc,
 		internalpostgresmodel.CreateRevokeTOTPRecoveryCodeProc,
 		internalpostgresmodel.CreateVerifyTOTPProc,
+		internalpostgresmodel.CreateVerifyEmailProc,
+		internalpostgresmodel.CreateIsUserEmailVerifiedProc,
+		internalpostgresmodel.CreateRevokeUserEmailProc,
+		internalpostgresmodel.CreateChangeEmailProc,
 	)
 }

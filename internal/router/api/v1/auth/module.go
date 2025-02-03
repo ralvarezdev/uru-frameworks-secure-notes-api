@@ -104,6 +104,7 @@ var (
 			m.RegisterExactRoute(
 				"POST /password/forgot",
 				Controller.ForgotPassword,
+				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(
 					&ForgotPasswordRequest{},
 				),
@@ -111,6 +112,7 @@ var (
 			m.RegisterExactRoute(
 				"POST /password/reset",
 				Controller.ResetPassword,
+				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(
 					&ResetPasswordRequest{},
 				),
@@ -118,11 +120,13 @@ var (
 			m.RegisterExactRoute(
 				"PUT /email",
 				Controller.ChangeEmail,
+				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(&ChangeEmailRequest{}),
 			)
 			m.RegisterExactRoute(
 				"POST /email/send-verification",
 				Controller.SendEmailVerificationToken,
+				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
 				"POST /email/verify/{token_id}",
@@ -131,15 +135,18 @@ var (
 			m.RegisterExactRoute(
 				"PUT /phone-number",
 				Controller.ChangePhoneNumber,
+				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(&ChangePhoneNumberRequest{}),
 			)
 			m.RegisterExactRoute(
 				"POST /phone-number/send-verification",
 				Controller.SendPhoneNumberVerificationCode,
+				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
 				"POST /phone-number/verify",
 				Controller.VerifyPhoneNumber,
+				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(&VerifyPhoneNumberRequest{}),
 			)
 		},

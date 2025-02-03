@@ -19,7 +19,6 @@ import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
-	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -309,7 +308,7 @@ func (s *service) GenerateEmailVerificationToken() (uuid.UUID, time.Time) {
 }
 
 // SignUp signs up a user
-func (s *service) SignUp(body *SignUpRequest) *int64 {
+func (s *service) SignUp(body *SignUpRequest) int64 {
 	if body == nil {
 		panic(gonethttp.ErrNilRequestBody)
 	}
@@ -353,7 +352,7 @@ func (s *service) SignUp(body *SignUpRequest) *int64 {
 	// Generate the email verification token and its expiration time
 	emailVerificationToken, emailVerificationTokenExpiresAt := s.GenerateEmailVerificationToken()
 
-	// Run the SQL function to sign up the user
+	// Run the SQL stored procedure to sign up the user
 	var userID sql.NullInt64
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.SignUpProc,
@@ -386,10 +385,10 @@ func (s *service) SignUp(body *SignUpRequest) *int64 {
 	go internalmailersend.SendVerificationEmail(
 		body.FirstName+" "+body.LastName,
 		body.Email,
-		internal.VerifyEmailURL+"/"+emailVerificationToken.String(),
+		emailVerificationToken,
 	)
 
-	return &(userID.Int64)
+	return userID.Int64
 }
 
 // LogIn logs in a user
@@ -397,7 +396,7 @@ func (s *service) LogIn(
 	w http.ResponseWriter,
 	r *http.Request,
 	body *LogInRequest,
-) *int64 {
+) int64 {
 	// Check if the request body is nil
 	if body == nil {
 		panic(gonethttp.ErrNilRequestBody)
@@ -529,7 +528,7 @@ func (s *service) LogIn(
 		userEncryptedKey.String,
 		userRefreshTokenInfo.ExpiresAt,
 	)
-	return &(userID.Int64)
+	return userID.Int64
 }
 
 // RevokeRefreshToken revokes a user refresh token
@@ -589,7 +588,7 @@ func (s *service) RevokeRefreshToken(
 }
 
 // LogOut logs out a user
-func (s *service) LogOut(w http.ResponseWriter, r *http.Request) *int64 {
+func (s *service) LogOut(w http.ResponseWriter, r *http.Request) int64 {
 	// Get the user refresh token ID from the request
 	userRefreshTokenID, err := internaljwtclaims.GetID(r)
 	if err != nil {
@@ -603,14 +602,14 @@ func (s *service) LogOut(w http.ResponseWriter, r *http.Request) *int64 {
 		userRefreshTokenID,
 	)
 
-	return &userRefreshTokenID
+	return userRefreshTokenID
 }
 
 // RevokeRefreshTokens revokes all user refresh tokens
 func (s *service) RevokeRefreshTokens(
 	w http.ResponseWriter,
 	r *http.Request,
-) *int64 {
+) int64 {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -657,11 +656,11 @@ func (s *service) RevokeRefreshTokens(
 	// Clear cookies
 	s.ClearCookies(w)
 
-	return &userID
+	return userID
 }
 
 // RefreshToken refreshes a user token
-func (s *service) RefreshToken(w http.ResponseWriter, r *http.Request) *int64 {
+func (s *service) RefreshToken(w http.ResponseWriter, r *http.Request) int64 {
 	// Get the user ID and the user refresh token ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -719,11 +718,11 @@ func (s *service) RefreshToken(w http.ResponseWriter, r *http.Request) *int64 {
 			userAccessTokenInfo.ExpiresAt,
 		)
 	}
-	return &userID
+	return userID
 }
 
 // GenerateTOTPUrl generates a TOTP URL
-func (s *service) GenerateTOTPUrl(r *http.Request) (*int64, *string) {
+func (s *service) GenerateTOTPUrl(r *http.Request) (int64, *string) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -767,14 +766,14 @@ func (s *service) GenerateTOTPUrl(r *http.Request) (*int64, *string) {
 	if err != nil {
 		panic(err)
 	}
-	return &userID, &totpUrl
+	return userID, &totpUrl
 }
 
 // VerifyTOTP verifies a TOTP secret
 func (s *service) VerifyTOTP(
 	r *http.Request,
 	body *VerifyTOTPRequest,
-) (*int64, *[]string) {
+) (int64, *[]string) {
 	// Check if the request body is nil
 	if body == nil {
 		panic(gonethttp.ErrNilRequestBody)
@@ -871,18 +870,18 @@ func (s *service) VerifyTOTP(
 		panic(err)
 	}
 
-	return &userID, totpRecoveryCodes
+	return userID, totpRecoveryCodes
 }
 
 // RevokeTOTP revokes a TOTP secret
-func (s *service) RevokeTOTP(r *http.Request) *int64 {
+func (s *service) RevokeTOTP(r *http.Request) int64 {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
 		panic(err)
 	}
 
-	// Run the SQL function to get the user TOTP ID by the user ID
+	// Run the SQL stored procedure to get the user TOTP ID by the user ID
 	_, err = internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.RevokeTOTPProc,
 		userID,
@@ -890,12 +889,12 @@ func (s *service) RevokeTOTP(r *http.Request) *int64 {
 	if err != nil {
 		panic(err)
 	}
-	return &userID
+	return userID
 }
 
 // ListRefreshTokens lists all user refresh tokens
 func (s *service) ListRefreshTokens(r *http.Request) (
-	*int64,
+	int64,
 	*[]*internalapiv1common.UserRefreshTokenWithID,
 ) {
 	// Get the user ID from the request
@@ -929,14 +928,14 @@ func (s *service) ListRefreshTokens(r *http.Request) (
 		userRefreshTokens = append(userRefreshTokens, &userRefreshToken)
 	}
 
-	return &userID, &userRefreshTokens
+	return userID, &userRefreshTokens
 }
 
 // GetRefreshToken gets a user refresh token
 func (s *service) GetRefreshToken(
 	r *http.Request,
 	userRefreshTokenID int64,
-) (*int64, *internalapiv1common.UserRefreshToken) {
+) (int64, *internalapiv1common.UserRefreshToken) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -960,5 +959,133 @@ func (s *service) GetRefreshToken(
 		panic(err)
 	}
 
-	return &userID, &userRefreshToken
+	return userID, &userRefreshToken
+}
+
+// VerifyEmail verifies a user email
+func (s *service) VerifyEmail(
+	emailVerificationToken string,
+) int64 {
+	// Run the SQL stored procedure to verify the user email by the email verification token
+	var userID sql.NullInt64
+	if err := internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.VerifyEmailProc,
+		emailVerificationToken,
+		nil,
+	).Scan(
+		&userID,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			panic(ErrVerifyEmailTokenNotFound)
+		}
+		panic(err)
+	}
+	return userID.Int64
+}
+
+// SendEmailVerificationToken sends an email verification token
+func (s *service) SendEmailVerificationToken(
+	r *http.Request,
+) int64 {
+	// Get the subject from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Run the SQL stored procedure to check if the user email is verified
+	var userFirstName, userLastName, userEmail sql.NullString
+	var userEmailIsVerified sql.NullBool
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.IsUserEmailVerifiedProc,
+		userID,
+		nil,
+		nil, nil,
+		nil,
+	).Scan(
+		&userFirstName,
+		&userLastName,
+		&userEmail,
+		&userEmailIsVerified,
+	); err != nil {
+		panic(err)
+	}
+
+	// Check if the user email is already verified
+	if userEmailIsVerified.Bool {
+		panic(ErrSendEmailVerificationTokenAlreadyVerified)
+	}
+
+	// Generate the email verification token and its expiration time
+	emailVerificationToken, emailVerificationTokenExpiresAt := s.GenerateEmailVerificationToken()
+
+	// Run the SQL function to send the email verification
+	if _, err = internalpostgres.PoolService.Exec(
+		&internalpostgresmodel.SendEmailVerificationTokenProc,
+		userID,
+		emailVerificationToken,
+		emailVerificationTokenExpiresAt,
+	); err != nil {
+		panic(err)
+	}
+
+	// Send email verification
+	go internalmailersend.SendVerificationEmail(
+		userFirstName.String+" "+userLastName.String,
+		userEmail.String,
+		emailVerificationToken,
+	)
+
+	return userID
+}
+
+// ChangeEmail changes a user email
+func (s *service) ChangeEmail(
+	r *http.Request,
+	body *ChangeEmailRequest,
+) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Generate the email verification token and its expiration time
+	emailVerificationToken, emailVerificationTokenExpiresAt := s.GenerateEmailVerificationToken()
+
+	// Run the SQL stored procedure to change the user email
+	var userFirstName, userLastName sql.NullString
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.ChangeEmailProc,
+		userID,
+		body.Email,
+		emailVerificationToken,
+		emailVerificationTokenExpiresAt,
+		nil, nil,
+	).Scan(
+		&userFirstName,
+		&userLastName,
+	); err != nil {
+		isUniqueViolation, constraintName := godatabasespgx.IsUniqueViolationError(err)
+		if !isUniqueViolation {
+			panic(err)
+		}
+		if constraintName == internalpostgresmodel.UserEmailsUniqueEmail {
+			panic(ErrChangeEmailAlreadyRegistered)
+		}
+	}
+
+	// Send email verification
+	go internalmailersend.SendVerificationEmail(
+		userFirstName.String+" "+userLastName.String,
+		body.Email,
+		emailVerificationToken,
+	)
+
+	return userID
 }
