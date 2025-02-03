@@ -15,6 +15,18 @@ type (
 	controller struct{}
 )
 
+// GetTokenWildcard gets the token wildcard
+func (c *controller) GetTokenWildcard(
+	w http.ResponseWriter,
+	r *http.Request,
+	dest *string,
+) bool {
+	return internalhandler.Handler.ParseWildcard(
+		w, r, "token", dest,
+		gostringsconvert.ToString,
+	)
+}
+
 // SignUp signs up a new user
 // @Summary Sign up a new user
 // @Description Creates a new user account with the provided details
@@ -412,26 +424,23 @@ func (c *controller) SendEmailVerificationToken(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param token_id path string true "Token ID"
+// @Param token path string true "Token"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/email/verify/{token_id} [post]
+// @Router /api/v1/auth/email/verify/{token} [post]
 func (c *controller) VerifyEmail(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// Get the token ID from the URL
-	var tokenID string
-	if !internalhandler.Handler.ParseWildcard(
-		w, r, "token_id", &tokenID,
-		gostringsconvert.ToString,
-	) {
+	// Get the token from the URL
+	var token string
+	if !c.GetTokenWildcard(w, r, &token) {
 		return
 	}
 
 	// Verify the email
-	userID := Service.VerifyEmail(tokenID)
+	userID := Service.VerifyEmail(token)
 
 	// Log the successful email verification
 	internallogger.Api.VerifyEmail(userID)
@@ -476,8 +485,21 @@ func (c *controller) ChangePassword(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/password/forgot [post]
 func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*ForgotPasswordRequest)
+
+	// Send the reset password email
+	userID := Service.ForgotPassword(body)
+
+	// Log the successful reset password email request
+	internallogger.Api.ForgotPassword(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
 	)
 }
 
@@ -487,15 +509,34 @@ func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param request body ResetPasswordRequest
+// @Param token_id path string true "Token ID"
+// @Param request body ResetPasswordRequest true "Reset Password Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/password/reset [post]
+// @Router /api/v1/auth/password/reset/{token} [post]
 func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	// Get the token from the URL
+	var token string
+	if !c.GetTokenWildcard(w, r, &token) {
+		return
+	}
+
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*ResetPasswordRequest)
+
+	// Reset the password
+	userID := Service.ResetPassword(token, body)
+
+	// Log the successful password reset
+	internallogger.Api.ResetPassword(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
 	)
 }
 

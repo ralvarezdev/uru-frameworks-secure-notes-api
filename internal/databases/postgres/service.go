@@ -85,5 +85,9 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateIsUserEmailVerifiedProc,
 		internalpostgresmodel.CreateRevokeUserEmailProc,
 		internalpostgresmodel.CreateChangeEmailProc,
+		internalpostgresmodel.CreateForgotPasswordProc,
+		internalpostgresmodel.CreateRevokeResetPasswordTokenProc,
+		internalpostgresmodel.CreateResetPasswordProc,
+		internalpostgresmodel.CreateRevokePasswordHashProc,
 	)
 }

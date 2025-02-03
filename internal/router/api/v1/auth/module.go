@@ -104,15 +104,13 @@ var (
 			m.RegisterExactRoute(
 				"POST /password/forgot",
 				Controller.ForgotPassword,
-				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(
 					&ForgotPasswordRequest{},
 				),
 			)
 			m.RegisterExactRoute(
-				"POST /password/reset",
+				"POST /password/reset/{token}",
 				Controller.ResetPassword,
-				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(
 					&ResetPasswordRequest{},
 				),
@@ -129,7 +127,7 @@ var (
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
-				"POST /email/verify/{token_id}",
+				"POST /email/verify/{token}",
 				Controller.VerifyEmail,
 			)
 			m.RegisterExactRoute(

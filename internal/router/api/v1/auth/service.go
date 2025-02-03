@@ -307,6 +307,11 @@ func (s *service) GenerateEmailVerificationToken() (uuid.UUID, time.Time) {
 	return uuid.New(), time.Now().UTC().Add(internaltoken.EmailVerificationTokenDuration)
 }
 
+// GenerateResetPasswordToken generates a reset password token
+func (s *service) GenerateResetPasswordToken() (uuid.UUID, time.Time) {
+	return uuid.New(), time.Now().UTC().Add(internaltoken.ResetPasswordTokenDuration)
+}
+
 // SignUp signs up a user
 func (s *service) SignUp(body *SignUpRequest) int64 {
 	if body == nil {
@@ -381,9 +386,16 @@ func (s *service) SignUp(body *SignUpRequest) int64 {
 		}
 	}
 
+	// Send welcome email
+	fullName := body.FirstName + " " + body.LastName
+	go internalmailersend.SendWelcomeEmail(
+		fullName,
+		body.Email,
+	)
+
 	// Send email verification
 	go internalmailersend.SendVerificationEmail(
-		body.FirstName+" "+body.LastName,
+		fullName,
 		body.Email,
 		emailVerificationToken,
 	)
@@ -968,18 +980,24 @@ func (s *service) VerifyEmail(
 ) int64 {
 	// Run the SQL stored procedure to verify the user email by the email verification token
 	var userID sql.NullInt64
+	var userInvalidToken sql.NullBool
 	if err := internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.VerifyEmailProc,
 		emailVerificationToken,
 		nil,
+		nil,
 	).Scan(
 		&userID,
+		&userInvalidToken,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrVerifyEmailTokenNotFound)
-		}
 		panic(err)
 	}
+
+	// Check if the email verification token is invalid
+	if userInvalidToken.Bool {
+		panic(ErrVerifyEmailInvalidToken)
+	}
+
 	return userID.Int64
 }
 
@@ -1088,4 +1106,88 @@ func (s *service) ChangeEmail(
 	)
 
 	return userID
+}
+
+// ForgotPassword sends a forgot password email
+func (s *service) ForgotPassword(
+	body *ForgotPasswordRequest,
+) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Generate the reset password token and its expiration time
+	resetPasswordToken, resetPasswordTokenExpiresAt := s.GenerateResetPasswordToken()
+
+	// Run the SQL stored procedure to send the forgot password email
+	var userID sql.NullInt64
+	var userFirstName, userLastName, userEmail sql.NullString
+	if err := internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.ForgotPasswordProc,
+		body.Username,
+		resetPasswordToken,
+		resetPasswordTokenExpiresAt,
+		nil,
+		nil, nil,
+		nil,
+	).Scan(
+		&userID,
+		&userFirstName,
+		&userLastName,
+		&userEmail,
+	); err != nil {
+		panic(err)
+	}
+
+	// Send reset password email
+	go internalmailersend.SendResetPasswordEmail(
+		userFirstName.String+" "+userLastName.String,
+		userEmail.String,
+		resetPasswordToken,
+	)
+
+	return userID.Int64
+}
+
+// ResetPassword resets a user password
+func (s *service) ResetPassword(
+	resetPasswordToken string,
+	body *ResetPasswordRequest,
+) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Hash the password
+	passwordHash, err := gocryptobcrypt.HashPassword(
+		body.Password,
+		internalbcrypt.Cost,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// Run the SQL stored procedure to reset the user password
+	var userID sql.NullInt64
+	var userInvalidToken sql.NullBool
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.ResetPasswordProc,
+		resetPasswordToken,
+		passwordHash,
+		nil, nil,
+	).Scan(
+		&userID,
+		&userInvalidToken,
+	); err != nil {
+		panic(err)
+	}
+
+	// Check if the reset password token is invalid
+	if userInvalidToken.Bool {
+		panic(ErrResetPasswordInvalidToken)
+	}
+
+	return userID.Int64
 }

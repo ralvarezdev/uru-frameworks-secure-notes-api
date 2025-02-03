@@ -56,7 +56,7 @@ var (
 	GetUserEmailIDProc = "CALL get_user_email_id($1, $2)"
 
 	// VerifyEmailProc is the query to call the verify email stored procedure
-	VerifyEmailProc = "CALL verify_email($1, $2)"
+	VerifyEmailProc = "CALL verify_email($1, $2, $3)"
 
 	// IsUserEmailVerifiedProc is the query to call the is user email verified stored procedure
 	IsUserEmailVerifiedProc = "CALL is_user_email_verified($1, $2, $3, $4, $5)"
@@ -66,4 +66,16 @@ var (
 
 	// ChangeEmailProc is the query to call the change email stored procedure
 	ChangeEmailProc = "CALL change_email($1, $2, $3, $4, $5, $6)"
+
+	// ForgotPasswordProc is the query to call the forgot password stored procedure
+	ForgotPasswordProc = "CALL forgot_password($1, $2, $3, $4, $5, $6, $7)"
+
+	// RevokeResetPasswordTokenProc is the query to call the revoke reset password token stored procedure
+	RevokeResetPasswordTokenProc = "CALL revoke_reset_password_token($1)"
+
+	// RevokePasswordHashProc is the query to call the revoke password hash stored procedure
+	RevokePasswordHashProc = "CALL revoke_password_hash($1)"
+
+	// ResetPasswordProc is the query to call the reset password stored procedure
+	ResetPasswordProc = "CALL reset_password($1, $2, $3, $4)"
 )

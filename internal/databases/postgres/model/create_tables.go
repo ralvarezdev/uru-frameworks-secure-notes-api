@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS user_password_hashes (
 );
 `
 
-	// CreateUserResetPasswords is the SQL query to create the UserResetPassword table
+	// CreateUserResetPasswords is the SQL query to create the user_reset_passwords table
 	CreateUserResetPasswords = `
 CREATE TABLE IF NOT EXISTS user_reset_passwords (
     id BIGSERIAL PRIMARY KEY,

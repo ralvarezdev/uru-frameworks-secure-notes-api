@@ -107,4 +107,16 @@ var (
 		http.StatusBadRequest,
 		nil,
 	)
+	ErrVerifyEmailInvalidToken = gonethttpresponse.NewFieldError(
+		"token",
+		"email has already been verified, token has expired, or token is invalid",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrResetPasswordInvalidToken = gonethttpresponse.NewFieldError(
+		"token",
+		"token has expired or is invalid",
+		http.StatusBadRequest,
+		nil,
+	)
 )

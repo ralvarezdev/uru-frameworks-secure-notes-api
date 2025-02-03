@@ -6,7 +6,7 @@ const (
 CREATE OR REPLACE PROCEDURE send_email_verification_token(
 	IN in_user_id BIGINT,
 	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_expires_at TIMESTAMP,
+	IN in_email_verification_token_expires_at TIMESTAMP,
 )
 LANGUAGE plpgsql
 AS $$
@@ -25,7 +25,7 @@ BEGIN
 	VALUES (
 		out_user_email_id,
 		in_email_verification_token,
-		in_email_verification_expires_at
+		in_email_verification_token_expires_at
 	);	
 END;
 $$;
@@ -42,7 +42,7 @@ CREATE OR REPLACE PROCEDURE sign_up(
 	IN in_email VARCHAR,
 	IN in_password_hash VARCHAR,
 	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_expires_at TIMESTAMP,
+	IN in_email_verification_token_expires_at TIMESTAMP,
 	OUT out_user_id BIGINT
 )
 LANGUAGE plpgsql
@@ -99,7 +99,7 @@ BEGIN
 	);
 
 	-- Insert into user_email_verifications table
-	call send_email_verification_token(out_user_id, in_email_verification_token, in_email_verification_expires_at);
+	call send_email_verification_token(out_user_id, in_email_verification_token, in_email_verification_token_expires_at);
 EXCEPTION 
 	WHEN OTHERS THEN 
 		RAISE;
@@ -629,7 +629,8 @@ $$;
 	CreateVerifyEmailProc = `
 CREATE OR REPLACE PROCEDURE verify_email(
 	IN in_user_email_verification_token VARCHAR,
-	OUT out_user_id BIGINT
+	OUT out_user_id BIGINT,
+	OUT out_invalid_token BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -653,14 +654,23 @@ BEGIN
 		user_email_verifications.expires_at > NOW()
 	AND
 		user_email_verifications.revoked_at IS NULL;
+	AND
+		user_email_verifications.verified_at IS NULL;
 
-	-- Update the user_email_verifications table
-	UPDATE
-		user_email_verifications
-	SET
-		verified_at = NOW()
-	WHERE
-		user_email_verifications.id = out_user_email_verification_id;
+	-- Check if the user email verification token is invalid
+	IF out_user_email_verification_id IS NULL THEN
+		out_invalid_token = TRUE;
+	ELSE
+		out_invalid_token = FALSE;
+
+		-- Update the user_email_verifications table
+		UPDATE
+			user_email_verifications
+		SET
+			verified_at = NOW()
+		WHERE
+			user_email_verifications.id = out_user_email_verification_id;
+	END IF;
 END;
 $$;
 `
@@ -756,7 +766,7 @@ CREATE OR REPLACE PROCEDURE change_email(
 	IN in_user_id BIGINT,
 	IN in_new_email VARCHAR,
 	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_expires_at TIMESTAMP
+	IN in_email_verification_token_expires_at TIMESTAMP
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR,
 )
@@ -777,7 +787,7 @@ BEGIN
 	);
 
 	-- Insert into user_email_verifications table
-	CALL send_email_verification_token(in_user_id, in_email_verification_token, in_email_verification_expires_at);
+	CALL send_email_verification_token(in_user_id, in_email_verification_token, in_email_verification_token_expires_at);
 
 	-- Select the user first name and last name by user ID
 	SELECT
@@ -790,6 +800,157 @@ BEGIN
 		users
 	WHERE
 		users.id = in_user_id;
+END;
+$$;
+`
+
+	// CreateRevokeResetPasswordTokenProc is the query to create the revoke reset password token stored procedure
+	CreateRevokeResetPasswordTokenProc = `
+CREATE OR REPLACE PROCEDURE revoke_reset_password_token(
+	IN in_user_id BIGINT
+)	
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_reset_passwords table
+	UPDATE
+		user_reset_passwords
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_reset_passwords.user_id = out_user_id
+	AND
+		user_reset_passwords.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateForgotPasswordProc is the query to create the forgot password stored procedure
+	CreateForgotPasswordProc = `
+CREATE OR REPLACE PROCEDURE forgot_password(
+	IN in_username VARCHAR,
+	IN in_reset_token VARCHAR,
+	IN in_reset_token_expires_at TIMESTAMP,
+	OUT out_user_id BIGINT,
+	OUT out_user_first_name VARCHAR,
+	OUT out_user_last_name VARCHAR,
+	OUT out_user_email VARCHAR
+)
+LANGUAGE plpgsql	
+AS $$
+BEGIN
+	-- Select the user ID, first name, last name, and email by username
+	SELECT
+		users.id,
+		users.first_name,
+		users.last_name,
+		user_emails.email
+	INTO
+		out_user_id
+		out_user_first_name,
+		out_user_last_name,
+		out_user_email
+	FROM
+		users
+	INNER JOIN
+		user_usernames ON users.id = user_usernames.user_id
+	INNER JOIN
+		user_emails ON users.id = user_emails.user_id
+	WHERE
+		user_usernames.username = in_username
+	AND
+		user_usernames.revoked_at IS NULL
+	AND
+		user_emails.revoked_at IS NULL;
+	AND
+		users.deleted_at IS NULL;
+
+	-- Revoke the user reset password token, if it exists and hasn't been revoked
+	CALL revoke_reset_password_token(out_user_id);
+
+	-- Insert into user_reset_passwords table
+	INSERT INTO user_reset_passwords (
+		user_id,
+		reset_token,
+		expires_at
+	)
+	VALUES (
+		out_user_id,
+		in_reset_token,
+		in_reset_token_expires_at
+	);
+END;	
+$$;
+`
+
+	// CreateRevokePasswordHashProc is the query to create the revoke password hash stored procedure
+	CreateRevokePasswordHashProc = `
+CREATE OR REPLACE PROCEDURE revoke_password_hash(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_password_hashes table
+	UPDATE
+		user_password_hashes
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_password_hashes.user_id = in_user_id
+	AND
+		user_password_hashes.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateResetPasswordProc is the query to create the reset password stored procedure
+	CreateResetPasswordProc = `
+CREATE OR REPLACE PROCEDURE reset_password(
+	IN in_reset_password_token BIGINT,
+	IN in_new_password_hash VARCHAR,
+	OUT out_user_id BIGINT,
+	OUT out_invalid_token BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user ID by reset password token
+	SELECT
+		user_reset_passwords.user_id
+	INTO
+		out_user_id
+	FROM
+		user_reset_passwords
+	WHERE
+		user_reset_passwords.reset_token = in_reset_password_token
+	AND
+		user_reset_passwords.expires_at > NOW()
+	AND
+		user_reset_passwords.revoked_at IS NULL;
+
+	-- Check if the user ID exists
+	IF out_user_id IS NULL THEN
+		out_invalid_token = TRUE;
+	ELSE
+		out_invalid_token = FALSE;
+
+		-- Revoke the user password hash
+		call revoke_password_hash(out_user_id);
+	
+		-- Insert into user_password_hashes table
+		INSERT INTO user_password_hashes (
+			user_id,
+			password_hash
+		)
+		VALUES (
+			in_user_id,
+			in_new_password_hash
+		);
+	
+		-- Revoke the user reset password token
+		CALL revoke_reset_password_token(out_user_id);
+	END IF;
 END;
 $$;
 `

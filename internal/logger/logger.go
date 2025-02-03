@@ -201,3 +201,19 @@ func (l *Logger) SentWelcomeEmail(email string) {
 		"sent welcome email to: " + email,
 	)
 }
+
+// ForgotPassword logs the forgot password event
+func (l *Logger) ForgotPassword(id int64) {
+	l.logger.Info(
+		"user forgot password",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// ResetPassword logs the reset password event
+func (l *Logger) ResetPassword(id int64) {
+	l.logger.Info(
+		"user reset password",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
