@@ -467,8 +467,21 @@ func (c *controller) VerifyEmail(
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/password [put]
 func (c *controller) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*ChangePasswordRequest)
+
+	// Change the password
+	userID := Service.ChangePassword(r, body)
+
+	// Log the successful password change
+	internallogger.Api.ChangePassword(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
 	)
 }
 
@@ -509,7 +522,7 @@ func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param token_id path string true "Token ID"
+// @Param token path string true "Token"
 // @Param request body ResetPasswordRequest true "Reset Password Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody

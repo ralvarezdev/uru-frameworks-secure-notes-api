@@ -119,4 +119,16 @@ var (
 		http.StatusBadRequest,
 		nil,
 	)
+	ErrChangePasswordInvalidOldPassword = gonethttpresponse.NewFieldError(
+		"old_password",
+		"invalid old password",
+		http.StatusBadRequest,
+		nil,
+	)
+	ErrChangePasswordSamePassword = gonethttpresponse.NewFieldError(
+		"new_password",
+		"new password is the same as the old password",
+		http.StatusBadRequest,
+		nil,
+	)
 )

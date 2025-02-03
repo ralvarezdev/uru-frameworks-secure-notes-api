@@ -217,3 +217,11 @@ func (l *Logger) ResetPassword(id int64) {
 		fmt.Sprintf("user id: %d", id),
 	)
 }
+
+// ChangePassword logs the change password event
+func (l *Logger) ChangePassword(id int64) {
+	l.logger.Info(
+		"user changed password",
+		fmt.Sprintf("user id: %d", id),
+	)
+}

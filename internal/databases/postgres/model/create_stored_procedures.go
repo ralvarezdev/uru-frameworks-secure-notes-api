@@ -950,7 +950,103 @@ BEGIN
 	
 		-- Revoke the user reset password token
 		CALL revoke_reset_password_token(out_user_id);
+
+		-- Revoke the user tokens
+		CALL revoke_tokens(out_user_id);
 	END IF;
+END;
+$$;
+`
+
+	// CreateRevokeTokensExceptRefreshTokenIDProc is the query to create the revoke tokens except refresh token ID stored procedure
+	CreateRevokeTokensExceptRefreshTokenIDProc = `
+CREATE OR REPLACE PROCEDURE revoke_tokens_except_refresh_token_id(
+	IN in_user_id BIGINT,
+	IN in_user_refresh_token_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_refresh_tokens table
+	UPDATE
+		user_refresh_tokens
+	SET	
+		revoked_at = NOW()
+	WHERE
+		user_refresh_tokens.id = in_refresh_token_id
+	AND
+		user_refresh_tokens.user_id = in_user_id
+	AND 
+		user_refresh_tokens.revoked_at IS NULL;
+	AND
+		user_refresh_tokens.id != in_user_refresh_token_id;
+
+	-- Update the user_access_tokens table
+	UPDATE
+		user_access_tokens
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_access_tokens.user_refresh_token_id = in_refresh_token_id
+	AND
+		user_access_tokens.user_id = in_user_id
+	AND
+		user_access_tokens.revoked_at IS NULL;
+	AND
+		user_access_tokens.id != in_user_access_token_id;
+END;
+$$;
+`
+
+	// CreateGetUserPasswordHashProc is the query to create the get user password hash stored procedure
+	CreateGetUserPasswordHashProc = `
+CREATE OR REPLACE PROCEDURE get_user_password_hash(
+	IN in_user_id BIGINT,
+	OUT out_password_hash VARCHAR
+)	
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user password hash by user ID
+	SELECT
+		user_password_hashes.password_hash
+	INTO
+		out_password_hash
+	FROM
+		user_password_hashes
+	WHERE
+		user_password_hashes.user_id = in_user_id
+	AND
+		user_password_hashes.revoked_at IS NULL;
+END;	
+$$;
+`
+
+	// CreateChangePasswordProc is the query to create the change password stored procedure
+	CreateChangePasswordProc = `
+CREATE OR REPLACE PROCEDURE change_password(
+	IN in_user_id BIGINT,
+	IN in_new_password_hash VARCHAR,
+	IN in_user_refresh_token_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Revoke the user password hash
+	CALL revoke_password_hash(in_user_id);
+
+	-- Insert into user_password_hashes table
+	INSERT INTO user_password_hashes (
+		user_id,	
+		password_hash
+	)
+	VALUES (
+		in_user_id,
+		in_new_password_hash
+	);
+
+	-- Revoke the user tokens, except the current access token and refresh token
+	CALL revoke_tokens_except_refresh_token_id(in_user_id, in_user_refresh_token_id);
 END;
 $$;
 `

@@ -1191,3 +1191,68 @@ func (s *service) ResetPassword(
 
 	return userID.Int64
 }
+
+// ChangePassword changes a user password
+func (s *service) ChangePassword(
+	r *http.Request,
+	body *ChangePasswordRequest,
+) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the user password hash
+	var userPasswordHash sql.NullString
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.GetUserPasswordHashProc,
+		userID,
+		nil,
+	).Scan(
+		&userPasswordHash,
+	); err != nil {
+		panic(err)
+	}
+
+	// Validate the old password
+	if !gocryptobcrypt.CompareHashAndPassword(
+		userPasswordHash.String,
+		body.OldPassword,
+	) {
+		panic(ErrChangePasswordInvalidOldPassword)
+	}
+
+	// Check if the new password is the same as the old password
+	if gocryptobcrypt.CompareHashAndPassword(
+		userPasswordHash.String,
+		body.NewPassword,
+	) {
+		panic(ErrChangePasswordSamePassword)
+	}
+
+	// Hash the new password
+	newPasswordHash, err := gocryptobcrypt.HashPassword(
+		body.NewPassword,
+		internalbcrypt.Cost,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// Run the SQL stored procedure to change the user password
+	if _, err = internalpostgres.PoolService.Exec(
+		&internalpostgresmodel.ChangePasswordProc,
+		userID,
+		newPasswordHash,
+	); err != nil {
+		panic(err)
+	}
+
+	return userID
+}

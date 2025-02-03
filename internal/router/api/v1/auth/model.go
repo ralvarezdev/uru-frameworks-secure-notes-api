@@ -58,7 +58,8 @@ type ListRefreshTokensResponse struct {
 
 // ChangePasswordRequest is the request DTO to change password
 type ChangePasswordRequest struct {
-	Password string `json:"password"`
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
 }
 
 // ForgotPasswordRequest is the request DTO to forgot password

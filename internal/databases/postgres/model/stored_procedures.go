@@ -78,4 +78,13 @@ var (
 
 	// ResetPasswordProc is the query to call the reset password stored procedure
 	ResetPasswordProc = "CALL reset_password($1, $2, $3, $4)"
+
+	// RevokeTokensExceptRefreshTokenIDProc is the query to call the revoke tokens except refresh token ID stored procedure
+	RevokeTokensExceptRefreshTokenIDProc = "CALL revoke_tokens_except_refresh_token_id($1, $2)"
+
+	// ChangePasswordProc is the query to call the change password stored procedure
+	ChangePasswordProc = "CALL change_password($1, $2, $3)"
+
+	// GetUserPasswordHashProc is the query to call the get user password hash stored procedure
+	GetUserPasswordHashProc = "CALL get_user_password_hash($1, $2)"
 )
