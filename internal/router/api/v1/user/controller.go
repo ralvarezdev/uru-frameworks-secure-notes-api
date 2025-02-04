@@ -1,8 +1,10 @@
 package user
 
 import (
-	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
+	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
@@ -27,8 +29,18 @@ func (c *controller) UpdateProfile(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateProfileRequest)
+
+	// Update the profile
+	userID := Service.UpdateProfile(r, body)
+
+	// Log the profile update
+	internallogger.Api.UpdateProfile(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }
 
@@ -46,8 +58,15 @@ func (c *controller) GetMyProfile(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the user profile
+	userID, data := Service.GetMyProfile(r)
+
+	// Log the profile retrieval
+	internallogger.Api.GetMyProfile(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }
 
@@ -67,8 +86,18 @@ func (c *controller) ChangeUsername(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*ChangeUsernameRequest)
+
+	// Change the username
+	userID := Service.ChangeUsername(r, body)
+
+	// Log the username change
+	internallogger.Api.ChangeUsername(userID, body.Username)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }
 
@@ -88,7 +117,17 @@ func (c *controller) DeleteUser(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserRequest)
+
+	// Delete the user
+	userID := Service.DeleteUser(r, body)
+
+	// Log the user deletion
+	internallogger.Api.DeleteUser(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }

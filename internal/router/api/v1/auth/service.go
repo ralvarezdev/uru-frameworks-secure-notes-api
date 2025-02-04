@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"errors"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	gocryptoaes "github.com/ralvarezdev/go-crypto/aes"
@@ -15,10 +14,8 @@ import (
 	gocryptopbdkf2 "github.com/ralvarezdev/go-crypto/pbkdf2"
 	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
-	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
-	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -34,50 +31,13 @@ import (
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 )
 
 type (
 	// service is the structure for the API V1 service for the auth route group
 	service struct{}
-
-	// TokenInfo struct with the token information and the cookie attributes
-	TokenInfo struct {
-		Type             gojwttoken.Token
-		ID               int64
-		CookieAttributes *gonethttpcookie.Attributes
-		IssuedAt         time.Time
-		ExpiresAt        time.Time
-		Claims           jwt.Claims
-	}
 )
-
-// SetTokenToCache sets the token to the cache
-func (s *service) SetTokenToCache(
-	token gojwttoken.Token,
-	id int64,
-	expiresAt time.Time,
-	isValid bool,
-) {
-	_ = internaljwtcache.TokenValidator.Set(
-		token,
-		strconv.FormatInt(id, 10),
-		isValid,
-		expiresAt,
-	)
-}
-
-// RevokeTokenFromCache revokes the token from the cache
-func (s *service) RevokeTokenFromCache(
-	token gojwttoken.Token,
-	id int64,
-) {
-	_ = internaljwtcache.TokenValidator.Revoke(
-		token,
-		strconv.FormatInt(id, 10),
-	)
-}
 
 // RegisterFailedLoginAttempt registers a failed login attempt
 func (s *service) RegisterFailedLoginAttempt(
@@ -162,7 +122,7 @@ func (s *service) ValidateTOTPRecoveryCode(
 ) bool {
 	// Revoke the TOTP recovery code
 	result, err := internalpostgres.PoolService.Exec(
-		&internalpostgresmodel.RevokeTOTPRecoveryCodeProc,
+		&internalpostgresmodel.RevokeUserTOTPRecoveryCodeProc,
 		totpID,
 		totpRecoveryCode,
 	)
@@ -183,123 +143,6 @@ func (s *service) ValidateTOTPRecoveryCode(
 		true,
 	)
 	return false
-}
-
-// GenerateTokensInfo generates the user tokens info
-func (s *service) GenerateTokensInfo() (*TokenInfo, *TokenInfo) {
-	// Get the current time
-	currentTime := time.Now().UTC()
-
-	// Create the user tokens info
-	userRefreshTokenInfo := TokenInfo{
-		Type:             gojwttoken.RefreshToken,
-		CookieAttributes: internalcookie.RefreshToken,
-		IssuedAt:         currentTime,
-		ExpiresAt:        currentTime.Add(internaljwt.Durations[gojwttoken.RefreshToken]),
-	}
-	userAccessTokenInfo := TokenInfo{
-		Type:             gojwttoken.AccessToken,
-		CookieAttributes: internalcookie.AccessToken,
-		IssuedAt:         currentTime,
-		ExpiresAt:        currentTime.Add(internaljwt.Durations[gojwttoken.AccessToken]),
-	}
-	return &userRefreshTokenInfo, &userAccessTokenInfo
-}
-
-// SetTokensCookies generates user refresh token and user access token cookies
-func (s *service) SetTokensCookies(
-	w http.ResponseWriter,
-	userID int64,
-	userRefreshToken,
-	userAccessToken *TokenInfo,
-) {
-	// Set the tokens in the cache as valid
-	go func() {
-		for _, token := range []*TokenInfo{userRefreshToken, userAccessToken} {
-			s.SetTokenToCache(token.Type, token.ID, token.ExpiresAt, true)
-		}
-	}()
-
-	// Generate the user tokens claims
-	userRefreshToken.Claims = internaljwtclaims.NewRefreshTokenClaims(
-		userRefreshToken.ID,
-		strconv.FormatInt(userID, 10),
-		userRefreshToken.IssuedAt,
-		userRefreshToken.ExpiresAt,
-	)
-	userAccessToken.Claims = internaljwtclaims.NewAccessTokenClaims(
-		userAccessToken.ID,
-		strconv.FormatInt(userID, 10),
-		userAccessToken.IssuedAt,
-		userAccessToken.ExpiresAt,
-		userRefreshToken.ID,
-	)
-
-	// Create the user token claims and set the cookies
-
-	for _, userToken := range []*TokenInfo{userRefreshToken, userAccessToken} {
-		// Issue the user tokens
-		rawToken, err := internaljwt.Issuer.IssueToken(userToken.Claims)
-		if err != nil {
-			panic(err)
-		}
-
-		// Set the cookies
-		gonethttpcookie.SetCookie(
-			w,
-			userToken.CookieAttributes,
-			rawToken,
-			userToken.ExpiresAt,
-		)
-	}
-}
-
-// RenovateCookie creates a new cookie with the same value and a new expiration time
-func (s *service) RenovateCookie(
-	w http.ResponseWriter,
-	r *http.Request,
-	cookie *gonethttpcookie.Attributes,
-	expiresAt time.Time,
-) {
-	cookieValue, err := r.Cookie(cookie.Name)
-	if err != nil {
-		// Clear the cookies
-		s.ClearCookies(w)
-
-		// An essential cookie is missing, so the user must log in again
-		panic(
-			gonethttpresponse.NewCookieError(
-				cookie.Name,
-				"cookie not found, please log in again",
-				gonethttp.ErrCodeCookieNotFound,
-				http.StatusInternalServerError,
-			),
-		)
-	}
-	gonethttpcookie.SetCookie(
-		w,
-		cookie,
-		cookieValue.Value,
-		expiresAt,
-	)
-}
-
-// ClearCookies clears the user cookies
-func (s *service) ClearCookies(w http.ResponseWriter) {
-	// Remove the cookies
-	for _, cookie := range []*gonethttpcookie.Attributes{
-		internalcookie.RefreshToken,
-		internalcookie.AccessToken,
-		internalcookie.Salt,
-		internalcookie.EncryptedKey,
-	} {
-		gonethttpcookie.SetCookie(
-			w,
-			cookie,
-			"",
-			time.Now().Add(-time.Hour),
-		)
-	}
 }
 
 // GenerateEmailVerificationToken generates an email verification token
@@ -496,7 +339,7 @@ func (s *service) LogIn(
 	}
 
 	// Create the user tokens info
-	userRefreshTokenInfo, userAccessTokenInfo := s.GenerateTokensInfo()
+	userRefreshTokenInfo, userAccessTokenInfo := internaljwt.GenerateTokensInfo()
 
 	// Call the refresh token stored procedure
 	var userAccessTokenID, userRefreshTokenID sql.NullInt64
@@ -520,12 +363,14 @@ func (s *service) LogIn(
 	userAccessTokenInfo.ID = userAccessTokenID.Int64
 
 	// Set the user tokens cookies
-	s.SetTokensCookies(
+	if err := internalcookie.SetTokensCookies(
 		w,
 		userID.Int64,
 		userRefreshTokenInfo,
 		userAccessTokenInfo,
-	)
+	); err != nil {
+		panic(err)
+	}
 
 	// Set the user salt and encrypted key cookies
 	gonethttpcookie.SetCookie(
@@ -561,31 +406,11 @@ func (s *service) RevokeRefreshToken(
 	}
 
 	// Set the tokens in the cache as invalid
-	go func() {
-		// Get the user access token ID by the user refresh token ID
-		var userAccessTokenID sql.NullInt64
-		if err := internalpostgres.PoolService.QueryRow(
-			&internalpostgresmodel.GetAccessTokenByRefreshTokenIDProc,
-			userRefreshTokenID,
-			nil,
-		).Scan(
-			&userAccessTokenID,
-		); err != nil {
-			return
-		}
-
-		// Revoke the tokens in the cache
-		for token, id := range map[gojwttoken.Token]int64{
-			gojwttoken.RefreshToken: userRefreshTokenID,
-			gojwttoken.AccessToken:  userAccessTokenID.Int64,
-		} {
-			s.RevokeTokenFromCache(token, id)
-		}
-	}()
+	go internaljwtcache.RevokeRefreshTokenFromCache(userRefreshTokenID)
 
 	// Call the revoke tokens by ID stored procedure
 	_, err = internalpostgres.PoolService.Exec(
-		&internalpostgresmodel.RevokeTokensByIDProc,
+		&internalpostgresmodel.RevokeUserTokensByIDProc,
 		userID,
 		userRefreshTokenID,
 	)
@@ -595,7 +420,7 @@ func (s *service) RevokeRefreshToken(
 
 	// Clear cookies if the parent refresh token ID is the same as the user refresh token ID
 	if parentRefreshTokenID == userRefreshTokenID {
-		s.ClearCookies(w)
+		internalcookie.ClearCookies(w)
 	}
 }
 
@@ -629,36 +454,11 @@ func (s *service) RevokeRefreshTokens(
 	}
 
 	// Set the tokens in the cache as invalid
-	go func() {
-		// Get the user refresh tokens and user access tokens ID by user ID
-		var userRefreshTokenID, userAccessTokenID int64
-		rows, err := internalpostgres.PoolService.Query(
-			&internalpostgresmodel.ListUserTokensFn,
-			userID,
-		)
-		if err != nil {
-			return
-		}
-		defer rows.Close()
-
-		// Parse the user refresh tokens ID
-		for rows.Next() {
-			if err := rows.Scan(
-				&userRefreshTokenID,
-				&userAccessTokenID,
-			); err != nil {
-				return
-			}
-
-			// Revoke the user refresh token and user access token from the cache
-			s.RevokeTokenFromCache(gojwttoken.RefreshToken, userRefreshTokenID)
-			s.RevokeTokenFromCache(gojwttoken.AccessToken, userAccessTokenID)
-		}
-	}()
+	go internaljwtcache.RevokeUserRefreshTokensFromCache(userID)
 
 	// Call the revoke tokens stored procedure
 	_, err = internalpostgres.PoolService.Exec(
-		&internalpostgresmodel.RevokeTokensProc,
+		&internalpostgresmodel.RevokeUserTokensProc,
 		userID,
 	)
 	if err != nil {
@@ -666,7 +466,7 @@ func (s *service) RevokeRefreshTokens(
 	}
 
 	// Clear cookies
-	s.ClearCookies(w)
+	internalcookie.ClearCookies(w)
 
 	return userID
 }
@@ -687,7 +487,7 @@ func (s *service) RefreshToken(w http.ResponseWriter, r *http.Request) int64 {
 	clientIP := gonethttp.GetClientIP(r)
 
 	// Create the user tokens info
-	userRefreshTokenInfo, userAccessTokenInfo := s.GenerateTokensInfo()
+	userRefreshTokenInfo, userAccessTokenInfo := internaljwt.GenerateTokensInfo()
 
 	// Call the refresh token stored procedure
 	var userRefreshTokenID, userAccessTokenID sql.NullInt64
@@ -711,24 +511,28 @@ func (s *service) RefreshToken(w http.ResponseWriter, r *http.Request) int64 {
 	userAccessTokenInfo.ID = userAccessTokenID.Int64
 
 	// Set the user tokens cookies
-	s.SetTokensCookies(
+	if err = internalcookie.SetTokensCookies(
 		w,
 		userID,
 		userRefreshTokenInfo,
 		userAccessTokenInfo,
-	)
+	); err != nil {
+		panic(err)
+	}
 
 	// Renovate the user salt and encrypted key cookies
 	for _, cookie := range []*gonethttpcookie.Attributes{
 		internalcookie.Salt,
 		internalcookie.EncryptedKey,
 	} {
-		s.RenovateCookie(
+		if err = internalcookie.RenovateCookie(
 			w,
 			r,
 			cookie,
 			userAccessTokenInfo.ExpiresAt,
-		)
+		); err != nil {
+			panic(err)
+		}
 	}
 	return userID
 }
@@ -895,7 +699,7 @@ func (s *service) RevokeTOTP(r *http.Request) int64 {
 
 	// Run the SQL stored procedure to get the user TOTP ID by the user ID
 	_, err = internalpostgres.PoolService.Exec(
-		&internalpostgresmodel.RevokeTOTPProc,
+		&internalpostgresmodel.RevokeUserTOTPProc,
 		userID,
 	)
 	if err != nil {
@@ -907,7 +711,7 @@ func (s *service) RevokeTOTP(r *http.Request) int64 {
 // ListRefreshTokens lists all user refresh tokens
 func (s *service) ListRefreshTokens(r *http.Request) (
 	int64,
-	*[]*internalapiv1common.UserRefreshTokenWithID,
+	*ListRefreshTokensResponse,
 ) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
@@ -940,14 +744,16 @@ func (s *service) ListRefreshTokens(r *http.Request) (
 		userRefreshTokens = append(userRefreshTokens, &userRefreshToken)
 	}
 
-	return userID, &userRefreshTokens
+	return userID, &ListRefreshTokensResponse{
+		RefreshTokens: userRefreshTokens,
+	}
 }
 
 // GetRefreshToken gets a user refresh token
 func (s *service) GetRefreshToken(
 	r *http.Request,
 	userRefreshTokenID int64,
-) (int64, *internalapiv1common.UserRefreshToken) {
+) (int64, *GetRefreshTokenResponse) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -971,7 +777,9 @@ func (s *service) GetRefreshToken(
 		panic(err)
 	}
 
-	return userID, &userRefreshToken
+	return userID, &GetRefreshTokenResponse{
+		RefreshToken: &userRefreshToken,
+	}
 }
 
 // VerifyEmail verifies a user email
@@ -1015,7 +823,7 @@ func (s *service) SendEmailVerificationToken(
 	var userFirstName, userLastName, userEmail sql.NullString
 	var userEmailIsVerified sql.NullBool
 	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.IsUserEmailVerifiedProc,
+		&internalpostgresmodel.PreSendEmailVerificationTokenProc,
 		userID,
 		nil,
 		nil, nil,

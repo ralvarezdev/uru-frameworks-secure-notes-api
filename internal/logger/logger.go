@@ -225,3 +225,45 @@ func (l *Logger) ChangePassword(id int64) {
 		fmt.Sprintf("user id: %d", id),
 	)
 }
+
+// DeleteUser logs the delete user event
+func (l *Logger) DeleteUser(id int64) {
+	l.logger.Info(
+		"user deleted",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// ChangeUsername logs the change username event
+func (l *Logger) ChangeUsername(id int64, newUsername string) {
+	l.logger.Info(
+		"user changed username",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("new username: %s", newUsername),
+	)
+}
+
+// ChangeEmail logs the change email event
+func (l *Logger) ChangeEmail(id int64, newEmail string) {
+	l.logger.Info(
+		"user changed email",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("new email: %s", newEmail),
+	)
+}
+
+// UpdateProfile logs the update profile event
+func (l *Logger) UpdateProfile(id int64) {
+	l.logger.Info(
+		"user updated profile",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// GetMyProfile logs the get my profile event
+func (l *Logger) GetMyProfile(id int64) {
+	l.logger.Info(
+		"user got his/her profile",
+		fmt.Sprintf("user id: %d", id),
+	)
+}

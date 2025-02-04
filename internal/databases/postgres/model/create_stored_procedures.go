@@ -1,6 +1,27 @@
 package model
 
 const (
+	// CreateRevokeUserEmailVerificationTokenProc is the query to create the revoke user email verification token stored procedure
+	CreateRevokeUserEmailVerificationTokenProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_email_verification_token(
+	IN in_user_email_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_email_verifications table
+	UPDATE
+		user_email_verifications
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_email_verifications.user_email_id = in_user_email_id
+	AND
+		user_email_verifications.revoked_at IS NULL;
+END;	
+$$;
+`
+
 	// CreateSendEmailVerificationTokenProc is the query to create the send email verification token stored procedure
 	CreateSendEmailVerificationTokenProc = `
 CREATE OR REPLACE PROCEDURE send_email_verification_token(
@@ -15,6 +36,9 @@ DECLARE
 BEGIN
 	-- Select the user email by user ID
 	CALL get_user_email_id(in_user_id, out_user_email_id);
+
+	-- Revoke the user email verification token
+	CALL revoke_user_email_verification_token(out_user_email_id);
 
 	-- Insert into user_email_verifications table
 	INSERT INTO user_email_verifications (
@@ -107,14 +131,13 @@ END;
 $$;
 `
 
-	CreateRevokeTOTPProc = `
-CREATE OR REPLACE PROCEDURE revoke_totp(
+	// CreateRevokeUserTOTPProc is the query to create the revoke user TOTP stored procedure
+	CreateRevokeUserTOTPProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_totp(
 	IN in_user_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
-DECLARE
-	out_user_totp_id BIGINT;
 BEGIN
 	-- Update the user_totp_recovery_codes table
 	UPDATE
@@ -139,7 +162,6 @@ BEGIN
 		user_totps.user_id = in_user_id 
 	AND	
 		user_totps.revoked_at IS NULL;
-
 END;
 $$;
 `
@@ -191,9 +213,9 @@ END;
 $$;
 `
 
-	// CreateRevokeTokensByIDProc is the query to create the revoke tokens by ID stored procedure
-	CreateRevokeTokensByIDProc = `
-CREATE OR REPLACE PROCEDURE revoke_tokens_by_id(
+	// CreateRevokeUserTokensByIDProc is the query to create the revoke user tokens by ID stored procedure
+	CreateRevokeUserTokensByIDProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_tokens_by_id(
 	IN in_user_id BIGINT,
 	IN in_user_refresh_token_id BIGINT
 )
@@ -242,7 +264,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Revoke the old user refresh token and access token
-	CALL revoke_tokens_by_id(in_user_id, in_old_refresh_token_id);
+	CALL revoke_user_tokens_by_id(in_user_id, in_old_refresh_token_id);
 
 	-- Generate new tokens
 	CALL generate_tokens(in_user_id, in_old_refresh_token_id, in_ip_address, in_new_refresh_expires_at, in_new_access_expires_at, out_new_refresh_token_id, out_new_access_token_id);
@@ -250,9 +272,9 @@ END;
 $$;
 `
 
-	// CreateRevokeTokensProc is the query to create the revoke tokens stored procedure
-	CreateRevokeTokensProc = `
-CREATE OR REPLACE PROCEDURE revoke_tokens(
+	// CreateRevokeUserTokensProc is the query to create the revoke user tokens stored procedure
+	CreateRevokeUserTokensProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_tokens(
 	IN in_user_id BIGINT
 )
 LANGUAGE plpgsql
@@ -497,7 +519,7 @@ BEGIN
 
 	-- If the TOTP is not verified, revoke it
 	IF out_old_totp_verified_at IS NULL THEN
-		CALL revoke_totp(in_user_id);
+		CALL revoke_user_totp(in_user_id);
 	END IF;
 
 	-- If the TOTP wasn't active or verified, insert a new TOTP
@@ -578,10 +600,10 @@ END;
 $$;
 `
 
-	// CreateRevokeTOTPRecoveryCodeProc is the query to create the revoke TOTP recovery code stored procedure
-	CreateRevokeTOTPRecoveryCodeProc = `
-CREATE OR REPLACE PROCEDURE revoke_totp_recovery_code(
-	IN out_user_totp_id BIGINT,
+	// CreateRevokeUserTOTPRecoveryCodeProc is the query to create the revoke user TOTP recovery code stored procedure
+	CreateRevokeUserTOTPRecoveryCodeProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_totp_recovery_code(
+	IN in_user_totp_id BIGINT,
 	IN in_recovery_code VARCHAR
 )
 LANGUAGE plpgsql
@@ -593,7 +615,7 @@ BEGIN
 	SET
 		revoked_at = NOW()
 	WHERE
-		user_totp_recovery_codes.user_totp_id = out_user_totp_id
+		user_totp_recovery_codes.user_totp_id = in_user_totp_id
 	AND
 		user_totp_recovery_codes.recovery_code = in_recovery_code
 	AND
@@ -679,6 +701,30 @@ $$;
 	CreateIsUserEmailVerifiedProc = `
 CREATE OR REPLACE PROCEDURE is_user_email_verified(
 	IN in_user_id BIGINT,
+	OUT out_is_verified BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user email by user ID
+	SELECT
+		user_emails.verified_at IS NOT NULL
+	INTO
+		out_is_verified
+	FROM
+		user_emails
+	WHERE
+		user_emails.user_id = in_user_id
+	AND
+		user_emails.revoked_at IS NULL;	
+END;
+$$;
+`
+
+	// CreatePreSendEmailVerificationTokenProc is the query to create the pre-send email verification token stored procedure
+	CreatePreSendEmailVerificationTokenProc = `
+CREATE OR REPLACE PROCEDURE pre_send_email_verification_token(
+	IN in_user_id BIGINT,
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR,
 	OUT out_user_email VARCHAR,
@@ -686,20 +732,16 @@ CREATE OR REPLACE PROCEDURE is_user_email_verified(
 )
 LANGUAGE plpgsql
 AS $$
-DECLARE 
-	out_user_email_id BIGINT;
 BEGIN
 	-- Select the user email by user ID
 	SELECT
 		users.first_name,
 		users.last_name,
-		user_emails.id,
 		user_emails.email,
 		user_emails.verified_at IS NOT NULL
 	INTO
 		out_user_first_name,
 		out_user_last_name,
-		out_user_email_id,
 		out_user_email,
 		out_is_verified
 	FROM
@@ -710,17 +752,6 @@ BEGIN
 		user_emails.user_id = in_user_id
 	AND
 		user_emails.revoked_at IS NULL;
-
-	-- Revoke the user email verification token, if it exists and hasn't been verified
-	IF NOT out_is_verified THEN
-		-- Update the user_email_verifications table
-		UPDATE
-			user_email_verifications
-		SET
-			revoked_at = NOW()
-		WHERE
-			user_email_verifications.user_email_id = user_email_id;
-	END IF;
 END;
 $$;
 `
@@ -804,9 +835,9 @@ END;
 $$;
 `
 
-	// CreateRevokeResetPasswordTokenProc is the query to create the revoke reset password token stored procedure
-	CreateRevokeResetPasswordTokenProc = `
-CREATE OR REPLACE PROCEDURE revoke_reset_password_token(
+	// CreateRevokeUserResetPasswordTokenProc is the query to create the revoke user reset password token stored procedure
+	CreateRevokeUserResetPasswordTokenProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_reset_password_token(
 	IN in_user_id BIGINT
 )	
 LANGUAGE plpgsql
@@ -818,7 +849,7 @@ BEGIN
 	SET
 		revoked_at = NOW()
 	WHERE
-		user_reset_passwords.user_id = out_user_id
+		user_reset_passwords.user_id = in_user_id
 	AND
 		user_reset_passwords.revoked_at IS NULL;
 END;
@@ -866,7 +897,7 @@ BEGIN
 		users.deleted_at IS NULL;
 
 	-- Revoke the user reset password token, if it exists and hasn't been revoked
-	CALL revoke_reset_password_token(out_user_id);
+	CALL revoke_user_reset_password_token(out_user_id);
 
 	-- Insert into user_reset_passwords table
 	INSERT INTO user_reset_passwords (
@@ -883,9 +914,9 @@ END;
 $$;
 `
 
-	// CreateRevokePasswordHashProc is the query to create the revoke password hash stored procedure
-	CreateRevokePasswordHashProc = `
-CREATE OR REPLACE PROCEDURE revoke_password_hash(
+	// CreateRevokeUserPasswordHashProc is the query to create the revoke user password hash stored procedure
+	CreateRevokeUserPasswordHashProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_password_hash(
 	IN in_user_id BIGINT
 )
 LANGUAGE plpgsql
@@ -936,7 +967,7 @@ BEGIN
 		out_invalid_token = FALSE;
 
 		-- Revoke the user password hash
-		call revoke_password_hash(out_user_id);
+		call revoke_user_password_hash(out_user_id);
 	
 		-- Insert into user_password_hashes table
 		INSERT INTO user_password_hashes (
@@ -949,18 +980,18 @@ BEGIN
 		);
 	
 		-- Revoke the user reset password token
-		CALL revoke_reset_password_token(out_user_id);
+		CALL revoke_user_reset_password_token(out_user_id);
 
 		-- Revoke the user tokens
-		CALL revoke_tokens(out_user_id);
+		CALL revoke_user_tokens(out_user_id);
 	END IF;
 END;
 $$;
 `
 
-	// CreateRevokeTokensExceptRefreshTokenIDProc is the query to create the revoke tokens except refresh token ID stored procedure
-	CreateRevokeTokensExceptRefreshTokenIDProc = `
-CREATE OR REPLACE PROCEDURE revoke_tokens_except_refresh_token_id(
+	// CreateRevokeUserTokensExceptRefreshTokenIDProc is the query to create the revoke user tokens except refresh token ID stored procedure
+	CreateRevokeUserTokensExceptRefreshTokenIDProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_tokens_except_refresh_token_id(
 	IN in_user_id BIGINT,
 	IN in_user_refresh_token_id BIGINT
 )
@@ -1029,7 +1060,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Revoke the user password hash
-	CALL revoke_password_hash(in_user_id);
+	CALL revoke_user_password_hash(in_user_id);
 
 	-- Insert into user_password_hashes table
 	INSERT INTO user_password_hashes (
@@ -1042,7 +1073,346 @@ BEGIN
 	);
 
 	-- Revoke the user tokens, except the current access token and refresh token
-	CALL revoke_tokens_except_refresh_token_id(in_user_id, in_user_refresh_token_id);
+	CALL revoke_user_tokens_except_refresh_token_id(in_user_id, in_user_refresh_token_id);
+END;
+$$;
+`
+
+	// CreateRevokeUserUsernameProc is the query to create the revoke user username stored procedure
+	CreateRevokeUserUsernameProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_username(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_usernames table
+	UPDATE
+		user_usernames
+	SET
+		revoked_at = NOW()	
+	WHERE
+		user_usernames.user_id = in_user_id
+	AND
+		user_usernames.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateRevokeUserPhoneNumberProc is the query to create the revoke user phone number stored procedure
+	CreateRevokeUserPhoneNumberProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_phone_number(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_phone_numbers table
+	UPDATE
+		user_phone_numbers
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_phone_numbers.user_id = in_user_id
+	AND
+		user_phone_numbers.revoked_at IS NULL;
+
+	-- Update the user_phone_number_verifications table
+	UPDATE
+		user_phone_number_verifications
+	SET
+		revoked_at = NOW()
+	FROM
+		user_phone_numbers
+	WHERE
+		user_phone_number_verifications.user_phone_number_id = user_phone_numbers.id
+	AND
+		user_phone_numbers.user_id = in_user_id
+	AND
+		user_phone_number_verifications.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateDeleteUserProc is the query to create the delete user stored procedure
+	CreateDeleteUserProc = `
+CREATE OR REPLACE PROCEDURE delete_user(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Revoke the user username
+	CALL revoke_user_username(in_user_id);
+
+	-- Revoke the user email 
+	CALL revoke_user_email(in_user_id);
+
+	-- Revoke the user phone number
+	CALL revoke_user_phone_number(in_user_id);
+
+	-- Revoke the user password hash
+	CALL revoke_user_password_hash(in_user_id);
+
+	-- Revoke the user tokens
+	CALL revoke_user_tokens(in_user_id);
+
+	-- Revoke the user TOTP
+	CALL revoke_user_totp(in_user_id);
+
+	-- Revoke the user reset password token
+	CALL revoke_user_reset_password_token(in_user_id);
+
+	-- Update the users table
+	UPDATE
+		users
+	SET
+		deleted_at = NOW()
+	WHERE
+		users.id = in_user_id;
+
+	-- Delete the user tags
+	DELETE FROM
+		tags
+	WHERE
+		tags.user_id = in_user_id;
+
+	-- Delete the user note tags
+	DELETE FROM
+		note_tags
+	INNER JOIN
+		notes ON note_tags.note_id = notes.id
+	WHERE
+		notes.user_id = in_user_id;
+	
+	-- Delete the user note versions
+	DELETE FROM
+		note_versions
+	INNER JOIN
+		notes ON note_versions.note_id = notes.id
+	WHERE
+		notes.user_id = in_user_id;
+
+	-- Delete the user notes
+	DELETE FROM
+		notes
+	WHERE
+		notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateChangeUsernameProc is the query to create the change username stored procedure
+	CreateChangeUsernameProc = `
+CREATE OR REPLACE PROCEDURE change_username(
+	IN in_user_id BIGINT,
+	IN in_new_username VARCHAR
+)
+LANGUAGE plpgsql	
+AS $$
+BEGIN
+	-- Revoke the user username
+	CALL revoke_user_username(in_user_id);
+
+	-- Insert into user_usernames table
+	INSERT INTO user_usernames (
+		user_id,
+		username
+	)
+	VALUES (
+		in_user_id,
+		in_new_username
+	);
+END;
+$$;
+`
+
+	// CreateUpdateProfileProc is the query to create the update profile stored procedure
+	CreateUpdateProfileProc = `
+CREATE OR REPLACE PROCEDURE update_profile(
+	IN in_user_id BIGINT,
+	IN in_first_name VARCHAR,
+	IN in_last_name VARCHAR,
+	IN in_birthdate TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE 
+	out_first_name VARCHAR;
+	out_last_name VARCHAR;
+	out_birthdate TIMESTAMP;
+BEGIN
+	-- Select the user first name, last name, and birthdate by user ID
+	SELECT
+		users.first_name,
+		users.last_name,
+		users.birthdate
+	INTO
+		out_first_name,
+		out_last_name,
+		out_birthdate
+	FROM
+		users
+	WHERE
+		users.id = in_user_id;
+
+	-- Update the users table conditionally
+	UPDATE
+		users
+	SET
+		first_name = COALESCE(in_first_name, out_first_name),
+		last_name = COALESCE(in_last_name, out_last_name),
+		birthdate = COALESCE(in_birthdate, out_birthdate)
+	WHERE
+		users.id = in_user_id;
+END;
+$$;
+`
+
+	// CreateGetUserPhoneNumberProc is the query to create the get user phone number by user ID stored procedure
+	CreateGetUserPhoneNumberProc = `
+CREATE OR REPLACE PROCEDURE get_user_phone_number(
+	IN in_user_id BIGINT,
+	OUT out_phone_number VARCHAR
+)	
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user phone number by user ID
+	SELECT
+		user_phone_numbers.phone_number
+	INTO
+		out_phone_number
+	FROM
+		user_phone_numbers
+	WHERE
+		user_phone_numbers.user_id = in_user_id
+	AND
+		user_phone_numbers.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateGetUserUsernameProc is the query to create the get user username by user ID stored procedure
+	CreateGetUserUsernameProc = `
+CREATE OR REPLACE PROCEDURE get_user_username(
+	IN in_user_id BIGINT,
+	OUT out_username VARCHAR
+)	
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user username by user ID
+	SELECT
+		user_usernames.username
+	INTO
+		out_username
+	FROM
+		user_usernames
+	WHERE
+		user_usernames.user_id = in_user_id
+	AND
+		user_usernames.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateHasUserTOTPEnabledProc is the query to create the has user TOTP enabled stored procedure
+	CreateHasUserTOTPEnabledProc = `
+CREATE OR REPLACE PROCEDURE has_user_totp_enabled(
+	IN in_user_id BIGINT,
+	OUT out_has_totp_enabled BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user TOTP ID by user ID
+	SELECT
+		user_totps.verified_at IS NOT NULL
+	INTO
+		out_has_totp_enabled
+	FROM
+		user_totps
+	WHERE
+		user_totps.user_id = in_user_id
+	AND
+		user_totps.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateIsUserPhoneNumberVerifiedProc is the query to create the is user phone number verified stored procedure
+	CreateIsUserPhoneNumberVerifiedProc = `
+CREATE OR REPLACE PROCEDURE is_user_phone_number_verified(
+	IN in_user_id BIGINT,
+	OUT out_is_verified BOOLEAN
+)	
+LANGUAGE plpgsql	
+AS $$
+BEGIN
+	-- Select the user phone number by user ID
+	SELECT
+		user_phone_numbers.verified_at IS NOT NULL
+	INTO
+		out_is_verified
+	FROM
+		user_phone_numbers
+	WHERE
+		user_phone_numbers.user_id = in_user_id
+	AND
+		user_phone_numbers.revoked_at IS NULL;
+END;	
+$$;
+`
+
+	// CreateGetMyProfileProc is the query to create the get my profile stored procedure
+	CreateGetMyProfileProc = `
+CREATE OR REPLACE PROCEDURE get_my_profile(
+	IN in_user_id BIGINT,
+	OUT out_first_name VARCHAR,
+	OUT out_last_name VARCHAR,
+	OUT out_birthdate TIMESTAMP,
+	OUT out_username VARCHAR,
+	OUT out_email VARCHAR,
+	OUT out_is_email_verified BOOLEAN,
+	OUT out_phone_number VARCHAR,
+	OUT out_is_phone_number_verified BOOLEAN,
+	OUT out_has_totp_enabled BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user first name, last name, and birthdate by user ID
+	SELECT
+		users.first_name,
+		users.last_name,
+		users.birthdate
+	INTO
+		out_first_name,
+		out_last_name,
+		out_birthdate
+	FROM
+		users
+	WHERE
+		users.id = in_user_id;
+
+	-- Select the user username by user ID
+	CALL get_user_username(in_user_id, out_username);
+
+	-- Get the user email
+	CALL get_user_email(in_user_id, out_email);
+
+	-- Select the user phone number by user ID
+	CALL get_user_phone_number(in_user_id, out_phone_number);
+
+	-- Check if the user email is verified
+	CALL is_user_email_verified(in_user_id, out_is_email_verified);
+
+	-- Check if the user phone number is verified
+	CALL is_user_phone_number_verified(in_user_id, out_is_phone_number_verified);
+
+	-- Check if the user has TOTP enabled
+	CALL has_user_totp_enabled(in_user_id, out_has_totp_enabled);
 END;
 $$;
 `

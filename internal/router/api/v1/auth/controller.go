@@ -99,7 +99,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/auth/refresh-tokens [get]
 func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	// Get the user's refresh tokens
-	userID, userRefreshTokens := Service.ListRefreshTokens(r)
+	userID, data := Service.ListRefreshTokens(r)
 
 	// Log the successful fetch of the user's refresh tokens
 	internallogger.Api.ListRefreshTokens(userID)
@@ -107,9 +107,7 @@ func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
-			ListRefreshTokensResponse{
-				RefreshTokens: *userRefreshTokens,
-			},
+			data,
 			http.StatusOK,
 		),
 	)
@@ -132,7 +130,7 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	body, _ := gonethttpctx.GetCtxBody(r).(*GetRefreshTokenRequest)
 
 	// Get the user's refresh token by ID
-	userID, userRefreshToken := Service.GetRefreshToken(
+	userID, data := Service.GetRefreshToken(
 		r,
 		body.RefreshTokenID,
 	)
@@ -143,9 +141,7 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
-			GetRefreshTokenResponse{
-				RefreshToken: userRefreshToken,
-			},
+			data,
 			http.StatusOK,
 		),
 	)
@@ -373,11 +369,14 @@ func (c *controller) ChangeEmail(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// Send the email verification token
-	userID := Service.SendEmailVerificationToken(r)
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*ChangeEmailRequest)
 
-	// Log the successful email verification token request
-	internallogger.Api.SendEmailVerificationToken(userID)
+	// Change the email
+	userID := Service.ChangeEmail(r, body)
+
+	// Log the successful email change
+	internallogger.Api.ChangeEmail(userID, body.Email)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(

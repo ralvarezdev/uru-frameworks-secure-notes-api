@@ -13,15 +13,15 @@ type UpdateProfileRequest struct {
 
 // GetMyProfileResponse is the response DTO to get my profile
 type GetMyProfileResponse struct {
-	FirstName       string  `json:"first_name"`
-	LastName        string  `json:"last_name"`
-	Username        string  `json:"username"`
-	Email           string  `json:"email"`
-	EmailIsVerified bool    `json:"email_is_verified"`
-	Phone           *string `json:"phone,omitempty"`
-	PhoneIsVerified *bool   `json:"phone_is_verified,omitempty"`
-	HasTOTP         bool    `json:"has_totp"`
-	NumberNotes     int     `json:"number_notes"`
+	FirstName       string     `json:"first_name"`
+	LastName        string     `json:"last_name"`
+	Birthdate       *time.Time `json:"birthdate,omitempty"`
+	Username        string     `json:"username"`
+	Email           string     `json:"email"`
+	EmailIsVerified bool       `json:"email_is_verified"`
+	Phone           *string    `json:"phone,omitempty"`
+	PhoneIsVerified *bool      `json:"phone_is_verified,omitempty"`
+	HasTOTPEnabled  bool       `json:"has_totp_enabled"`
 }
 
 // ChangeUsernameRequest is the request DTO to change username
