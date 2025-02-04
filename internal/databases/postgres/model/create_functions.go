@@ -4,7 +4,7 @@ const (
 	// CreateGetUserRefreshTokenByIDFn is the SQL query to create the get user refresh token by ID function
 	CreateGetUserRefreshTokenByIDFn = `
 CREATE OR REPLACE FUNCTION get_user_refresh_token_by_id(
-	in_refresh_token_id BIGINT,
+	in_user_refresh_token_id BIGINT,
 	in_user_id BIGINT
 ) RETURNS 
 TABLE(
@@ -22,7 +22,7 @@ BEGIN
 	FROM
 		user_refresh_tokens
 	WHERE
-		user_refresh_tokens.id = in_refresh_token_id
+		user_refresh_tokens.id = in_user_refresh_token_id
 	AND
 		user_refresh_tokens.user_id = in_user_id
 	AND
@@ -66,16 +66,16 @@ CREATE OR REPLACE FUNCTION list_user_tokens(
 	in_user_id BIGINT
 ) RETURNS
 TABLE(
-	out_refresh_token_id BIGINT,
-	out_access_token_id BIGINT
+	out_user_refresh_token_id BIGINT,
+	out_user_access_token_id BIGINT
 )
 AS $$
 BEGIN
 	-- Return the user tokens
 	RETURN QUERY
 	SELECT
-		user_refresh_tokens.id AS out_refresh_token_id,
-		user_access_tokens.id AS out_access_token_id
+		user_refresh_tokens.id AS out_user_refresh_token_id,
+		user_access_tokens.id AS out_user_access_token_id
 	FROM
 		user_refresh_tokens
 	INNER JOIN

@@ -11,44 +11,44 @@ var (
 	ErrSignUpUsernameAlreadyRegistered = gonethttpresponse.NewFieldError(
 		"username",
 		"username is already registered",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrSignUpEmailAlreadyRegistered = gonethttpresponse.NewFieldError(
 		"email",
 		"email is already registered",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrLogInInvalidUsername = gonethttpresponse.NewFieldError(
 		"username",
 		"user not found by username",
-		http.StatusUnauthorized,
 		nil,
+		http.StatusUnauthorized,
 	)
 	ErrLogInInvalidPassword = gonethttpresponse.NewFieldError(
 		"password",
 		"invalid password",
-		http.StatusUnauthorized,
 		nil,
+		http.StatusUnauthorized,
 	)
 	ErrLogInInvalidTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		"invalid TOTP code",
-		http.StatusUnauthorized,
 		nil,
+		http.StatusUnauthorized,
 	)
 	ErrLogInInvalidTOTPRecoveryCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		"invalid TOTP recovery code",
-		http.StatusUnauthorized,
 		nil,
+		http.StatusUnauthorized,
 	)
 	ErrLogInRequiredTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		fmt.Sprintf(govalidatormappervalidations.ErrRequiredField, "totp_code"),
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrLogInRequiredIsTOTPRecoveryCode = gonethttpresponse.NewFieldError(
 		"is_totp_recovery_code",
@@ -56,79 +56,79 @@ var (
 			govalidatormappervalidations.ErrRequiredField,
 			"is_totp_recovery_code",
 		),
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrGenerateTOTPUrlAlreadyVerified = gonethttpresponse.NewFieldError(
 		"totp",
 		"TOTP is already verified",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrVerifyTOTPNotGenerated = gonethttpresponse.NewFieldError(
 		"totp",
 		"user has not generated TOTP",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrVerifyTOTPInvalidTOTPCode = gonethttpresponse.NewFieldError(
 		"totp_code",
 		"invalid TOTP code",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrVerifyTOTPAlreadyVerified = gonethttpresponse.NewFieldError(
 		"totp",
 		"TOTP is already verified",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrGetRefreshTokenNotFound = gonethttpresponse.NewFieldError(
 		"id",
 		"refresh token not found",
-		http.StatusNotFound,
 		nil,
+		http.StatusNotFound,
 	)
 	ErrVerifyEmailTokenNotFound = gonethttpresponse.NewFieldError(
 		"token_id",
 		"email verification token not found",
-		http.StatusNotFound,
 		nil,
+		http.StatusNotFound,
 	)
 	ErrSendEmailVerificationTokenAlreadyVerified = gonethttpresponse.NewFieldError(
 		"email",
 		"email is already verified",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrChangeEmailAlreadyRegistered = gonethttpresponse.NewFieldError(
 		"email",
 		"email is already registered",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrVerifyEmailInvalidToken = gonethttpresponse.NewFieldError(
 		"token",
 		"email has already been verified, token has expired, or token is invalid",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrResetPasswordInvalidToken = gonethttpresponse.NewFieldError(
 		"token",
 		"token has expired or is invalid",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrChangePasswordInvalidOldPassword = gonethttpresponse.NewFieldError(
 		"old_password",
 		"invalid old password",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 	ErrChangePasswordSamePassword = gonethttpresponse.NewFieldError(
 		"new_password",
 		"new password is the same as the old password",
-		http.StatusBadRequest,
 		nil,
+		http.StatusBadRequest,
 	)
 )

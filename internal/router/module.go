@@ -15,6 +15,7 @@ var (
 		Controller: Controller,
 		BeforeLoadFn: func(m *gonethttp.Module) {
 			m.Middlewares = &[]func(http.Handler) http.Handler{
+				internalmiddleware.Limit,
 				internalmiddleware.HandleError,
 				gosecurityheadersnethttp.Handler,
 			}

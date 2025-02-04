@@ -6,7 +6,7 @@ const (
 CREATE OR REPLACE PROCEDURE send_email_verification_token(
 	IN in_user_id BIGINT,
 	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_token_expires_at TIMESTAMP,
+	IN in_email_verification_token_expires_at TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
@@ -152,8 +152,8 @@ CREATE OR REPLACE PROCEDURE generate_tokens(
 	IN in_ip_address VARCHAR,
 	IN in_refresh_expires_at TIMESTAMP,
 	IN in_access_expires_at TIMESTAMP,
-	OUT out_refresh_token_id BIGINT,
-	OUT out_access_token_id BIGINT
+	OUT out_user_refresh_token_id BIGINT,
+	OUT out_user_access_token_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
@@ -172,7 +172,7 @@ BEGIN
 		in_refresh_expires_at
 	)
 	RETURNING
-		id INTO out_refresh_token_id;
+		id INTO out_user_refresh_token_id;
 
 	-- Insert into user_access_tokens table
 	INSERT INTO user_access_tokens (
@@ -182,11 +182,11 @@ BEGIN
 	)
 	VALUES (
   		in_user_id,
-  		out_refresh_token_id,
+  		out_user_refresh_token_id,
   		in_access_expires_at
 	)
 	RETURNING
-  		id INTO out_access_token_id;
+  		id INTO out_user_access_token_id;
 END;
 $$;
 `
@@ -195,7 +195,7 @@ $$;
 	CreateRevokeTokensByIDProc = `
 CREATE OR REPLACE PROCEDURE revoke_tokens_by_id(
 	IN in_user_id BIGINT,
-	IN in_refresh_token_id BIGINT
+	IN in_user_refresh_token_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
@@ -206,7 +206,7 @@ BEGIN
 	SET	
 		revoked_at = NOW()
 	WHERE
-		user_refresh_tokens.id = in_refresh_token_id
+		user_refresh_tokens.id = in_user_refresh_token_id
 	AND
 		user_refresh_tokens.user_id = in_user_id
 	AND 
@@ -218,7 +218,7 @@ BEGIN
 	SET
 		revoked_at = NOW()
 	WHERE
-		user_access_tokens.user_refresh_token_id = in_refresh_token_id
+		user_access_tokens.user_refresh_token_id = in_user_refresh_token_id
 	AND
 		user_access_tokens.user_id = user_id
 	AND
@@ -284,8 +284,8 @@ $$;
 	// CreateGetAccessTokenIDByRefreshTokenIDProc is the query to create the get access token ID by refresh token ID stored procedure
 	CreateGetAccessTokenIDByRefreshTokenIDProc = `
 CREATE OR REPLACE PROCEDURE get_access_token_id_by_refresh_token_id(
-	IN in_refresh_token_id BIGINT,
-	OUT out_access_token_id BIGINT
+	IN in_user_refresh_token_id BIGINT,
+	OUT out_user_access_token_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
@@ -294,11 +294,11 @@ BEGIN
 	SELECT
 		user_access_tokens.id
 	INTO
-		out_access_token_id
+		out_user_access_token_id
 	FROM
 		user_access_tokens
 	WHERE
-		user_access_tokens.user_refresh_token_id = in_refresh_token_id
+		user_access_tokens.user_refresh_token_id = in_user_refresh_token_id
 	AND
 		user_access_tokens.revoked_at IS NULL;
 END;
@@ -519,7 +519,7 @@ $$;
 	// CreateIsRefreshTokenValidProc is the query to create the is refresh token valid stored procedure
 	CreateIsRefreshTokenValidProc = `
 CREATE OR REPLACE PROCEDURE is_refresh_token_valid(
-	IN in_refresh_token_id BIGINT,
+	IN in_user_refresh_token_id BIGINT,
 	OUT out_expires_at TIMESTAMP,
 	OUT out_found BOOLEAN,
 	OUT out_is_expired BOOLEAN
@@ -535,7 +535,7 @@ BEGIN
 	FROM
 		user_refresh_tokens
 	WHERE
-		user_refresh_tokens.id = in_refresh_token_id
+		user_refresh_tokens.id = in_user_refresh_token_id
 	AND
 		user_refresh_tokens.revoked_at IS NULL;
 
@@ -550,7 +550,7 @@ $$;
 	// CreateIsAccessTokenValidProc is the query to create the is access token valid stored procedure
 	CreateIsAccessTokenValidProc = `
 CREATE OR REPLACE PROCEDURE is_access_token_valid(
-	IN in_access_token_id BIGINT,
+	IN in_user_access_token_id BIGINT,
 	OUT out_expires_at TIMESTAMP,
 	OUT out_found BOOLEAN,
 	OUT out_is_expired BOOLEAN
@@ -566,7 +566,7 @@ BEGIN
 	FROM
 		user_access_tokens
 	WHERE
-		user_access_tokens.id = in_access_token_id
+		user_access_tokens.id = in_user_access_token_id
 	AND
 		user_access_tokens.revoked_at IS NULL;
 	
@@ -653,7 +653,7 @@ BEGIN
 	AND
 		user_email_verifications.expires_at > NOW()
 	AND
-		user_email_verifications.revoked_at IS NULL;
+		user_email_verifications.revoked_at IS NULL
 	AND
 		user_email_verifications.verified_at IS NULL;
 
@@ -681,7 +681,7 @@ CREATE OR REPLACE PROCEDURE is_user_email_verified(
 	IN in_user_id BIGINT,
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR,
-	OUT out_user_email VARCHAR
+	OUT out_user_email VARCHAR,
 	OUT out_is_verified BOOLEAN
 )
 LANGUAGE plpgsql
@@ -719,7 +719,7 @@ BEGIN
 		SET
 			revoked_at = NOW()
 		WHERE
-			user_email_verifications.user_email_id = user_email_id
+			user_email_verifications.user_email_id = user_email_id;
 	END IF;
 END;
 $$;
@@ -766,9 +766,9 @@ CREATE OR REPLACE PROCEDURE change_email(
 	IN in_user_id BIGINT,
 	IN in_new_email VARCHAR,
 	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_token_expires_at TIMESTAMP
+	IN in_email_verification_token_expires_at TIMESTAMP,
 	OUT out_user_first_name VARCHAR,
-	OUT out_user_last_name VARCHAR,
+	OUT out_user_last_name VARCHAR
 )
 LANGUAGE plpgsql
 AS $$
@@ -861,7 +861,7 @@ BEGIN
 	AND
 		user_usernames.revoked_at IS NULL
 	AND
-		user_emails.revoked_at IS NULL;
+		user_emails.revoked_at IS NULL
 	AND
 		users.deleted_at IS NULL;
 
@@ -973,11 +973,9 @@ BEGIN
 	SET	
 		revoked_at = NOW()
 	WHERE
-		user_refresh_tokens.id = in_refresh_token_id
-	AND
 		user_refresh_tokens.user_id = in_user_id
 	AND 
-		user_refresh_tokens.revoked_at IS NULL;
+		user_refresh_tokens.revoked_at IS NULL
 	AND
 		user_refresh_tokens.id != in_user_refresh_token_id;
 
@@ -987,13 +985,11 @@ BEGIN
 	SET
 		revoked_at = NOW()
 	WHERE
-		user_access_tokens.user_refresh_token_id = in_refresh_token_id
-	AND
 		user_access_tokens.user_id = in_user_id
 	AND
-		user_access_tokens.revoked_at IS NULL;
+		user_access_tokens.revoked_at IS NULL
 	AND
-		user_access_tokens.id != in_user_access_token_id;
+		user_access_tokens.user_refresh_token_id != in_user_refresh_token_id;
 END;
 $$;
 `

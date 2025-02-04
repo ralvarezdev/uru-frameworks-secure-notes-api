@@ -271,8 +271,8 @@ func (s *service) RenovateCookie(
 			gonethttpresponse.NewCookieError(
 				cookie.Name,
 				"cookie not found, please log in again",
-				http.StatusInternalServerError,
 				gonethttp.ErrCodeCookieNotFound,
+				http.StatusInternalServerError,
 			),
 		)
 	}
