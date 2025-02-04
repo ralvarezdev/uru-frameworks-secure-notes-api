@@ -26,8 +26,8 @@ $$;
 	CreateSendEmailVerificationTokenProc = `
 CREATE OR REPLACE PROCEDURE send_email_verification_token(
 	IN in_user_id BIGINT,
-	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_token_expires_at TIMESTAMP
+	IN in_user_email_verification_token VARCHAR,
+	IN in_user_email_verification_token_expires_at TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
@@ -48,8 +48,8 @@ BEGIN
 	)
 	VALUES (
 		out_user_email_id,
-		in_email_verification_token,
-		in_email_verification_token_expires_at
+		in_user_email_verification_token,
+		in_user_email_verification_token_expires_at
 	);	
 END;
 $$;
@@ -58,15 +58,15 @@ $$;
 	// CreateSignUpProc is the query to create the sign-up stored procedure
 	CreateSignUpProc = `
 CREATE OR REPLACE PROCEDURE sign_up(
-	IN in_first_name VARCHAR,
-	IN in_last_name VARCHAR,
-	IN in_salt VARCHAR,
-	IN in_encrypted_key TEXT, 
-	IN in_username VARCHAR,
-	IN in_email VARCHAR,
-	IN in_password_hash VARCHAR,
-	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_token_expires_at TIMESTAMP,
+	IN in_user_first_name VARCHAR,
+	IN in_user_last_name VARCHAR,
+	IN in_user_salt VARCHAR,
+	IN in_user_encrypted_key TEXT, 
+	IN in_user_username VARCHAR,
+	IN in_user_email VARCHAR,
+	IN in_user_password_hash VARCHAR,
+	IN in_user_email_verification_token VARCHAR,
+	IN in_user_email_verification_token_expires_at TIMESTAMP,
 	OUT out_user_id BIGINT
 )
 LANGUAGE plpgsql
@@ -82,10 +82,10 @@ BEGIN
 		encrypted_key
 	) 
 	VALUES (
-		in_first_name, 
-		in_last_name, 
-		in_salt,
-		in_encrypted_key
+		in_user_first_name, 
+		in_user_last_name, 
+		in_user_salt,
+		in_user_encrypted_key
 	)
 	RETURNING 
 		id INTO out_user_id;
@@ -97,7 +97,7 @@ BEGIN
 	)
 	VALUES (
 		out_user_id, 
-		in_username
+		in_user_username
 	);
 
 	-- Insert into user_emails table
@@ -107,7 +107,7 @@ BEGIN
 	)
 	VALUES (
 		out_user_id, 
-		in_email
+		in_user_email
 	) 
 	RETURNING
 		id INTO out_user_email_id;
@@ -119,14 +119,11 @@ BEGIN
 	) 
 	VALUES (
 		out_user_id, 
-		in_password_hash
+		in_user_password_hash
 	);
 
 	-- Insert into user_email_verifications table
-	call send_email_verification_token(out_user_id, in_email_verification_token, in_email_verification_token_expires_at);
-EXCEPTION 
-	WHEN OTHERS THEN 
-		RAISE;
+	call send_email_verification_token(out_user_id, in_user_email_verification_token, in_user_email_verification_token_expires_at);
 END;
 $$;
 `
@@ -166,14 +163,14 @@ END;
 $$;
 `
 
-	// CreateGenerateTokensProc is the query to create the generate tokens stored procedure
-	CreateGenerateTokensProc = `
-CREATE OR REPLACE PROCEDURE generate_tokens(
+	// CreateGenerateUserTokensProc is the query to create the generate user tokens stored procedure
+	CreateGenerateUserTokensProc = `
+CREATE OR REPLACE PROCEDURE generate_user_tokens(
 	IN in_user_id BIGINT,
-	IN in_parent_refresh_token_id BIGINT,
-	IN in_ip_address VARCHAR,
-	IN in_refresh_expires_at TIMESTAMP,
-	IN in_access_expires_at TIMESTAMP,
+	IN in_user_parent_refresh_token_id BIGINT,
+	IN in_user_ip_address VARCHAR,
+	IN in_user_refresh_token_expires_at TIMESTAMP,
+	IN in_user_access_token_expires_at TIMESTAMP,
 	OUT out_user_refresh_token_id BIGINT,
 	OUT out_user_access_token_id BIGINT
 )
@@ -189,9 +186,9 @@ BEGIN
 	)
 	VALUES (
 		in_user_id,
-		in_parent_refresh_token_id,
-		in_ip_address,
-		in_refresh_expires_at
+		in_user_parent_refresh_token_id,
+		in_user_ip_address,
+		in_user_refresh_token_expires_at
 	)
 	RETURNING
 		id INTO out_user_refresh_token_id;
@@ -205,7 +202,7 @@ BEGIN
 	VALUES (
   		in_user_id,
   		out_user_refresh_token_id,
-  		in_access_expires_at
+  		in_user_access_token_expires_at
 	)
 	RETURNING
   		id INTO out_user_access_token_id;
@@ -253,21 +250,21 @@ $$;
 	CreateRefreshTokenProc = `
 CREATE OR REPLACE PROCEDURE refresh_token(
 	IN in_user_id BIGINT,
-	IN in_old_refresh_token_id BIGINT,
-	IN in_ip_address VARCHAR,
-	IN in_new_refresh_expires_at TIMESTAMP,
-	IN in_new_access_expires_at TIMESTAMP,
-	OUT out_new_refresh_token_id BIGINT,
-	OUT out_new_access_token_id BIGINT
+	IN in_old_user_refresh_token_id BIGINT,
+	IN in_user_ip_address VARCHAR,
+	IN in_new_user_refresh_token_expires_at TIMESTAMP,
+	IN in_new_user_access_token_expires_at TIMESTAMP,
+	OUT out_new_user_refresh_token_id BIGINT,
+	OUT out_new_user_access_token_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Revoke the old user refresh token and access token
-	CALL revoke_user_tokens_by_id(in_user_id, in_old_refresh_token_id);
+	CALL revoke_user_tokens_by_id(in_user_id, in_old_user_refresh_token_id);
 
 	-- Generate new tokens
-	CALL generate_tokens(in_user_id, in_old_refresh_token_id, in_ip_address, in_new_refresh_expires_at, in_new_access_expires_at, out_new_refresh_token_id, out_new_access_token_id);
+	CALL generate_user_tokens(in_user_id, in_old_user_refresh_token_id, in_user_ip_address, in_new_user_refresh_token_expires_at, in_new_user_access_token_expires_at, out_new_user_refresh_token_id, out_new_user_access_token_id);
 END;
 $$;
 `
@@ -330,13 +327,13 @@ $$;
 	// CreatePreLogInProc is the query to create the pre-log in stored procedure
 	CreatePreLogInProc = `
 CREATE OR REPLACE PROCEDURE pre_log_in(
-	IN in_username VARCHAR,
+	IN in_user_username VARCHAR,
 	OUT out_user_id BIGINT,
-	OUT out_password_hash VARCHAR,
-	OUT out_salt VARCHAR,
-	OUT out_encrypted_key TEXT,
-	OUT out_totp_id BIGINT,
-	OUT out_totp_secret VARCHAR
+	OUT out_user_password_hash VARCHAR,
+	OUT out_user_salt VARCHAR,
+	OUT out_user_encrypted_key TEXT,
+	OUT out_user_totp_id BIGINT,
+	OUT out_user_totp_secret VARCHAR
 )
 LANGUAGE plpgsql
 AS $$
@@ -349,9 +346,9 @@ BEGIN
 		user_password_hashes.password_hash
 	INTO
 		out_user_id,
-		out_salt,	
-		out_encrypted_key,	
-		out_password_hash
+		out_user_salt,	
+		out_user_encrypted_key,	
+		out_user_password_hash
 	FROM
 		users
 	INNER JOIN
@@ -359,7 +356,7 @@ BEGIN
 	INNER JOIN
 		user_password_hashes ON users.id = user_password_hashes.user_id
 	WHERE
-		user_usernames.username = in_username
+		user_usernames.username = in_user_username
 	AND
 		user_usernames.revoked_at IS NULL
 	AND
@@ -372,8 +369,8 @@ BEGIN
 		user_totps.id,
 		user_totps.secret
 	INTO
-		out_totp_id,
-		out_totp_secret
+		out_user_totp_id,
+		out_user_totp_secret
 	FROM
 		user_totps
 	WHERE
@@ -385,8 +382,8 @@ BEGIN
 
 	-- If the user doesn't have a TOTP, set the TOTP ID and secret to NULL
 	IF NOT FOUND THEN
-		out_totp_id = NULL;
-		out_totp_secret = NULL;
+		out_user_totp_id = NULL;
+		out_user_totp_secret = NULL;
 	END IF;
 END;
 $$;
@@ -394,9 +391,9 @@ $$;
 
 	// CreateRegisterFailedLogInAttemptProc is the query to create the register failed log in attempt stored procedure
 	CreateRegisterFailedLogInAttemptProc = `
-CREATE OR REPLACE PROCEDURE register_failed_login_attempt(
+CREATE OR REPLACE PROCEDURE register_failed_log_in_attempt(
 	IN in_user_id BIGINT,
-	IN in_ip_address VARCHAR,
+	IN in_user_ip_address VARCHAR,
 	IN in_bad_password BOOLEAN,
 	IN in_bad_2fa_code BOOLEAN
 )
@@ -412,7 +409,7 @@ BEGIN
 	)
 	VALUES (
 		in_user_id,
-		in_ip_address,
+		in_user_ip_address,
 		in_bad_password,
 		in_bad_2fa_code
 	);
@@ -424,9 +421,9 @@ $$;
 	CreateGetUserTOTPProc = `
 CREATE OR REPLACE PROCEDURE get_user_totp(
 	IN in_user_id BIGINT,
-	OUT out_totp_id BIGINT,
-	OUT out_totp_secret VARCHAR,
-	OUT out_totp_verified_at TIMESTAMP
+	OUT out_user_totp_id BIGINT,
+	OUT out_user_totp_secret VARCHAR,
+	OUT out_user_totp_verified_at TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
@@ -437,9 +434,9 @@ BEGIN
 		user_totps.secret,
 		user_totps.verified_at
 	INTO
-		out_totp_id,
-		out_totp_secret,
-		out_totp_verified_at
+		out_user_totp_id,
+		out_user_totp_secret,
+		out_user_totp_verified_at
 	FROM
 		user_totps
 	WHERE
@@ -454,7 +451,7 @@ $$;
 	CreateGetUserEmailProc = `
 CREATE OR REPLACE PROCEDURE get_user_email(
 	IN in_user_id BIGINT,
-	OUT out_email VARCHAR
+	OUT out_user_email VARCHAR
 )
 LANGUAGE plpgsql
 AS $$
@@ -463,7 +460,7 @@ BEGIN
 	SELECT
 		user_emails.email
 	INTO
-		out_email
+		out_user_email
 	FROM
 		user_emails
 	WHERE
@@ -500,22 +497,22 @@ $$;
 
 	// CreateGenerateTOTPUrlProc is the query to create the generate TOTP URL stored procedure
 	CreateGenerateTOTPUrlProc = `
-CREATE OR REPLACE PROCEDURE pre_generate_totp_url(
+CREATE OR REPLACE PROCEDURE generate_totp_url(
 	IN in_user_id BIGINT,
-	IN in_new_totp_secret VARCHAR,
-	OUT out_email VARCHAR,
-	OUT out_old_totp_id BIGINT,
-	OUT out_old_totp_secret VARCHAR,
-	OUT out_old_totp_verified_at TIMESTAMP
+	IN in_new_user_totp_secret VARCHAR,
+	OUT out_user_email VARCHAR,
+	OUT out_old_user_totp_id BIGINT,
+	OUT out_old_user_totp_secret VARCHAR,
+	OUT out_old_user_totp_verified_at TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Select the user email by user ID
-	CALL get_user_email(in_user_id, out_email);
+	CALL get_user_email(in_user_id, out_user_email);
 
 	-- Select the TOTP ID, secret, and verified at by user ID
-	CALL get_user_totp(in_user_id, out_old_totp_id, out_old_totp_secret, out_old_totp_verified_at);
+	CALL get_user_totp(in_user_id, out_old_user_totp_id, out_old_user_totp_secret, out_old_user_totp_verified_at);
 
 	-- If the TOTP is not verified, revoke it
 	IF out_old_totp_verified_at IS NULL THEN
@@ -531,7 +528,7 @@ BEGIN
 		)
 		VALUES (
 			in_user_id,
-			in_new_totp_secret
+			in_new_user_totp_secret
 		);
 	END IF;
 END;
@@ -542,9 +539,9 @@ $$;
 	CreateIsRefreshTokenValidProc = `
 CREATE OR REPLACE PROCEDURE is_refresh_token_valid(
 	IN in_user_refresh_token_id BIGINT,
-	OUT out_expires_at TIMESTAMP,
-	OUT out_found BOOLEAN,
-	OUT out_is_expired BOOLEAN
+	OUT out_user_refresh_token_expires_at TIMESTAMP,
+	OUT out_user_refresh_token_found BOOLEAN,
+	OUT out_user_refresh_token_is_expired BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -553,7 +550,7 @@ BEGIN
 	SELECT
 		user_refresh_tokens.expires_at
 	INTO
-		out_expires_at
+		out_user_refresh_token_expires_at
 	FROM
 		user_refresh_tokens
 	WHERE
@@ -562,8 +559,8 @@ BEGIN
 		user_refresh_tokens.revoked_at IS NULL;
 
 	IF out_expires_at IS NOT NULL THEN
-		out_found = TRUE;
-		out_is_expired = out_expires_at < NOW();
+		out_user_refresh_token_found = TRUE;
+		out_user_refresh_token_is_expired = out_user_refresh_token_expires_at < NOW();
 	END IF;
 END;
 $$;
@@ -573,9 +570,9 @@ $$;
 	CreateIsAccessTokenValidProc = `
 CREATE OR REPLACE PROCEDURE is_access_token_valid(
 	IN in_user_access_token_id BIGINT,
-	OUT out_expires_at TIMESTAMP,
-	OUT out_found BOOLEAN,
-	OUT out_is_expired BOOLEAN
+	OUT out_user_access_token_expires_at TIMESTAMP,
+	OUT out_user_access_token_found BOOLEAN,
+	OUT out_user_access_token_is_expired BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -584,7 +581,7 @@ BEGIN
 	SELECT
 		user_access_tokens.expires_at
 	INTO
-		out_expires_at
+		out_user_access_token_expires_at
 	FROM
 		user_access_tokens
 	WHERE
@@ -593,8 +590,8 @@ BEGIN
 		user_access_tokens.revoked_at IS NULL;
 	
 	IF out_expires_at IS NOT NULL THEN
-		out_found = TRUE;
-		out_is_expired = out_expires_at < NOW();
+		out_user_access_token_found = TRUE;
+		out_user_access_token_is_expired = out_user_access_token_expires_at < NOW();
 	END IF;
 END;	
 $$;
@@ -604,7 +601,7 @@ $$;
 	CreateRevokeUserTOTPRecoveryCodeProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_totp_recovery_code(
 	IN in_user_totp_id BIGINT,
-	IN in_recovery_code VARCHAR
+	IN in_user_totp_recovery_code VARCHAR
 )
 LANGUAGE plpgsql
 AS $$
@@ -617,7 +614,7 @@ BEGIN
 	WHERE
 		user_totp_recovery_codes.user_totp_id = in_user_totp_id
 	AND
-		user_totp_recovery_codes.recovery_code = in_recovery_code
+		user_totp_recovery_codes.recovery_code = in_user_totp_recovery_code
 	AND
 		user_totp_recovery_codes.revoked_at IS NULL;
 END;
@@ -701,7 +698,7 @@ $$;
 	CreateIsUserEmailVerifiedProc = `
 CREATE OR REPLACE PROCEDURE is_user_email_verified(
 	IN in_user_id BIGINT,
-	OUT out_is_verified BOOLEAN
+	OUT out_user_email_is_verified BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -710,7 +707,7 @@ BEGIN
 	SELECT
 		user_emails.verified_at IS NOT NULL
 	INTO
-		out_is_verified
+		out_user_email_is_verified
 	FROM
 		user_emails
 	WHERE
@@ -728,7 +725,7 @@ CREATE OR REPLACE PROCEDURE pre_send_email_verification_token(
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR,
 	OUT out_user_email VARCHAR,
-	OUT out_is_verified BOOLEAN
+	OUT out_user_email_is_verified BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -743,7 +740,7 @@ BEGIN
 		out_user_first_name,
 		out_user_last_name,
 		out_user_email,
-		out_is_verified
+		out_user_email_is_verified
 	FROM
 		user_emails
 	INNER JOIN
@@ -795,9 +792,9 @@ $$;
 	CreateChangeEmailProc = `
 CREATE OR REPLACE PROCEDURE change_email(
 	IN in_user_id BIGINT,
-	IN in_new_email VARCHAR,
-	IN in_email_verification_token VARCHAR,
-	IN in_email_verification_token_expires_at TIMESTAMP,
+	IN in_new_user_email VARCHAR,
+	IN in_user_email_verification_token VARCHAR,
+	IN in_user_email_verification_token_expires_at TIMESTAMP,
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR
 )
@@ -814,11 +811,11 @@ BEGIN
 	)
 	VALUES (
 		in_user_id,
-		in_new_email
+		in_new_user_email
 	);
 
 	-- Insert into user_email_verifications table
-	CALL send_email_verification_token(in_user_id, in_email_verification_token, in_email_verification_token_expires_at);
+	CALL send_email_verification_token(in_user_id, in_user_email_verification_token, in_user_email_verification_token_expires_at);
 
 	-- Select the user first name and last name by user ID
 	SELECT
@@ -859,9 +856,9 @@ $$;
 	// CreateForgotPasswordProc is the query to create the forgot password stored procedure
 	CreateForgotPasswordProc = `
 CREATE OR REPLACE PROCEDURE forgot_password(
-	IN in_username VARCHAR,
-	IN in_reset_token VARCHAR,
-	IN in_reset_token_expires_at TIMESTAMP,
+	IN in_user_username VARCHAR,
+	IN in_user_reset_password_token VARCHAR,
+	IN in_user_reset_password_token_expires_at TIMESTAMP,
 	OUT out_user_id BIGINT,
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR,
@@ -888,7 +885,7 @@ BEGIN
 	INNER JOIN
 		user_emails ON users.id = user_emails.user_id
 	WHERE
-		user_usernames.username = in_username
+		user_usernames.username = in_user_username
 	AND
 		user_usernames.revoked_at IS NULL
 	AND
@@ -907,8 +904,8 @@ BEGIN
 	)
 	VALUES (
 		out_user_id,
-		in_reset_token,
-		in_reset_token_expires_at
+		in_user_reset_password_token,
+		in_user_reset_password_token_expires_at
 	);
 END;	
 $$;
@@ -938,8 +935,8 @@ $$;
 	// CreateResetPasswordProc is the query to create the reset password stored procedure
 	CreateResetPasswordProc = `
 CREATE OR REPLACE PROCEDURE reset_password(
-	IN in_reset_password_token BIGINT,
-	IN in_new_password_hash VARCHAR,
+	IN in_user_reset_password_token BIGINT,
+	IN in_new_user_password_hash VARCHAR,
 	OUT out_user_id BIGINT,
 	OUT out_invalid_token BOOLEAN
 )
@@ -954,7 +951,7 @@ BEGIN
 	FROM
 		user_reset_passwords
 	WHERE
-		user_reset_passwords.reset_token = in_reset_password_token
+		user_reset_passwords.reset_token = in_user_reset_password_token
 	AND
 		user_reset_passwords.expires_at > NOW()
 	AND
@@ -976,7 +973,7 @@ BEGIN
 		)
 		VALUES (
 			in_user_id,
-			in_new_password_hash
+			in_new_user_password_hash
 		);
 	
 		-- Revoke the user reset password token
@@ -1029,7 +1026,7 @@ $$;
 	CreateGetUserPasswordHashProc = `
 CREATE OR REPLACE PROCEDURE get_user_password_hash(
 	IN in_user_id BIGINT,
-	OUT out_password_hash VARCHAR
+	OUT out_user_password_hash VARCHAR
 )	
 LANGUAGE plpgsql
 AS $$
@@ -1038,7 +1035,7 @@ BEGIN
 	SELECT
 		user_password_hashes.password_hash
 	INTO
-		out_password_hash
+		out_user_password_hash
 	FROM
 		user_password_hashes
 	WHERE
@@ -1053,7 +1050,7 @@ $$;
 	CreateChangePasswordProc = `
 CREATE OR REPLACE PROCEDURE change_password(
 	IN in_user_id BIGINT,
-	IN in_new_password_hash VARCHAR,
+	IN in_new_user_password_hash VARCHAR,
 	IN in_user_refresh_token_id BIGINT
 )
 LANGUAGE plpgsql
@@ -1069,7 +1066,7 @@ BEGIN
 	)
 	VALUES (
 		in_user_id,
-		in_new_password_hash
+		in_new_user_password_hash
 	);
 
 	-- Revoke the user tokens, except the current access token and refresh token
@@ -1206,7 +1203,7 @@ $$;
 	CreateChangeUsernameProc = `
 CREATE OR REPLACE PROCEDURE change_username(
 	IN in_user_id BIGINT,
-	IN in_new_username VARCHAR
+	IN in_new_user_username VARCHAR
 )
 LANGUAGE plpgsql	
 AS $$
@@ -1221,8 +1218,36 @@ BEGIN
 	)
 	VALUES (
 		in_user_id,
-		in_new_username
+		in_new_user_username
 	);
+END;
+$$;
+`
+
+	// CreateGetUserBasicInfoProc is the query to create the get user basic info stored procedure
+	CreateGetUserBasicInfoProc = `
+CREATE OR REPLACE PROCEDURE get_user_basic_info(
+	IN in_user_id BIGINT,
+	OUT out_user_first_name VARCHAR,
+	OUT out_user_last_name VARCHAR,
+	OUT out_user_birthdate TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user first name, last name, and birthdate by user ID
+	SELECT
+		users.first_name,
+		users.last_name,
+		users.birthdate
+	INTO
+		out_user_first_name,
+		out_user_last_name,
+		out_user_birthdate
+	FROM
+		users
+	WHERE
+		users.id = in_user_id;
 END;
 $$;
 `
@@ -1231,38 +1256,27 @@ $$;
 	CreateUpdateProfileProc = `
 CREATE OR REPLACE PROCEDURE update_profile(
 	IN in_user_id BIGINT,
-	IN in_first_name VARCHAR,
-	IN in_last_name VARCHAR,
-	IN in_birthdate TIMESTAMP
+	IN in_user_first_name VARCHAR,
+	IN in_user_last_name VARCHAR,
+	IN in_user_birthdate TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE 
-	out_first_name VARCHAR;
-	out_last_name VARCHAR;
-	out_birthdate TIMESTAMP;
+	out_user_first_name VARCHAR;
+	out_user_last_name VARCHAR;
+	out_user_birthdate TIMESTAMP;
 BEGIN
 	-- Select the user first name, last name, and birthdate by user ID
-	SELECT
-		users.first_name,
-		users.last_name,
-		users.birthdate
-	INTO
-		out_first_name,
-		out_last_name,
-		out_birthdate
-	FROM
-		users
-	WHERE
-		users.id = in_user_id;
+	CALL get_user_basic_info(in_user_id, out_user_first_name, out_user_last_name, out_user_birthdate);
 
 	-- Update the users table conditionally
 	UPDATE
 		users
 	SET
-		first_name = COALESCE(in_first_name, out_first_name),
-		last_name = COALESCE(in_last_name, out_last_name),
-		birthdate = COALESCE(in_birthdate, out_birthdate)
+		first_name = COALESCE(in_user_first_name, out_first_name),
+		last_name = COALESCE(in_user_last_name, out_last_name),
+		birthdate = COALESCE(in_user_birthdate, out_birthdate)
 	WHERE
 		users.id = in_user_id;
 END;
@@ -1273,7 +1287,7 @@ $$;
 	CreateGetUserPhoneNumberProc = `
 CREATE OR REPLACE PROCEDURE get_user_phone_number(
 	IN in_user_id BIGINT,
-	OUT out_phone_number VARCHAR
+	OUT out_user_phone_number VARCHAR
 )	
 LANGUAGE plpgsql
 AS $$
@@ -1282,7 +1296,7 @@ BEGIN
 	SELECT
 		user_phone_numbers.phone_number
 	INTO
-		out_phone_number
+		out_user_phone_number
 	FROM
 		user_phone_numbers
 	WHERE
@@ -1297,7 +1311,7 @@ $$;
 	CreateGetUserUsernameProc = `
 CREATE OR REPLACE PROCEDURE get_user_username(
 	IN in_user_id BIGINT,
-	OUT out_username VARCHAR
+	OUT out_user_username VARCHAR
 )	
 LANGUAGE plpgsql
 AS $$
@@ -1306,7 +1320,7 @@ BEGIN
 	SELECT
 		user_usernames.username
 	INTO
-		out_username
+		out_user_username
 	FROM
 		user_usernames
 	WHERE
@@ -1321,7 +1335,7 @@ $$;
 	CreateHasUserTOTPEnabledProc = `
 CREATE OR REPLACE PROCEDURE has_user_totp_enabled(
 	IN in_user_id BIGINT,
-	OUT out_has_totp_enabled BOOLEAN
+	OUT out_user_has_totp_enabled BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -1330,7 +1344,7 @@ BEGIN
 	SELECT
 		user_totps.verified_at IS NOT NULL
 	INTO
-		out_has_totp_enabled
+		out_user_has_totp_enabled
 	FROM
 		user_totps
 	WHERE
@@ -1345,7 +1359,7 @@ $$;
 	CreateIsUserPhoneNumberVerifiedProc = `
 CREATE OR REPLACE PROCEDURE is_user_phone_number_verified(
 	IN in_user_id BIGINT,
-	OUT out_is_verified BOOLEAN
+	OUT out_user_phone_number_is_verified BOOLEAN
 )	
 LANGUAGE plpgsql	
 AS $$
@@ -1354,7 +1368,7 @@ BEGIN
 	SELECT
 		user_phone_numbers.verified_at IS NOT NULL
 	INTO
-		out_is_verified
+		out_user_phone_number_is_verified
 	FROM
 		user_phone_numbers
 	WHERE
@@ -1369,50 +1383,39 @@ $$;
 	CreateGetMyProfileProc = `
 CREATE OR REPLACE PROCEDURE get_my_profile(
 	IN in_user_id BIGINT,
-	OUT out_first_name VARCHAR,
-	OUT out_last_name VARCHAR,
-	OUT out_birthdate TIMESTAMP,
-	OUT out_username VARCHAR,
-	OUT out_email VARCHAR,
-	OUT out_is_email_verified BOOLEAN,
-	OUT out_phone_number VARCHAR,
-	OUT out_is_phone_number_verified BOOLEAN,
-	OUT out_has_totp_enabled BOOLEAN
+	OUT out_user_first_name VARCHAR,
+	OUT out_user_last_name VARCHAR,
+	OUT out_user_birthdate TIMESTAMP,
+	OUT out_user_username VARCHAR,
+	OUT out_user_email VARCHAR,
+	OUT out_user_email_is_verified BOOLEAN,
+	OUT out_user_phone_number VARCHAR,
+	OUT out_user_phone_number_is_verified BOOLEAN,
+	OUT out_user_has_totp_enabled BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Select the user first name, last name, and birthdate by user ID
-	SELECT
-		users.first_name,
-		users.last_name,
-		users.birthdate
-	INTO
-		out_first_name,
-		out_last_name,
-		out_birthdate
-	FROM
-		users
-	WHERE
-		users.id = in_user_id;
+	CALL get_user_basic_info(in_user_id, out_user_first_name, out_user_last_name, out_user_birthdate);
 
 	-- Select the user username by user ID
 	CALL get_user_username(in_user_id, out_username);
 
 	-- Get the user email
-	CALL get_user_email(in_user_id, out_email);
+	CALL get_user_email(in_user_id, out_user_email);
 
 	-- Select the user phone number by user ID
-	CALL get_user_phone_number(in_user_id, out_phone_number);
+	CALL get_user_phone_number(in_user_id, out_user_phone_number);
 
 	-- Check if the user email is verified
-	CALL is_user_email_verified(in_user_id, out_is_email_verified);
+	CALL is_user_email_verified(in_user_id, out_user_email_is_verified);
 
 	-- Check if the user phone number is verified
-	CALL is_user_phone_number_verified(in_user_id, out_is_phone_number_verified);
+	CALL is_user_phone_number_verified(in_user_id, out_user_phone_number_is_verified);
 
 	-- Check if the user has TOTP enabled
-	CALL has_user_totp_enabled(in_user_id, out_has_totp_enabled);
+	CALL has_user_totp_enabled(in_user_id, out_user_has_totp_enabled);
 END;
 $$;
 `

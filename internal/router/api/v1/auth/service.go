@@ -47,7 +47,7 @@ func (s *service) RegisterFailedLoginAttempt(
 ) {
 	// Insert the failed login attempt
 	_, err := internalpostgres.PoolService.Exec(
-		&internalpostgresmodel.RegisterFailedLoginAttemptProc,
+		&internalpostgresmodel.RegisterFailedLogInAttemptProc,
 		userID,
 		ipAddress,
 		badPassword,
@@ -344,7 +344,7 @@ func (s *service) LogIn(
 	// Call the refresh token stored procedure
 	var userAccessTokenID, userRefreshTokenID sql.NullInt64
 	if err := internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.GenerateTokensProc,
+		&internalpostgresmodel.GenerateUserTokensProc,
 		userID,
 		nil,
 		clientIP,

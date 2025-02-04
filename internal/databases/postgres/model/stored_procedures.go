@@ -7,8 +7,8 @@ var (
 	// RevokeUserTOTPProc is the query to call the revoke user TOTP stored procedure
 	RevokeUserTOTPProc = "CALL revoke_user_totp($1)"
 
-	// GenerateTokensProc is the query to call the generate tokens stored procedure
-	GenerateTokensProc = "CALL generate_tokens($1, $2, $3, $4, $5, $6, $7)"
+	// GenerateUserTokensProc is the query to call the generate user tokens stored procedure
+	GenerateUserTokensProc = "CALL generate_user_tokens($1, $2, $3, $4, $5, $6, $7)"
 
 	// RevokeUserTokensByIDProc is the query to call the revoke user tokens by ID stored procedure
 	RevokeUserTokensByIDProc = "CALL revoke_user_tokens_by_id($1, $2)"
@@ -25,8 +25,8 @@ var (
 	// PreLogInProc is the query to call the pre-login stored procedure
 	PreLogInProc = "CALL pre_log_in($1, $2, $3, $4, $5, $6, $7);"
 
-	// RegisterFailedLoginAttemptProc is the query to call the register failed login attempt stored procedure
-	RegisterFailedLoginAttemptProc = "CALL register_failed_login_attempt($1, $2, $3, $4)"
+	// RegisterFailedLogInAttemptProc is the query to call the register failed login attempt stored procedure
+	RegisterFailedLogInAttemptProc = "CALL register_failed_log_in_attempt($1, $2, $3, $4)"
 
 	// GetUserTOTPProc is the query to call the get user TOTP by user ID stored procedure
 	GetUserTOTPProc = "CALL get_user_totp($1, $2, $3, $4)"
@@ -35,7 +35,7 @@ var (
 	GetUserEmailProc = "CALL get_user_email($1, $2)"
 
 	// GenerateTOTPUrlProc is the query to call the generate TOTP URL stored procedure
-	GenerateTOTPUrlProc = "CALL pre_generate_totp_url($1, $2, $3, $4, $5, $6)"
+	GenerateTOTPUrlProc = "CALL generate_totp_url($1, $2, $3, $4, $5, $6)"
 
 	// IsRefreshTokenValidProc is the query to call the is refresh token valid stored procedure
 	IsRefreshTokenValidProc = "CALL is_refresh_token_valid($1, $2, $3, $4)"
@@ -123,4 +123,7 @@ var (
 
 	// GetMyProfileProc is the query to call the get my profile stored procedure
 	GetMyProfileProc = "CALL get_my_profile($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+
+	// GetUserBasicInfoProc is the query to call the get user basic info stored procedure
+	GetUserBasicInfoProc = "CALL get_user_basic_info($1, $2, $3, $4)"
 )
