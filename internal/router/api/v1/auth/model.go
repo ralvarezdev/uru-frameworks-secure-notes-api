@@ -1,7 +1,7 @@
 package auth
 
 import (
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
+	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
 type (
@@ -49,12 +49,12 @@ type (
 
 	// GetRefreshTokenResponse is the response DTO to get a refresh token that has not been revoked or expired
 	GetRefreshTokenResponse struct {
-		RefreshToken *internalapiv1common.UserRefreshToken `json:"refresh_token"`
+		RefreshToken *internalpostgresmodel.UserRefreshToken `json:"refresh_token"`
 	}
 
 	// ListRefreshTokensResponse is the response DTO to list refresh tokens that have not been revoked or expired
 	ListRefreshTokensResponse struct {
-		RefreshTokens []*internalapiv1common.UserRefreshTokenWithID `json:"refresh_tokens"`
+		RefreshTokens []*internalpostgresmodel.UserRefreshTokenWithID `json:"refresh_tokens"`
 	}
 
 	// ChangePasswordRequest is the request DTO to change password

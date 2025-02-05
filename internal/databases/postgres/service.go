@@ -110,10 +110,13 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateCreateUserTagProc,
 		internalpostgresmodel.CreateUpdateUserTagProc,
 		internalpostgresmodel.CreateDeleteUserTagProc,
-		internalpostgresmodel.CreateGetUserTagProc,
+		internalpostgresmodel.CreateGetUserTagByTagIDProc,
 		internalpostgresmodel.CreateUpdateUserNoteArchiveProc,
 		internalpostgresmodel.CreateUpdateUserNoteTrashProc,
 		internalpostgresmodel.CreateUpdateUserNoteStarProc,
 		internalpostgresmodel.CreateUpdateUserNotePinProc,
+		internalpostgresmodel.CreateCreateUserNoteVersionProc,
+		internalpostgresmodel.CreateGetUserNoteVersionByNoteVersionIDProc,
+		internalpostgresmodel.CreateDeleteUserNoteVersionProc,
 	)
 }

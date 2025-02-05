@@ -136,8 +136,8 @@ var (
 	// UpdateUserTagProc is the query to call the stored procedure to update user tag
 	UpdateUserTagProc = "CALL update_user_tag($1, $2, $3)"
 
-	// GetUserTagProc is the query to call the stored procedure to get user tag
-	GetUserTagProc = "CALL get_user_tag($1, $2, $3, $4, $5)"
+	// GetUserTagByTagIDProc is the query to call the stored procedure to get user tag by tag ID
+	GetUserTagByTagIDProc = "CALL get_user_tag_by_tag_id($1, $2, $3, $4, $5)"
 
 	// UpdateUserNoteTrashProc is the query to call the stored procedure to update user note trash
 	UpdateUserNoteTrashProc = "CALL update_user_note_trash($1, $2, $3)"
@@ -150,4 +150,13 @@ var (
 
 	// UpdateUserNotePinProc is the query to call the stored procedure to update user note pin
 	UpdateUserNotePinProc = "CALL update_user_note_pin($1, $2, $3)"
+
+	// CreateUserNoteVersionProc is the query to call the stored procedure to create user note version
+	CreateUserNoteVersionProc = "CALL create_user_note_version($1, $2, $3, $4, $5)"
+
+	// DeleteUserNoteVersionProc is the query to call the stored procedure to delete user note version
+	DeleteUserNoteVersionProc = "CALL delete_user_note_version($1, $2)"
+
+	// GetUserNoteVersionByNoteVersionIDProc is the query to call the stored procedure to get user note version by note version ID
+	GetUserNoteVersionByNoteVersionIDProc = "CALL get_user_note_version_by_note_version_id($1, $2, $3, $4)"
 )

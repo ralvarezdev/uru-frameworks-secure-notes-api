@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS note_tags (
 CREATE TABLE IF NOT EXISTS note_versions (
     id SERIAL PRIMARY KEY,
     note_id BIGINT NOT NULL,
-    encrypted_body TEXT NOT NULL,
+    encrypted_content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
 );

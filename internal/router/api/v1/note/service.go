@@ -1,8 +1,6 @@
 package note
 
 import (
-	"database/sql"
-	"errors"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
@@ -32,16 +30,19 @@ func (s *service) UpdateUserNoteStar(
 	}
 
 	// Update the note star
-	if _, err = internalpostgres.PoolService.Exec(
+	commandTag, err := internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.UpdateUserNoteStarProc,
 		userID,
 		body.NoteID,
 		body.Star,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrUpdateUserNoteStarNotFound)
-		}
+	)
+	if err != nil {
 		panic(err)
+	}
+
+	// Check if the note exists
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrUpdateUserNoteStarNotFound)
 	}
 	return userID
 }
@@ -63,16 +64,19 @@ func (s *service) UpdateUserNoteArchive(
 	}
 
 	// Update the note archive
-	if _, err = internalpostgres.PoolService.Exec(
+	commandTag, err := internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.UpdateUserNoteArchiveProc,
 		userID,
 		body.NoteID,
 		body.Archive,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrUpdateUserNoteArchiveNotFound)
-		}
+	)
+	if err != nil {
 		panic(err)
+	}
+
+	// Check if the note exists
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrUpdateUserNoteArchiveNotFound)
 	}
 	return userID
 }
@@ -94,16 +98,19 @@ func (s *service) UpdateUserNotePin(
 	}
 
 	// Update the note pin
-	if _, err = internalpostgres.PoolService.Exec(
+	commandTag, err := internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.UpdateUserNotePinProc,
 		userID,
 		body.NoteID,
 		body.Pin,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrUpdateUserNotePinNotFound)
-		}
+	)
+	if err != nil {
 		panic(err)
+	}
+
+	// Check if the note exists
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrUpdateUserNotePinNotFound)
 	}
 	return userID
 }
@@ -125,16 +132,19 @@ func (s *service) UpdateUserNoteTrash(
 	}
 
 	// Update the note trash
-	if _, err = internalpostgres.PoolService.Exec(
+	commandTag, err := internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.UpdateUserNoteTrashProc,
 		userID,
 		body.NoteID,
 		body.Trash,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrUpdateUserNoteTrashNotFound)
-		}
+	)
+	if err != nil {
 		panic(err)
+	}
+
+	// Check if the note exists
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrUpdateUserNoteTrashNotFound)
 	}
 	return userID
 }

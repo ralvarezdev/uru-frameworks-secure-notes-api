@@ -797,6 +797,9 @@ func (s *service) VerifyEmail(
 		&userID,
 		&userInvalidToken,
 	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			panic(ErrVerifyEmailTokenNotFound)
+		}
 		panic(err)
 	}
 
@@ -804,7 +807,6 @@ func (s *service) VerifyEmail(
 	if userInvalidToken.Bool {
 		panic(ErrVerifyEmailInvalidToken)
 	}
-
 	return userID.Int64
 }
 

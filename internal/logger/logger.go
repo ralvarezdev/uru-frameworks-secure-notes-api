@@ -351,3 +351,31 @@ func (l *Logger) UpdateUserNotePin(id, noteID int64, pin bool) {
 		fmt.Sprintf("pin: %t", pin),
 	)
 }
+
+// CreateUserNoteVersion logs the create user note version event
+func (l *Logger) CreateUserNoteVersion(id, noteID, noteVersionID int64) {
+	l.logger.Info(
+		"user created note version",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+		fmt.Sprintf("note version id: %d", noteVersionID),
+	)
+}
+
+// DeleteUserNoteVersion logs the delete user note version event
+func (l *Logger) DeleteUserNoteVersion(id, noteVersionID int64) {
+	l.logger.Info(
+		"user deleted note version",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note version id: %d", noteVersionID),
+	)
+}
+
+// GetUserNoteVersionByNoteVersionID logs the get user note version by note version ID event
+func (l *Logger) GetUserNoteVersionByNoteVersionID(id, noteVersionID int64) {
+	l.logger.Info(
+		"user got note version",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note version id: %d", noteVersionID),
+	)
+}

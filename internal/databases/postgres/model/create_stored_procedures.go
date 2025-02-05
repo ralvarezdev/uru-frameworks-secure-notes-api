@@ -1488,9 +1488,9 @@ END;
 $$;
 `
 
-	// CreateGetUserTagProc is the query to create the stored procedure to get user tag
-	CreateGetUserTagProc = `
-CREATE OR REPLACE PROCEDURE get_user_tag(
+	// CreateGetUserTagByTagIDProc is the query to create the stored procedure to get user tag by tag ID
+	CreateGetUserTagByTagIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_tag_by_tag_id(
 	IN in_user_id BIGINT,
 	IN in_user_tag_id BIGINT,
 	OUT out_user_tag_name VARCHAR
@@ -1613,6 +1613,102 @@ BEGIN
 			ELSE NULL
 	WHERE
 		notes.id = in_user_note_id
+	AND
+		notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateCreateUserNoteVersionProc is the query to create the stored procedure to create user note version
+	CreateCreateUserNoteVersionProc = `
+CREATE OR REPLACE PROCEDURE create_user_note_version(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_version_encrypted_content TEXT,
+	OUT out_user_note_id_is_valid BOOLEAN,
+	OUT out_user_note_version_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user note ID is valid
+	SELECT
+		notes.id IS NOT NULL
+	INTO
+		out_user_note_id_is_valid
+	FROM
+		notes
+	WHERE
+		notes.id = in_user_note_id
+	AND
+		notes.user_id = in_user_id;
+
+	-- If the user note ID is valid, insert into note_versions table
+	IF out_user_note_id_is_valid THEN
+		-- Insert into note_versions table
+		INSERT INTO note_versions (
+			user_id,
+			note_id,
+			encrypted_content
+		)
+		VALUES (
+			in_user_id,
+			in_user_note_id,
+			in_user_note_version_encrypted_content
+		)
+		RETURNING
+			id INTO out_user_note_version_id;
+	END IF;
+END;
+$$;
+`
+
+	// CreateDeleteUserNoteVersionProc is the query to create the stored procedure to delete user note version
+	CreateDeleteUserNoteVersionProc = `
+CREATE OR REPLACE PROCEDURE delete_user_note_version(
+	IN in_user_id BIGINT,
+	IN in_user_note_version_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Delete the user note version
+	DELETE FROM
+		note_versions
+	INNER JOIN
+		notes ON note_versions.note_id = notes.id
+	WHERE
+		note_versions.id = in_user_note_version_id
+	AND
+		note_versions.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateGetUserNoteVersionByNoteVersionIDProc is the query to create the stored procedure to get user note version by note version ID
+	CreateGetUserNoteVersionByNoteVersionIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_note_version_by_note_version_id(
+	IN in_user_id BIGINT,
+	IN in_user_note_version_id BIGINT,	
+	OUT out_user_note_version_encrypted_content TEXT,
+	OUT out_user_note_version_created_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user note version encrypted content and created at by user ID and note version ID
+	SELECT
+		note_versions.encrypted_content,
+		note_versions.created_at
+	INTO
+		out_user_note_version_encrypted_content,
+		out_user_note_version_created_at
+	FROM
+		note_versions
+	INNER JOIN
+		notes ON note_versions.note_id = notes.id
+	WHERE
+		note_versions.id = in_user_note_version_id
 	AND
 		notes.user_id = in_user_id;
 END;

@@ -69,16 +69,19 @@ func (s *service) UpdateUserTag(
 	}
 
 	// Update the tag
-	if _, err = internalpostgres.PoolService.Exec(
+	commandTag, err := internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.UpdateUserTagProc,
 		userID,
 		body.TagID,
 		body.Name,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrUpdateUserTagNotFound)
-		}
+	)
+	if err != nil {
 		panic(err)
+	}
+
+	// Check if the tag was updated
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrUpdateUserTagNotFound)
 	}
 	return userID
 }
@@ -100,15 +103,18 @@ func (s *service) DeleteUserTag(
 	}
 
 	// Delete the tag
-	if _, err = internalpostgres.PoolService.Exec(
+	commandTag, err := internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.DeleteUserTagProc,
 		userID,
 		body.TagID,
-	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrDeleteUserTagNotFound)
-		}
+	)
+	if err != nil {
 		panic(err)
+	}
+
+	// Check if the tag was deleted
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrDeleteUserTagNotFound)
 	}
 	return userID
 }
@@ -135,7 +141,7 @@ func (s *service) GetUserTagByTagID(
 	// Get the tag
 	var tag internalpostgresmodel.Tag
 	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.GetUserTagProc,
+		&internalpostgresmodel.GetUserTagByTagIDProc,
 		userID,
 		body.TagID,
 	).Scan(
