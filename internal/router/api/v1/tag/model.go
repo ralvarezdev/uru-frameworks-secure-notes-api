@@ -1,31 +1,34 @@
 package tag
 
 import (
+	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 )
 
-// CreateTagRequest is the request DTO to create a tag
-type CreateTagRequest struct {
-	Name string `json:"name"`
-}
+type (
+	// CreateUserTagRequest is the request DTO to create a user tag
+	CreateUserTagRequest struct {
+		Name string `json:"name"`
+	}
 
-// UpdateTagRequest is the request DTO to update a tag
-type UpdateTagRequest struct {
-	TagID int64   `json:"tag_id"`
-	Name  *string `json:"name,omitempty"`
-}
+	// UpdateUserTagRequest is the request DTO to update a user tag
+	UpdateUserTagRequest struct {
+		TagID int64   `json:"tag_id"`
+		Name  *string `json:"name,omitempty"`
+	}
 
-// DeleteTagRequest is the request DTO to delete a tag
-type DeleteTagRequest struct {
-	TagID int64 `json:"tag_id"`
-}
+	// DeleteUserTagRequest is the request DTO to delete a user tag
+	DeleteUserTagRequest struct {
+		TagID int64 `json:"tag_id"`
+	}
 
-// GetTagRequest is the request DTO to get a tag
-type GetTagRequest struct {
-	TagID int64 `json:"tag_id"`
-}
+	// GetUserTagByTagIDRequest is the request DTO to get a user tag by tag ID
+	GetUserTagByTagIDRequest struct {
+		TagID int64 `json:"tag_id"`
+	}
 
-// GetTagResponse is the response DTO to get a tag
-type GetTagResponse struct {
-	Tag internalapiv1common.Tag `json:"tag"`
-}
+	// GetUserTagByTagIDResponse is the response DTO to get a user tag by tag ID
+	GetUserTagByTagIDResponse struct {
+		Tag internalpostgresmodel.Tag `json:"tag"`
+	}
+)

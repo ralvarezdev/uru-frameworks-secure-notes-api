@@ -144,10 +144,14 @@ CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
 CREATE TABLE IF NOT EXISTS notes (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    is_pinned BOOLEAN,
     title VARCHAR(255) NOT NULL,
     color VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	pinned_at TIMESTAMP,
+	starred_at TIMESTAMP,
+	archived_at TIMESTAMP,
+	trashed_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
@@ -229,6 +233,8 @@ CREATE TABLE IF NOT EXISTS tags (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     name VARCHAR(50) UNIQUE NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON tags (user_id, name);

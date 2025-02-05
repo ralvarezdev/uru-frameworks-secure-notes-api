@@ -122,7 +122,6 @@ func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 // @Param request body GetRefreshTokenRequest true "Get Refresh Token Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-token [get]
 func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {

@@ -1,8 +1,9 @@
 package tags
 
 import (
-	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
@@ -11,9 +12,9 @@ type (
 	controller struct{}
 )
 
-// ListTags lists tags
-// @Summary List tags
-// @Description Lists tags
+// ListUserTags lists tags of the authenticated user
+// @Summary List tags of the authenticated user
+// @Description Lists tags of the authenticated user
 // @Tags api v1 tags
 // @Accept json
 // @Produce json
@@ -21,11 +22,18 @@ type (
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/tags [get]
-func (c *controller) ListTags(
+func (c *controller) ListUserTags(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the list of tags
+	userID, data := Service.ListUserTags(r)
+
+	// Log the list of tags retrieval
+	internallogger.Api.ListUserTags(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }

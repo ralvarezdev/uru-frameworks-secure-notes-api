@@ -1,7 +1,7 @@
 package model
 
 const (
-	// CreateRevokeUserEmailVerificationTokenProc is the query to create the revoke user email verification token stored procedure
+	// CreateRevokeUserEmailVerificationTokenProc is the query to create the stored procedure to revoke user email verification token
 	CreateRevokeUserEmailVerificationTokenProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_email_verification_token(
 	IN in_user_email_id BIGINT
@@ -22,7 +22,7 @@ END;
 $$;
 `
 
-	// CreateSendEmailVerificationTokenProc is the query to create the send email verification token stored procedure
+	// CreateSendEmailVerificationTokenProc is the query to create the stored procedure to send email verification token
 	CreateSendEmailVerificationTokenProc = `
 CREATE OR REPLACE PROCEDURE send_email_verification_token(
 	IN in_user_id BIGINT,
@@ -55,7 +55,7 @@ END;
 $$;
 `
 
-	// CreateSignUpProc is the query to create the sign-up stored procedure
+	// CreateSignUpProc is the query to create the stored procedure to sign-up
 	CreateSignUpProc = `
 CREATE OR REPLACE PROCEDURE sign_up(
 	IN in_user_first_name VARCHAR,
@@ -128,7 +128,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTOTPProc is the query to create the revoke user TOTP stored procedure
+	// CreateRevokeUserTOTPProc is the query to create the stored procedure to revoke user TOTP
 	CreateRevokeUserTOTPProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_totp(
 	IN in_user_id BIGINT
@@ -163,7 +163,7 @@ END;
 $$;
 `
 
-	// CreateGenerateUserTokensProc is the query to create the generate user tokens stored procedure
+	// CreateGenerateUserTokensProc is the query to create the stored procedure to generate user tokens
 	CreateGenerateUserTokensProc = `
 CREATE OR REPLACE PROCEDURE generate_user_tokens(
 	IN in_user_id BIGINT,
@@ -210,7 +210,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTokensByIDProc is the query to create the revoke user tokens by ID stored procedure
+	// CreateRevokeUserTokensByIDProc is the query to create the stored procedure to revoke user tokens by ID
 	CreateRevokeUserTokensByIDProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_tokens_by_id(
 	IN in_user_id BIGINT,
@@ -246,7 +246,7 @@ END;
 $$;
 `
 
-	// CreateRefreshTokenProc is the query to create the refresh token stored procedure
+	// CreateRefreshTokenProc is the query to create the stored procedure to refresh token
 	CreateRefreshTokenProc = `
 CREATE OR REPLACE PROCEDURE refresh_token(
 	IN in_user_id BIGINT,
@@ -269,7 +269,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTokensProc is the query to create the revoke user tokens stored procedure
+	// CreateRevokeUserTokensProc is the query to create the stored procedure to revoke user tokens
 	CreateRevokeUserTokensProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_tokens(
 	IN in_user_id BIGINT
@@ -300,7 +300,7 @@ END;
 $$;
 `
 
-	// CreateGetAccessTokenIDByRefreshTokenIDProc is the query to create the get access token ID by refresh token ID stored procedure
+	// CreateGetAccessTokenIDByRefreshTokenIDProc is the query to create the stored procedure to get access token ID by refresh token ID
 	CreateGetAccessTokenIDByRefreshTokenIDProc = `
 CREATE OR REPLACE PROCEDURE get_access_token_id_by_refresh_token_id(
 	IN in_user_refresh_token_id BIGINT,
@@ -324,7 +324,7 @@ END;
 $$;
 `
 
-	// CreatePreLogInProc is the query to create the pre-log in stored procedure
+	// CreatePreLogInProc is the query to create the stored procedure to pre-log in
 	CreatePreLogInProc = `
 CREATE OR REPLACE PROCEDURE pre_log_in(
 	IN in_user_username VARCHAR,
@@ -389,7 +389,7 @@ END;
 $$;
 `
 
-	// CreateRegisterFailedLogInAttemptProc is the query to create the register failed log in attempt stored procedure
+	// CreateRegisterFailedLogInAttemptProc is the query to create the stored procedure to register failed log in attempt
 	CreateRegisterFailedLogInAttemptProc = `
 CREATE OR REPLACE PROCEDURE register_failed_log_in_attempt(
 	IN in_user_id BIGINT,
@@ -417,7 +417,7 @@ END;
 $$;
 `
 
-	// CreateGetUserTOTPProc is the query to create the get user TOTP by user ID stored procedure
+	// CreateGetUserTOTPProc is the query to create the stored procedure to get user TOTP by user ID
 	CreateGetUserTOTPProc = `
 CREATE OR REPLACE PROCEDURE get_user_totp(
 	IN in_user_id BIGINT,
@@ -447,7 +447,7 @@ END;
 $$;
 `
 
-	// CreateGetUserEmailProc is the query to create the get user email by user ID stored procedure
+	// CreateGetUserEmailProc is the query to create the stored procedure to get user email by user ID
 	CreateGetUserEmailProc = `
 CREATE OR REPLACE PROCEDURE get_user_email(
 	IN in_user_id BIGINT,
@@ -471,7 +471,7 @@ END;
 $$;
 `
 
-	// CreateGetUserEmailIDProc is the query to create the get user email ID by user ID stored procedure
+	// CreateGetUserEmailIDProc is the query to create the stored procedure to get user email ID by user ID
 	CreateGetUserEmailIDProc = `
 CREATE OR REPLACE PROCEDURE get_user_email_id(
 	IN in_user_id BIGINT,
@@ -495,7 +495,7 @@ END;
 $$;
 `
 
-	// CreateGenerateTOTPUrlProc is the query to create the generate TOTP URL stored procedure
+	// CreateGenerateTOTPUrlProc is the query to create the stored procedure to generate TOTP URL
 	CreateGenerateTOTPUrlProc = `
 CREATE OR REPLACE PROCEDURE generate_totp_url(
 	IN in_user_id BIGINT,
@@ -535,7 +535,7 @@ END;
 $$;
 `
 
-	// CreateIsRefreshTokenValidProc is the query to create the is refresh token valid stored procedure
+	// CreateIsRefreshTokenValidProc is the query to create the stored procedure to check if the refresh token is valid
 	CreateIsRefreshTokenValidProc = `
 CREATE OR REPLACE PROCEDURE is_refresh_token_valid(
 	IN in_user_refresh_token_id BIGINT,
@@ -566,7 +566,7 @@ END;
 $$;
 `
 
-	// CreateIsAccessTokenValidProc is the query to create the is access token valid stored procedure
+	// CreateIsAccessTokenValidProc is the query to create the stored procedure to check if the access token is valid
 	CreateIsAccessTokenValidProc = `
 CREATE OR REPLACE PROCEDURE is_access_token_valid(
 	IN in_user_access_token_id BIGINT,
@@ -597,7 +597,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTOTPRecoveryCodeProc is the query to create the revoke user TOTP recovery code stored procedure
+	// CreateRevokeUserTOTPRecoveryCodeProc is the query to create the stored procedure to revoke user TOTP recovery code
 	CreateRevokeUserTOTPRecoveryCodeProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_totp_recovery_code(
 	IN in_user_totp_id BIGINT,
@@ -621,7 +621,7 @@ END;
 $$;
 `
 
-	// CreateVerifyTOTPProc is the query to create verify TOTP stored procedure
+	// CreateVerifyTOTPProc is the query to create verify TOTP
 	CreateVerifyTOTPProc = `
 CREATE OR REPLACE PROCEDURE verify_totp(
 	IN in_user_totp_id BIGINT
@@ -644,7 +644,7 @@ END;
 $$;
 `
 
-	// CreateVerifyEmailProc is the query to create the verify email stored procedure
+	// CreateVerifyEmailProc is the query to create the stored procedure to verify email
 	CreateVerifyEmailProc = `
 CREATE OR REPLACE PROCEDURE verify_email(
 	IN in_user_email_verification_token VARCHAR,
@@ -694,7 +694,7 @@ END;
 $$;
 `
 
-	// CreateIsUserEmailVerifiedProc is the query to create the is user email verified stored procedure
+	// CreateIsUserEmailVerifiedProc is the query to create the stored procedure to check if the user email is verified
 	CreateIsUserEmailVerifiedProc = `
 CREATE OR REPLACE PROCEDURE is_user_email_verified(
 	IN in_user_id BIGINT,
@@ -718,7 +718,7 @@ END;
 $$;
 `
 
-	// CreatePreSendEmailVerificationTokenProc is the query to create the pre-send email verification token stored procedure
+	// CreatePreSendEmailVerificationTokenProc is the query to create the stored procedure to pre-send email verification token
 	CreatePreSendEmailVerificationTokenProc = `
 CREATE OR REPLACE PROCEDURE pre_send_email_verification_token(
 	IN in_user_id BIGINT,
@@ -753,7 +753,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserEmailProc is the query to create the revoke user email stored procedure
+	// CreateRevokeUserEmailProc is the query to create the stored procedure to revoke user email
 	CreateRevokeUserEmailProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_email(
 	IN in_user_id BIGINT
@@ -788,7 +788,7 @@ END;
 $$;
 `
 
-	// CreateChangeEmailProc is the query to create the change email stored procedure
+	// CreateChangeEmailProc is the query to create the stored procedure to change email
 	CreateChangeEmailProc = `
 CREATE OR REPLACE PROCEDURE change_email(
 	IN in_user_id BIGINT,
@@ -832,7 +832,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserResetPasswordTokenProc is the query to create the revoke user reset password token stored procedure
+	// CreateRevokeUserResetPasswordTokenProc is the query to create the stored procedure to revoke user reset password token
 	CreateRevokeUserResetPasswordTokenProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_reset_password_token(
 	IN in_user_id BIGINT
@@ -853,7 +853,7 @@ END;
 $$;
 `
 
-	// CreateForgotPasswordProc is the query to create the forgot password stored procedure
+	// CreateForgotPasswordProc is the query to create the stored procedure to forgot password
 	CreateForgotPasswordProc = `
 CREATE OR REPLACE PROCEDURE forgot_password(
 	IN in_user_username VARCHAR,
@@ -911,7 +911,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserPasswordHashProc is the query to create the revoke user password hash stored procedure
+	// CreateRevokeUserPasswordHashProc is the query to create the stored procedure to revoke user password hash
 	CreateRevokeUserPasswordHashProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_password_hash(
 	IN in_user_id BIGINT
@@ -932,7 +932,7 @@ END;
 $$;
 `
 
-	// CreateResetPasswordProc is the query to create the reset password stored procedure
+	// CreateResetPasswordProc is the query to create the stored procedure to reset password
 	CreateResetPasswordProc = `
 CREATE OR REPLACE PROCEDURE reset_password(
 	IN in_user_reset_password_token BIGINT,
@@ -986,7 +986,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTokensExceptRefreshTokenIDProc is the query to create the revoke user tokens except refresh token ID stored procedure
+	// CreateRevokeUserTokensExceptRefreshTokenIDProc is the query to create the stored procedure to revoke user tokens except refresh token ID
 	CreateRevokeUserTokensExceptRefreshTokenIDProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_tokens_except_refresh_token_id(
 	IN in_user_id BIGINT,
@@ -1022,7 +1022,7 @@ END;
 $$;
 `
 
-	// CreateGetUserPasswordHashProc is the query to create the get user password hash stored procedure
+	// CreateGetUserPasswordHashProc is the query to create the stored procedure to get user password hash
 	CreateGetUserPasswordHashProc = `
 CREATE OR REPLACE PROCEDURE get_user_password_hash(
 	IN in_user_id BIGINT,
@@ -1046,7 +1046,7 @@ END;
 $$;
 `
 
-	// CreateChangePasswordProc is the query to create the change password stored procedure
+	// CreateChangePasswordProc is the query to create the stored procedure to change password
 	CreateChangePasswordProc = `
 CREATE OR REPLACE PROCEDURE change_password(
 	IN in_user_id BIGINT,
@@ -1075,7 +1075,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserUsernameProc is the query to create the revoke user username stored procedure
+	// CreateRevokeUserUsernameProc is the query to create the stored procedure to revoke user username
 	CreateRevokeUserUsernameProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_username(
 	IN in_user_id BIGINT
@@ -1096,7 +1096,7 @@ END;
 $$;
 `
 
-	// CreateRevokeUserPhoneNumberProc is the query to create the revoke user phone number stored procedure
+	// CreateRevokeUserPhoneNumberProc is the query to create the stored procedure to revoke user phone number
 	CreateRevokeUserPhoneNumberProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_phone_number(
 	IN in_user_id BIGINT
@@ -1131,7 +1131,7 @@ END;
 $$;
 `
 
-	// CreateDeleteUserProc is the query to create the delete user stored procedure
+	// CreateDeleteUserProc is the query to create the stored procedure to delete user
 	CreateDeleteUserProc = `
 CREATE OR REPLACE PROCEDURE delete_user(
 	IN in_user_id BIGINT
@@ -1199,7 +1199,7 @@ END;
 $$;
 `
 
-	// CreateChangeUsernameProc is the query to create the change username stored procedure
+	// CreateChangeUsernameProc is the query to create the stored procedure to change username
 	CreateChangeUsernameProc = `
 CREATE OR REPLACE PROCEDURE change_username(
 	IN in_user_id BIGINT,
@@ -1224,7 +1224,7 @@ END;
 $$;
 `
 
-	// CreateGetUserBasicInfoProc is the query to create the get user basic info stored procedure
+	// CreateGetUserBasicInfoProc is the query to create the stored procedure to get user basic info
 	CreateGetUserBasicInfoProc = `
 CREATE OR REPLACE PROCEDURE get_user_basic_info(
 	IN in_user_id BIGINT,
@@ -1252,7 +1252,7 @@ END;
 $$;
 `
 
-	// CreateUpdateProfileProc is the query to create the update profile stored procedure
+	// CreateUpdateProfileProc is the query to create the stored procedure to update profile
 	CreateUpdateProfileProc = `
 CREATE OR REPLACE PROCEDURE update_profile(
 	IN in_user_id BIGINT,
@@ -1283,7 +1283,7 @@ END;
 $$;
 `
 
-	// CreateGetUserPhoneNumberProc is the query to create the get user phone number by user ID stored procedure
+	// CreateGetUserPhoneNumberProc is the query to create the stored procedure to get user phone number by user ID
 	CreateGetUserPhoneNumberProc = `
 CREATE OR REPLACE PROCEDURE get_user_phone_number(
 	IN in_user_id BIGINT,
@@ -1307,7 +1307,7 @@ END;
 $$;
 `
 
-	// CreateGetUserUsernameProc is the query to create the get user username by user ID stored procedure
+	// CreateGetUserUsernameProc is the query to create the stored procedure to get user username by user ID
 	CreateGetUserUsernameProc = `
 CREATE OR REPLACE PROCEDURE get_user_username(
 	IN in_user_id BIGINT,
@@ -1331,7 +1331,7 @@ END;
 $$;
 `
 
-	// CreateHasUserTOTPEnabledProc is the query to create the has user TOTP enabled stored procedure
+	// CreateHasUserTOTPEnabledProc is the query to create the stored procedure to check if the user has TOTP enabled
 	CreateHasUserTOTPEnabledProc = `
 CREATE OR REPLACE PROCEDURE has_user_totp_enabled(
 	IN in_user_id BIGINT,
@@ -1355,7 +1355,7 @@ END;
 $$;
 `
 
-	// CreateIsUserPhoneNumberVerifiedProc is the query to create the is user phone number verified stored procedure
+	// CreateIsUserPhoneNumberVerifiedProc is the query to create the stored procedure to check if the user phone number is verified
 	CreateIsUserPhoneNumberVerifiedProc = `
 CREATE OR REPLACE PROCEDURE is_user_phone_number_verified(
 	IN in_user_id BIGINT,
@@ -1379,7 +1379,7 @@ END;
 $$;
 `
 
-	// CreateGetMyProfileProc is the query to create the get my profile stored procedure
+	// CreateGetMyProfileProc is the query to create the stored procedure to get my profile
 	CreateGetMyProfileProc = `
 CREATE OR REPLACE PROCEDURE get_my_profile(
 	IN in_user_id BIGINT,
@@ -1416,6 +1416,105 @@ BEGIN
 
 	-- Check if the user has TOTP enabled
 	CALL has_user_totp_enabled(in_user_id, out_user_has_totp_enabled);
+END;
+$$;
+`
+
+	// CreateCreateUserTagProc is the query to create the stored procedure to create user tag
+	CreateCreateUserTagProc = `
+CREATE OR REPLACE PROCEDURE create_user_tag(
+	IN in_user_id BIGINT,
+	IN in_user_tag_name VARCHAR,
+	OUT out_user_tag_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Insert into tags table
+	INSERT INTO tags (
+		user_id,
+		name
+	)
+	VALUES (
+		in_user_id,
+		in_user_tag_name
+	)
+	RETURNING
+		id INTO out_user_tag_id;
+END;
+$$;
+`
+
+	// CreateUpdateUserTagProc is the query to create the stored procedure to update user tag
+	CreateUpdateUserTagProc = `
+CREATE OR REPLACE PROCEDURE update_user_tag(
+	IN in_user_id BIGINT,
+	IN in_user_tag_id BIGINT,
+	IN in_user_tag_name VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN	
+	-- Update the tags table
+	UPDATE
+		tags
+	SET
+		name = in_user_tag_name
+	WHERE
+		tags.id = in_user_tag_id
+	AND
+		tags.user_id = in_user_id;
+END;	
+$$;
+`
+
+	// CreateDeleteUserTagProc is the query to create the stored procedure to delete user tag
+	CreateDeleteUserTagProc = `
+CREATE OR REPLACE PROCEDURE delete_user_tag(
+	IN in_user_id BIGINT,
+	IN in_user_tag_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Delete the user tag
+	DELETE FROM
+		tags
+	WHERE
+		tags.id = in_user_tag_id
+	AND
+		tags.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateGetUserTagProc is the query to create the stored procedure to get user tag
+	CreateGetUserTagProc = `
+CREATE OR REPLACE PROCEDURE get_user_tag(
+	IN in_user_id BIGINT,
+	IN in_user_tag_id BIGINT,
+	OUT out_user_tag_name VARCHAR
+	OUT out_user_tag_created_at TIMESTAMP,
+	OUT out_user_tag_updated_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user tag name, created at, and updated at by user ID and tag ID
+	SELECT
+		tags.name,
+		tags.created_at,
+		tags.updated_at
+	INTO
+		out_user_tag_name,
+		out_user_tag_created_at,
+		out_user_tag_updated_at
+	FROM
+		tags
+	WHERE
+		tags.id = in_user_tag_id
+	AND
+		tags.user_id = in_user_id;
 END;
 $$;
 `

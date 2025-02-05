@@ -60,6 +60,62 @@ var (
 					&ListNoteTagsRequest{},
 				),
 			)
+			m.RegisterExactRoute(
+				"POST /pin",
+				Controller.PinNote,
+				internalmiddleware.Validate(
+					&PinNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"DELETE /pin",
+				Controller.UnpinNote,
+				internalmiddleware.Validate(
+					&UnpinNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"POST /archive",
+				Controller.ArchiveNote,
+				internalmiddleware.Validate(
+					&ArchiveNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"DELETE /archive",
+				Controller.UnarchiveNote,
+				internalmiddleware.Validate(
+					&UnarchiveNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"POST /trash",
+				Controller.TrashNote,
+				internalmiddleware.Validate(
+					&TrashNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"DELETE /trash",
+				Controller.UntrashNote,
+				internalmiddleware.Validate(
+					&UntrashNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"POST /star",
+				Controller.StarNote,
+				internalmiddleware.Validate(
+					&StarNoteRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"DELETE /star",
+				Controller.UnstarNote,
+				internalmiddleware.Validate(
+					&UnstarNoteRequest{},
+				),
+			)
 		},
 	}
 )

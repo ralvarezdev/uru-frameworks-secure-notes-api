@@ -63,6 +63,7 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateGetUserRefreshTokenByIDFn,
 		internalpostgresmodel.CreateListUserRefreshTokensFn,
 		internalpostgresmodel.CreateListUserTokensFn,
+		internalpostgresmodel.CreateListUserTagsFn,
 		internalpostgresmodel.CreateGetUserEmailIDProc,
 		internalpostgresmodel.CreateRevokeUserEmailVerificationTokenProc,
 		internalpostgresmodel.CreateSendEmailVerificationTokenProc,
@@ -106,5 +107,9 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateHasUserTOTPEnabledProc,
 		internalpostgresmodel.CreateIsUserPhoneNumberVerifiedProc,
 		internalpostgresmodel.CreateGetMyProfileProc,
+		internalpostgresmodel.CreateCreateUserTagProc,
+		internalpostgresmodel.CreateUpdateUserTagProc,
+		internalpostgresmodel.CreateDeleteUserTagProc,
+		internalpostgresmodel.CreateGetUserTagProc,
 	)
 }

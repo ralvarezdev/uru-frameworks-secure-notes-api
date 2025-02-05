@@ -267,3 +267,47 @@ func (l *Logger) GetMyProfile(id int64) {
 		fmt.Sprintf("user id: %d", id),
 	)
 }
+
+// ListUserTags logs the list user tags event
+func (l *Logger) ListUserTags(id int64) {
+	l.logger.Info(
+		"user listed tags",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// CreateUserTag logs the create user tag event
+func (l *Logger) CreateUserTag(id, tagID int64) {
+	l.logger.Info(
+		"user created tag",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("tag id: %d", tagID),
+	)
+}
+
+// UpdateUserTag logs the update user tag event
+func (l *Logger) UpdateUserTag(id, tagID int64) {
+	l.logger.Info(
+		"user updated tag",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("tag id: %d", tagID),
+	)
+}
+
+// DeleteUserTag logs the delete user tag event
+func (l *Logger) DeleteUserTag(id, tagID int64) {
+	l.logger.Info(
+		"user deleted tag",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("tag id: %d", tagID),
+	)
+}
+
+// GetUserTagByTagID logs the get user tag by tag ID event
+func (l *Logger) GetUserTagByTagID(id, tagID int64) {
+	l.logger.Info(
+		"user got tag",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("tag id: %d", tagID),
+	)
+}

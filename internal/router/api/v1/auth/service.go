@@ -28,7 +28,6 @@ import (
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internalmailersend "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/mailersend"
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
 	"io"
 	"net/http"
 	"time"
@@ -730,9 +729,9 @@ func (s *service) ListRefreshTokens(r *http.Request) (
 	defer rows.Close()
 
 	// Parse the user refresh tokens
-	var userRefreshTokens []*internalapiv1common.UserRefreshTokenWithID
+	var userRefreshTokens []*internalpostgresmodel.UserRefreshTokenWithID
 	for rows.Next() {
-		var userRefreshToken internalapiv1common.UserRefreshTokenWithID
+		var userRefreshToken internalpostgresmodel.UserRefreshTokenWithID
 		if err = rows.Scan(
 			&userRefreshToken.ID,
 			&userRefreshToken.IssuedAt,
@@ -761,7 +760,7 @@ func (s *service) GetRefreshToken(
 	}
 
 	// Run the SQL function to get the user refresh token by the ID and user ID
-	var userRefreshToken internalapiv1common.UserRefreshToken
+	var userRefreshToken internalpostgresmodel.UserRefreshToken
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetUserRefreshTokenByIDFn,
 		userRefreshTokenID,

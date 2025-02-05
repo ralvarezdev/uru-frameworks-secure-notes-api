@@ -1,129 +1,141 @@
 package model
 
 var (
-	// SignUpProc is the query to call the sign-up stored procedure
+	// SignUpProc is the query to call the stored procedure to sign-up
 	SignUpProc = "CALL sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 
-	// RevokeUserTOTPProc is the query to call the revoke user TOTP stored procedure
+	// RevokeUserTOTPProc is the query to call the stored procedure to revoke user TOTP
 	RevokeUserTOTPProc = "CALL revoke_user_totp($1)"
 
-	// GenerateUserTokensProc is the query to call the generate user tokens stored procedure
+	// GenerateUserTokensProc is the query to call the stored procedure to generate user tokens
 	GenerateUserTokensProc = "CALL generate_user_tokens($1, $2, $3, $4, $5, $6, $7)"
 
-	// RevokeUserTokensByIDProc is the query to call the revoke user tokens by ID stored procedure
+	// RevokeUserTokensByIDProc is the query to call the stored procedure to revoke user tokens by ID
 	RevokeUserTokensByIDProc = "CALL revoke_user_tokens_by_id($1, $2)"
 
-	// RefreshTokenProc is the query to call the refresh token stored procedure
+	// RefreshTokenProc is the query to call the stored procedure to refresh token
 	RefreshTokenProc = "CALL refresh_token($1, $2, $3, $4, $5, $6, $7)"
 
-	// RevokeUserTokensProc is the query to call the revoke user tokens stored procedure
+	// RevokeUserTokensProc is the query to call the stored procedure to revoke user tokens
 	RevokeUserTokensProc = "CALL revoke_user_tokens($1)"
 
-	// GetAccessTokenByRefreshTokenIDProc is the query to call the get access token by refresh token ID stored procedure
+	// GetAccessTokenByRefreshTokenIDProc is the query to call the stored procedure to get access token by refresh token ID
 	GetAccessTokenByRefreshTokenIDProc = "CALL get_access_token_by_refresh_token_id($1, $2)"
 
-	// PreLogInProc is the query to call the pre-login stored procedure
+	// PreLogInProc is the query to call the stored procedure to pre-login
 	PreLogInProc = "CALL pre_log_in($1, $2, $3, $4, $5, $6, $7);"
 
-	// RegisterFailedLogInAttemptProc is the query to call the register failed login attempt stored procedure
+	// RegisterFailedLogInAttemptProc is the query to call the stored procedure to register failed login attempt
 	RegisterFailedLogInAttemptProc = "CALL register_failed_log_in_attempt($1, $2, $3, $4)"
 
-	// GetUserTOTPProc is the query to call the get user TOTP by user ID stored procedure
+	// GetUserTOTPProc is the query to call the stored procedure to get user TOTP by user ID
 	GetUserTOTPProc = "CALL get_user_totp($1, $2, $3, $4)"
 
-	// GetUserEmailProc is the query to call the get user email by user ID stored procedure
+	// GetUserEmailProc is the query to call the stored procedure to get user email by user ID
 	GetUserEmailProc = "CALL get_user_email($1, $2)"
 
-	// GenerateTOTPUrlProc is the query to call the generate TOTP URL stored procedure
+	// GenerateTOTPUrlProc is the query to call the stored procedure to generate TOTP URL
 	GenerateTOTPUrlProc = "CALL generate_totp_url($1, $2, $3, $4, $5, $6)"
 
-	// IsRefreshTokenValidProc is the query to call the is refresh token valid stored procedure
+	// IsRefreshTokenValidProc is the query to call the stored procedure to check if the refresh token is valid
 	IsRefreshTokenValidProc = "CALL is_refresh_token_valid($1, $2, $3, $4)"
 
-	// IsAccessTokenValidProc is the query to call the is access token valid stored procedure
+	// IsAccessTokenValidProc is the query to call the stored procedure to check if the access token is valid
 	IsAccessTokenValidProc = "CALL is_access_token_valid($1, $2, $3, $4)"
 
-	// RevokeUserTOTPRecoveryCodeProc is the query to call the revoke user TOTP recovery code stored procedure
+	// RevokeUserTOTPRecoveryCodeProc is the query to call the stored procedure to revoke user TOTP recovery code
 	RevokeUserTOTPRecoveryCodeProc = "CALL revoke_user_totp_recovery_code($1, $2)"
 
-	// VerifyTOTPProc is the query to call verify TOTP stored procedure
+	// VerifyTOTPProc is the query to call the stored procedure to verify TOTP
 	VerifyTOTPProc = "CALL verify_totp($1)"
 
-	// SendEmailVerificationTokenProc is the query to call the send email verification token stored procedure
+	// SendEmailVerificationTokenProc is the query to call the stored procedure to send email verification token
 	SendEmailVerificationTokenProc = "CALL send_email_verification_token($1, $2, $3)"
 
-	// GetUserEmailIDProc is the query to call the get user email ID stored procedure
+	// GetUserEmailIDProc is the query to call the stored procedure to get user email ID
 	GetUserEmailIDProc = "CALL get_user_email_id($1, $2)"
 
-	// VerifyEmailProc is the query to call the verify email stored procedure
+	// VerifyEmailProc is the query to call the stored procedure to verify email
 	VerifyEmailProc = "CALL verify_email($1, $2, $3)"
 
-	// IsUserEmailVerifiedProc is the query to call the is user email verified stored procedure
+	// IsUserEmailVerifiedProc is the query to call the stored procedure to check if the user email is verified
 	IsUserEmailVerifiedProc = "CALL is_user_email_verified($1, $2)"
 
-	// PreSendEmailVerificationTokenProc is the query to call the pre-send email verification token stored procedure
+	// PreSendEmailVerificationTokenProc is the query to call the stored procedure to pre-send email verification token
 	PreSendEmailVerificationTokenProc = "CALL pre_send_email_verification_token($1, $2, $3, $4, $5, $6)"
 
-	// RevokeUserEmailProc is the query to call the revoke user email stored procedure
+	// RevokeUserEmailProc is the query to call the stored procedure to revoke user email
 	RevokeUserEmailProc = "CALL revoke_user_email($1)"
 
-	// ChangeEmailProc is the query to call the change email stored procedure
+	// ChangeEmailProc is the query to call the stored procedure to change email
 	ChangeEmailProc = "CALL change_email($1, $2, $3, $4, $5, $6)"
 
-	// ForgotPasswordProc is the query to call the forgot password stored procedure
+	// ForgotPasswordProc is the query to call the stored procedure to forgot password
 	ForgotPasswordProc = "CALL forgot_password($1, $2, $3, $4, $5, $6, $7)"
 
-	// RevokeUserResetPasswordTokenProc is the query to call the revoke user reset password token stored procedure
+	// RevokeUserResetPasswordTokenProc is the query to call the stored procedure to revoke user reset password token
 	RevokeUserResetPasswordTokenProc = "CALL revoke_user_reset_password_token($1)"
 
-	// RevokeUserPasswordHashProc is the query to call the revoke user password hash stored procedure
+	// RevokeUserPasswordHashProc is the query to call the stored procedure to revoke user password hash
 	RevokeUserPasswordHashProc = "CALL revoke_user_password_hash($1)"
 
-	// ResetPasswordProc is the query to call the reset password stored procedure
+	// ResetPasswordProc is the query to call the stored procedure to reset password
 	ResetPasswordProc = "CALL reset_password($1, $2, $3, $4)"
 
-	// RevokeUserTokensExceptRefreshTokenIDProc is the query to call the revoke user tokens except refresh token ID stored procedure
+	// RevokeUserTokensExceptRefreshTokenIDProc is the query to call the stored procedure to revoke user tokens except refresh token ID
 	RevokeUserTokensExceptRefreshTokenIDProc = "CALL revoke_user_tokens_except_refresh_token_id($1, $2)"
 
-	// ChangePasswordProc is the query to call the change password stored procedure
+	// ChangePasswordProc is the query to call the stored procedure to change password
 	ChangePasswordProc = "CALL change_password($1, $2, $3)"
 
-	// GetUserPasswordHashProc is the query to call the get user password hash stored procedure
+	// GetUserPasswordHashProc is the query to call the stored procedure to get user password hash
 	GetUserPasswordHashProc = "CALL get_user_password_hash($1, $2)"
 
-	// RevokeUserUsernameProc is the query to call the revoke username stored procedure
+	// RevokeUserUsernameProc is the query to call the stored procedure to revoke username
 	RevokeUserUsernameProc = "CALL revoke_user_username($1)"
 
-	// RevokeUserPhoneNumberProc is the query to call the revoke user phone number stored procedure
+	// RevokeUserPhoneNumberProc is the query to call the stored procedure to revoke user phone number
 	RevokeUserPhoneNumberProc = "CALL revoke_user_phone_number($1)"
 
-	// DeleteUserProc is the query to call the delete user stored procedure
+	// DeleteUserProc is the query to call the stored procedure to delete user
 	DeleteUserProc = "CALL delete_user($1)"
 
-	// ChangeUsernameProc is the query to call the change username stored procedure
+	// ChangeUsernameProc is the query to call the stored procedure to change username
 	ChangeUsernameProc = "CALL change_username($1, $2)"
 
-	// UpdateProfileProc is the query to call the update profile stored procedure
+	// UpdateProfileProc is the query to call the stored procedure to update profile
 	UpdateProfileProc = "CALL update_profile($1, $2, $3, $4)"
 
-	// RevokeUserEmailVerificationTokenProc is the query to call the revoke user email verification token stored procedure
+	// RevokeUserEmailVerificationTokenProc is the query to call the stored procedure to revoke user email verification token
 	RevokeUserEmailVerificationTokenProc = "CALL revoke_user_email_verification_token($1)"
 
-	// GetUserPhoneNumberProc is the query to call the get user phone number stored procedure
+	// GetUserPhoneNumberProc is the query to call the stored procedure to get user phone number
 	GetUserPhoneNumberProc = "CALL get_user_phone_number($1, $2)"
 
-	// GetUserUsernameProc is the query to call the get user username stored procedure
+	// GetUserUsernameProc is the query to call the stored procedure to get user username
 	GetUserUsernameProc = "CALL get_user_username($1, $2)"
 
-	// IsUserPhoneNumberVerifiedProc is the query to call the is user phone number verified stored procedure
+	// IsUserPhoneNumberVerifiedProc is the query to call the stored procedure to check if the user phone number is verified
 	IsUserPhoneNumberVerifiedProc = "CALL is_user_phone_number_verified($1, $2)"
 
-	// HasUserTOTPEnabledProc is the query to call the has user TOTP enabled stored procedure
+	// HasUserTOTPEnabledProc is the query to call the stored procedure to check if the user has TOTP enabled
 	HasUserTOTPEnabledProc = "CALL has_user_totp_enabled($1, $2)"
 
-	// GetMyProfileProc is the query to call the get my profile stored procedure
+	// GetMyProfileProc is the query to call the stored procedure to get my profile
 	GetMyProfileProc = "CALL get_my_profile($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 
-	// GetUserBasicInfoProc is the query to call the get user basic info stored procedure
+	// GetUserBasicInfoProc is the query to call the stored procedure to get user basic info
 	GetUserBasicInfoProc = "CALL get_user_basic_info($1, $2, $3, $4)"
+
+	// CreateUserTagProc is the query to call the stored procedure to create user tag
+	CreateUserTagProc = "CALL create_user_tag($1, $2, $3)"
+
+	// DeleteUserTagProc is the query to call the stored procedure to delete user tag
+	DeleteUserTagProc = "CALL delete_user_tag($1, $2)"
+
+	// UpdateUserTagProc is the query to call the stored procedure to update user tag
+	UpdateUserTagProc = "CALL update_user_tag($1, $2, $3)"
+
+	// GetUserTagProc is the query to call the stored procedure to get user tag
+	GetUserTagProc = "CALL get_user_tag($1, $2, $3, $4, $5)"
 )

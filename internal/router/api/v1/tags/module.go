@@ -21,7 +21,7 @@ var (
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.ListTags,
+				Controller.ListUserTags,
 			)
 		},
 	}

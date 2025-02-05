@@ -21,29 +21,29 @@ var (
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(
 				"POST /",
-				Controller.CreateTag, internalmiddleware.Validate(
-					&CreateTagRequest{},
+				Controller.CreateUserTag, internalmiddleware.Validate(
+					&CreateUserTagRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"PUT /",
-				Controller.UpdateTag,
+				Controller.UpdateUserTag,
 				internalmiddleware.Validate(
-					&UpdateTagRequest{},
+					&UpdateUserTagRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"DELETE /",
-				Controller.DeleteTag,
+				Controller.DeleteUserTag,
 				internalmiddleware.Validate(
-					&DeleteTagRequest{},
+					&DeleteUserTagRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.GetTag,
+				Controller.GetUserTagByTagID,
 				internalmiddleware.Validate(
-					&GetTagRequest{},
+					&GetUserTagByTagIDRequest{},
 				),
 			)
 		},
