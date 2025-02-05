@@ -18,4 +18,7 @@ var (
 
 	// SyncUserNoteVersionsFn is the SQL query to sync user note versions
 	SyncUserNoteVersionsFn = "SELECT * FROM sync_user_note_versions($1, $2, $3);"
+
+	// ListUserNotesTagsFn is the SQL query to list user notes tags
+	ListUserNotesTagsFn = "SELECT * FROM list_user_notes_tags($1, $2);"
 )

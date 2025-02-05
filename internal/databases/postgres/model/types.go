@@ -34,12 +34,16 @@ type (
 
 	// Note is the response DTO for the note
 	Note struct {
-		Title     string     `json:"title"`
-		NoteTags  []string   `json:"note_tags"`
-		IsPinned  *bool      `json:"is_pinned,omitempty"`
-		Color     *string    `json:"color,omitempty"`
-		CreatedAt time.Time  `json:"created_at"`
-		UpdatedAt *time.Time `json:"updated_at,omitempty"`
+		Title               string     `json:"title"`
+		NoteTagsID          []string   `json:"note_tags_id"`
+		Color               *string    `json:"color,omitempty"`
+		CreatedAt           time.Time  `json:"created_at"`
+		UpdatedAt           *time.Time `json:"updated_at,omitempty"`
+		PinnedAt            *time.Time `json:"pinned_at,omitempty"`
+		StarredAt           *time.Time `json:"starred_at,omitempty"`
+		ArchivedAt          *time.Time `json:"archived_at,omitempty"`
+		TrashedAt           *time.Time `json:"trashed_at,omitempty"`
+		LatestNoteVersionID *int64     `json:"latest_note_version_id,omitempty"`
 	}
 
 	// NoteWithID is the response DTO for the note with ID
@@ -61,12 +65,6 @@ type (
 		NoteVersion
 	}
 
-	// LoadedNote is the request DTO for the sync note
-	LoadedNote struct {
-		NoteID               int64   `json:"note_id"`
-		LoadedNoteVersionsID []int64 `json:"loaded_note_versions_id"`
-	}
-
 	// SyncNote is the response DTO for the sync note
 	SyncNote struct {
 		Title            *string           `json:"title,omitempty"`
@@ -76,5 +74,11 @@ type (
 		CreatedAt        *time.Time        `json:"created_at,omitempty"`
 		UpdatedAt        *time.Time        `json:"updated_at,omitempty"`
 		SyncNoteVersions []SyncNoteVersion `json:"sync_note_versions"`
+	}
+
+	// NoteTag is the response DTO for the note tag
+	NoteTag struct {
+		TagID      int64     `json:"tag_id"`
+		AssignedAt time.Time `json:"assigned_at"`
 	}
 )

@@ -1,13 +1,11 @@
 package auth
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	gocryptoaes "github.com/ralvarezdev/go-crypto/aes"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
@@ -642,7 +640,7 @@ func (s *service) VerifyTOTP(
 	}
 
 	// Generate the TOTP recovery codes
-	totpRecoveryCodes, err := gocryptototp.GenerateRecoveryCodes(
+	userTOTPRecoveryCodes, err := gocryptototp.GenerateRecoveryCodes(
 		internaltotp.RecoveryCodesCount,
 		internaltotp.RecoveryCodesLength,
 	)
@@ -650,42 +648,16 @@ func (s *service) VerifyTOTP(
 		panic(err)
 	}
 
-	// Create the insert TOTP recovery codes arguments
-	insertTOTPRecoveryCodesArgs := make(
-		[]interface{},
-		len(*totpRecoveryCodes)+1,
-	)
-	insertTOTPRecoveryCodesArgs[0] = &userTOTPID
-	for i, code := range *totpRecoveryCodes {
-		insertTOTPRecoveryCodesArgs[i+1] = &code
-	}
-
-	// Run transaction
-	err = internalpostgres.PoolService.CreateTransaction(
-		func(ctx context.Context, tx pgx.Tx) error {
-			// Update the user TOTP verified at
-			if _, err = tx.Exec(
-				ctx,
-				internalpostgresmodel.VerifyTOTPProc,
-				userTOTPID,
-			); err != nil {
-				return err
-			}
-
-			// Insert the user TOTP recovery codes
-			_, err = tx.Exec(
-				ctx,
-				internalpostgresmodel.InsertUserTOTPRecoveryCodes,
-				insertTOTPRecoveryCodesArgs...,
-			)
-			return err
-		},
-	)
-	if err != nil {
+	// Verify the TOTP and insert the recovery codes
+	if _, err = internalpostgres.PoolService.Exec(
+		&internalpostgresmodel.VerifyTOTPProc,
+		userTOTPID,
+		userTOTPRecoveryCodes,
+	); err != nil {
 		panic(err)
 	}
 
-	return userID, totpRecoveryCodes
+	return userID, userTOTPRecoveryCodes
 }
 
 // RevokeTOTP revokes a TOTP secret

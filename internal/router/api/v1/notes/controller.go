@@ -11,9 +11,9 @@ type (
 	controller struct{}
 )
 
-// ListNotes lists notes
-// @Summary List notes
-// @Description List notes
+// ListUserNotes lists user notes
+// @Summary List user notes
+// @Description List user notes
 // @Tags api v1 notes
 // @Accept json
 // @Produce json
@@ -21,7 +21,7 @@ type (
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/notes [get]
-func (c *controller) ListNotes(
+func (c *controller) ListUserNotes(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -30,18 +30,18 @@ func (c *controller) ListNotes(
 	)
 }
 
-// SyncNotes syncs notes
-// @Summary Sync notes
-// @Description Sync notes
+// SyncUserNotes syncs user notes
+// @Summary Sync user notes
+// @Description Sync user notes
 // @Tags api v1 notes
 // @Accept json
 // @Produce json
-// @Param request body SyncNotesRequest true "Sync Notes Request"
+// @Param request body SyncUserNotesRequest true "Sync User Notes Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/notes/sync [post]
-func (c *controller) SyncNotes(
+func (c *controller) SyncUserNotes(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {

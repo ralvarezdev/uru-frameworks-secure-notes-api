@@ -17,8 +17,8 @@ type (
 
 	// SyncUserNoteVersionsRequest is the request DTO to sync note versions
 	SyncUserNoteVersionsRequest struct {
-		NoteID              int64 `json:"note_id"`
-		LatestNoteVersionID int64 `json:"latest_note_version_id"`
+		NoteID              int64  `json:"note_id"`
+		LatestNoteVersionID *int64 `json:"latest_note_version_id,omitempty"`
 	}
 
 	// SyncUserNoteVersionsResponse is the response DTO to sync user note versions

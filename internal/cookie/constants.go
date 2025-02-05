@@ -49,6 +49,14 @@ var (
 		Secure:   Secure,
 		Path:     "/",
 	}
+
+	// SyncNotes is the cookies attributes for the sync notes cookie
+	SyncNotes = &gonethttpcookie.Attributes{
+		Name:     "sync_notes",
+		HTTPOnly: true,
+		Secure:   Secure,
+		Path:     "/",
+	}
 )
 
 // SetTokensCookies generates user refresh token and user access token cookies

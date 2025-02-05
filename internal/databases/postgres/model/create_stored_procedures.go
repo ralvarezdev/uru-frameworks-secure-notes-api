@@ -624,7 +624,8 @@ $$;
 	// CreateVerifyTOTPProc is the query to create verify TOTP
 	CreateVerifyTOTPProc = `
 CREATE OR REPLACE PROCEDURE verify_totp(
-	IN in_user_totp_id BIGINT
+	IN in_user_totp_id BIGINT,
+	IN in_user_totp_recovery_codes VARCHAR[]
 )
 LANGUAGE plpgsql
 AS $$
@@ -640,6 +641,9 @@ BEGIN
 		user_totps.verified_at IS NULL
 	AND
 		user_totps.revoked_at IS NULL;
+
+	-- Create the TOTP recovery codes
+	call create_user_totp_recovery_codes(in_user_totp_id, in_user_totp_recovery_codes);
 END;
 $$;
 `
@@ -1170,31 +1174,31 @@ BEGIN
 
 	-- Delete the user tags
 	DELETE FROM
-		tags
+		user_tags
 	WHERE
-		tags.user_id = in_user_id;
+		user_tags.user_id = in_user_id;
 
 	-- Delete the user note tags
 	DELETE FROM
-		note_tags
+		user_note_tags
 	INNER JOIN
-		notes ON note_tags.note_id = notes.id
+		user_notes ON user_note_tags.note_id = user_notes.id
 	WHERE
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 	
 	-- Delete the user note versions
 	DELETE FROM
-		note_versions
+		user_note_versions
 	INNER JOIN
-		notes ON note_versions.note_id = notes.id
+		user_notes ON user_note_versions.note_id = user_notes.id
 	WHERE
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 
 	-- Delete the user notes
 	DELETE FROM
-		notes
+		user_notes
 	WHERE
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 END;
 $$;
 `
@@ -1276,7 +1280,8 @@ BEGIN
 	SET
 		first_name = COALESCE(in_user_first_name, out_first_name),
 		last_name = COALESCE(in_user_last_name, out_last_name),
-		birthdate = COALESCE(in_user_birthdate, out_birthdate)
+		birthdate = COALESCE(in_user_birthdate, out_birthdate),
+		update_at = NOW()
 	WHERE
 		users.id = in_user_id;
 END;
@@ -1430,8 +1435,8 @@ CREATE OR REPLACE PROCEDURE create_user_tag(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Insert into tags table
-	INSERT INTO tags (
+	-- Insert into user_tags table
+	INSERT INTO user_tag (
 		user_id,
 		name
 	)
@@ -1455,15 +1460,16 @@ CREATE OR REPLACE PROCEDURE update_user_tag(
 LANGUAGE plpgsql
 AS $$
 BEGIN	
-	-- Update the tags table
+	-- Update the user_tags table
 	UPDATE
-		tags
+		user_tag
 	SET
-		name = in_user_tag_name
+		name = in_user_tag_name,
+		updated_at = NOW()
 	WHERE
-		tags.id = in_user_tag_id
+		user_tag.id = in_user_tag_id
 	AND
-		tags.user_id = in_user_id;
+		user_tag.user_id = in_user_id;
 END;	
 $$;
 `
@@ -1479,11 +1485,11 @@ AS $$
 BEGIN
 	-- Delete the user tag
 	DELETE FROM
-		tags
+		user_tag
 	WHERE
-		tags.id = in_user_tag_id
+		user_tag.id = in_user_tag_id
 	AND
-		tags.user_id = in_user_id;
+		user_tag.user_id = in_user_id;
 END;
 $$;
 `
@@ -1502,19 +1508,19 @@ AS $$
 BEGIN
 	-- Select the user tag name, created at, and updated at by user ID and tag ID
 	SELECT
-		tags.name,
-		tags.created_at,
-		tags.updated_at
+		user_tag.name,
+		user_tag.created_at,
+		user_tag.updated_at
 	INTO
 		out_user_tag_name,
 		out_user_tag_created_at,
 		out_user_tag_updated_at
 	FROM
-		tags
+		user_tag
 	WHERE
-		tags.id = in_user_tag_id
+		user_tag.id = in_user_tag_id
 	AND
-		tags.user_id = in_user_id;
+		user_tag.user_id = in_user_id;
 END;
 $$;
 `
@@ -1529,17 +1535,18 @@ CREATE OR REPLACE PROCEDURE update_user_note_pin(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the notes table
+	-- Update the user_notes table
 	UPDATE
-		notes
+		user_notes
 	SET
 		pinned_at = CASE
 			WHEN in_user_note_pin THEN NOW()
-			ELSE NULL
+			ELSE NULL,
+		updated_at = NOW()
 	WHERE
-		notes.id = in_user_note_id
+		user_notes.id = in_user_note_id
 	AND
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 END;
 $$;
 `
@@ -1554,17 +1561,18 @@ CREATE OR REPLACE PROCEDURE update_user_note_archive(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the notes table
+	-- Update the user_notes table
 	UPDATE
-		notes
+		user_notes
 	SET
 		archived_at = CASE
 			WHEN in_user_note_archive THEN NOW()
-			ELSE NULL
+			ELSE NULL,
+		updated_at = NOW()
 	WHERE
-		notes.id = in_user_note_id
+		user_notes.id = in_user_note_id
 	AND
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 END;	
 $$;
 `
@@ -1579,17 +1587,18 @@ CREATE OR REPLACE PROCEDURE update_user_note_trash(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the notes table
+	-- Update the user_notes table
 	UPDATE
-		notes
+		user_notes
 	SET
 		trashed_at = CASE
 			WHEN in_user_note_trash THEN NOW()
-			ELSE NULL
+			ELSE NULL,
+		updated_at = NOW()
 	WHERE
-		notes.id = in_user_note_id
+		user_notes.id = in_user_note_id
 	AND
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 END;
 $$;
 `
@@ -1604,17 +1613,18 @@ CREATE OR REPLACE PROCEDURE update_user_note_star(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the notes table
+	-- Update the user_notes table
 	UPDATE
-		notes
+		user_notes
 	SET
 		starred_at = CASE
 			WHEN in_user_note_star THEN NOW()
-			ELSE NULL
+			ELSE NULL,
+		updated_at = NOW()
 	WHERE
-		notes.id = in_user_note_id
+		user_notes.id = in_user_note_id
 	AND
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 END;
 $$;
 `
@@ -1633,20 +1643,20 @@ AS $$
 BEGIN
 	-- Check if the user note ID is valid
 	SELECT
-		notes.id IS NOT NULL
+		user_notes.id IS NOT NULL
 	INTO
 		out_user_note_id_is_valid
 	FROM
-		notes
+		user_notes
 	WHERE
-		notes.id = in_user_note_id
+		user_notes.id = in_user_note_id
 	AND
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
 
-	-- If the user note ID is valid, insert into note_versions table
+	-- If the user note ID is valid, insert into user_note_versions table
 	IF out_user_note_id_is_valid THEN
-		-- Insert into note_versions table
-		INSERT INTO note_versions (
+		-- Insert into user_note_versions table
+		INSERT INTO user_note_versions (
 			user_id,
 			note_id,
 			encrypted_content
@@ -1674,13 +1684,13 @@ AS $$
 BEGIN
 	-- Delete the user note version
 	DELETE FROM
-		note_versions
+		user_note_versions
 	INNER JOIN
-		notes ON note_versions.note_id = notes.id
+		user_notes ON user_note_versions.note_id = user_notes.id
 	WHERE
-		note_versions.id = in_user_note_version_id
+		user_note_versions.id = in_user_note_version_id
 	AND
-		note_versions.user_id = in_user_id;
+		user_note_versions.user_id = in_user_id;
 END;
 $$;
 `
@@ -1696,21 +1706,337 @@ CREATE OR REPLACE PROCEDURE get_user_note_version_by_note_version_id(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Select the user note version encrypted content and created at by user ID and note version ID
+	-- Select the user note version encrypted content and created at by user ID and user note version ID
 	SELECT
-		note_versions.encrypted_content,
-		note_versions.created_at
+		user_note_versions.encrypted_content,
+		user_note_versions.created_at
 	INTO
 		out_user_note_version_encrypted_content,
 		out_user_note_version_created_at
 	FROM
-		note_versions
+		user_note_versions
 	INNER JOIN
-		notes ON note_versions.note_id = notes.id
+		user_notes ON user_note_versions.note_id = user_notes.id
 	WHERE
-		note_versions.id = in_user_note_version_id
+		user_note_versions.id = in_user_note_version_id
 	AND
-		notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateValidateUserTagIDsProc is the query to create the stored procedure to validate user tag IDs
+	CreateValidateUserTagIDsProc = `
+CREATE OR REPLACE PROCEDURE validate_user_tag_ids(
+	IN in_user_id BIGINT,
+	IN in_user_tag_ids BIGINT[],
+	OUT out_valid_user_tag_ids BIGINT[]
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user tag IDs are valid
+	SELECT
+		ARRAY(
+			SELECT
+				user_tag.id
+			FROM
+				user_tag
+			WHERE
+				user_tag.user_id = in_user_id
+			AND
+				user_tag.id = ANY(in_user_tag_ids)
+		)
+	INTO
+		out_valid_user_tag_ids;
+END;
+$$;
+`
+
+	// CreateAddUserNoteTagsProc is the query to create the stored procedure to add user note tags
+	CreateAddUserNoteTagsProc = `
+CREATE OR REPLACE PROCEDURE add_user_note_tags(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_tag_ids BIGINT[]
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user tag IDs are valid
+	CALL validate_user_tag_ids(in_user_id, in_user_note_tag_ids, out_valid_user_note_tag_ids);
+
+	-- Insert into note_tags table
+	FOREACH valid_user_note_tag_id IN ARRAY out_valid_user_note_tag_ids
+	LOOP
+		INSERT INTO user_note_tags (
+			note_id,
+			tag_id
+		)
+		VALUES (
+			out_user_note_id,
+			valid_user_note_tag_id
+		);
+	END LOOP;
+END;
+$$;
+`
+
+	// CreateCreateUserNoteProc is the query to create the stored procedure to create user note
+	CreateCreateUserNoteProc = `
+CREATE OR REPLACE PROCEDURE create_user_note(
+	IN in_user_id BIGINT,
+	IN in_user_note_title VARCHAR,
+	IN in_user_note_tag_ids BIGINT[],
+	IN in_user_note_color VARCHAR,
+	IN in_user_note_pinned BOOLEAN,
+	IN in_user_note_archived BOOLEAN,
+	IN in_user_note_trashed BOOLEAN,
+	IN in_user_note_starred BOOLEAN,
+	IN in_user_note_encrypted_content TEXT,
+	OUT out_user_note_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	out_valid_user_note_tag_ids BIGINT[];
+BEGIN
+	-- Insert into user_notes table
+	INSERT INTO user_notes (
+		user_id,
+		title,
+		color,
+		pinned_at,
+		archived_at,
+		trashed_at,
+		starred_at
+	)
+	VALUES (
+		in_user_id,
+		in_user_note_title,
+		in_user_note_color,
+		CASE
+			WHEN in_user_note_pinned THEN NOW()
+			ELSE NULL,
+		CASE
+			WHEN in_user_note_archived THEN NOW()
+			ELSE NULL,
+		CASE
+			WHEN in_user_note_trashed THEN NOW()
+			ELSE NULL,
+		CASE	
+			WHEN in_user_note_starred THEN NOW()	
+			ELSE NULL
+	)
+	RETURNING
+		id INTO out_user_note_id;
+
+	-- Insert into user_note_versions table
+	INSERT INTO user_note_versions (
+		user_id,
+		note_id,
+		encrypted_content
+	)
+	VALUES (
+		in_user_id,
+		out_user_note_id,
+		in_user_note_encrypted_content
+	);
+
+	-- Add user note tags
+	CALL add_user_note_tags(in_user_id, out_user_note_id, in_user_note_tag_ids);
+END;
+$$;
+`
+
+	// CreateCreateUserTOTPRecoveryCodesProc is the query to create the stored procedure to create user TOTP recovery codes
+	CreateCreateUserTOTPRecoveryCodesProc = `
+CREATE OR REPLACE PROCEDURE create_user_totp_recovery_codes(
+	IN in_user_totp_id BIGINT,
+	IN in_user_totp_recovery_codes VARCHAR[]
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Insert into user_totp_recovery_codes table
+	FOREACH user_totp_recovery_code IN ARRAY in_user_totp_recovery_codes
+	LOOP
+		INSERT INTO user_totp_recovery_codes (
+			user_totp_id,
+			recovery_code
+		)
+		VALUES (
+			in_user_totp_id,
+			user_totp_recovery_code
+		);
+	END LOOP;
+END;
+$$;
+`
+
+	// CreateDeleteUserNoteProc is the query to create the stored procedure to delete user note
+	CreateDeleteUserNoteProc = `
+CREATE OR REPLACE PROCEDURE delete_user_note(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Delete the user note versions
+	DELETE FROM
+		user_note_versions
+	WHERE
+		user_note_versions.note_id = in_user_note_id
+	AND
+		user_note_versions.user_id = in_user_id;
+
+	-- Delete the user note tags
+	DELETE FROM
+		user_note_tags
+	INNER JOIN
+		user_notes ON user_note_tags.note_id = user_notes.id
+	WHERE
+		user_note_tags.note_id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id;
+
+	-- Delete the user note
+	DELETE FROM
+		user_notes
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateRemoveUserNoteTagsProc is the query to create the stored procedure to remove user note tags
+	CreateRemoveUserNoteTagsProc = `
+CREATE OR REPLACE PROCEDURE remove_user_note_tags(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_tag_ids BIGINT[]
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user tag IDs are valid
+	CALL validate_user_tag_ids(in_user_id, in_user_note_tag_ids, out_valid_user_note_tag_ids);
+
+	-- Delete the user note tags
+	DELETE FROM
+		user_note_tags
+	WHERE
+		user_note_tags.note_id = in_user_note_id
+	AND
+		user_note_tags.tag_id = ANY(out_valid_user_note_tag_ids);
+END;
+$$;
+`
+
+	// CreateUpdateUserNoteProc is the query to create the stored procedure to update user note
+	CreateUpdateUserNoteProc = `
+CREATE OR REPLACE PROCEDURE update_user_note(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_title VARCHAR,
+	IN in_user_note_color VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	out_user_note_title VARCHAR;
+	out_user_note_color VARCHAR;
+BEGIN
+	-- Select the user note title and color by user ID and user note ID
+	SELECT
+		user_notes.title,
+		user_notes.color
+	INTO
+		out_user_note_title,
+		out_user_note_color
+	FROM
+		user_notes
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id;
+
+	-- Update the user_notes table
+	UPDATE
+		user_notes
+	SET
+		title = COALESCE(in_user_note_title, out_user_note_title),
+		color = COALESCE(in_user_note_color, out_user_note_color),
+		updated_at = NOW()
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateGetUserNoteByNoteIDProc is the query to create the stored procedure to get user note by note ID
+	CreateGetUserNoteByNoteIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_note_by_note_id(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	OUT out_user_note_title VARCHAR,
+	OUT out_user_note_color VARCHAR,
+	OUT out_user_note_created_at TIMESTAMP,
+	OUT out_user_note_updated_at TIMESTAMP,
+	OUT out_user_note_pinned_at TIMESTAMP,
+	OUT out_user_note_archived_at TIMESTAMP,
+	OUT out_user_note_trashed_at TIMESTAMP,
+	OUT out_user_note_starred_at TIMESTAMP,
+	OUT out_user_note_latest_note_version_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user note title, color, created at, updated at, pinned at, archived at, trashed at, and starred at by user ID and user note ID
+	SELECT
+		user_notes.title,
+		user_notes.color,
+		user_notes.created_at,
+		user_notes.updated_at,
+		user_notes.pinned_at,
+		user_notes.archived_at,
+		user_notes.trashed_at,
+		user_notes.starred_at
+	INTO
+		out_user_note_title,
+		out_user_note_color,
+		out_user_note_created_at,
+		out_user_note_updated_at,
+		out_user_note_pinned_at,
+		out_user_note_archived_at,
+		out_user_note_trashed_at,
+		out_user_note_starred_at
+	FROM
+		user_notes
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id;
+
+	-- Select the user note latest user note version ID by user ID and user note ID
+	SELECT
+		user_note_versions.id
+	INTO
+		out_user_note_latest_note_version_id
+	FROM
+		user_note_versions
+	WHERE
+		user_note_versions.note_id = in_user_note_id
+	AND
+		user_note_versions.user_id = in_user_id
+	ORDER BY
+		user_note_versions.created_at DESC
+	LIMIT 1;
 END;
 $$;
 `

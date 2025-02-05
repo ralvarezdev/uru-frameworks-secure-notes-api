@@ -27,37 +27,51 @@ var (
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(
 				"POST /",
-				Controller.CreateNote,
+				Controller.CreateUserNote,
 				internalmiddleware.Validate(
-					&CreateNoteRequest{},
+					&CreateUserNoteRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"PUT /",
-				Controller.UpdateNote,
+				Controller.UpdateUserNote,
 				internalmiddleware.Validate(
-					&UpdateNoteRequest{},
+					&UpdateUserNoteRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"DELETE /",
-				Controller.DeleteNote,
+				Controller.DeleteUserNote,
 				internalmiddleware.Validate(
-					&DeleteNoteRequest{},
+					&DeleteUserNoteRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.GetNote,
+				Controller.GetUserNote,
 				internalmiddleware.Validate(
-					&GetNoteRequest{},
+					&GetUserNoteRequest{},
 				),
 			)
 			m.RegisterExactRoute(
 				"GET /tags",
-				Controller.ListNoteTags,
+				Controller.ListUserNoteTags,
 				internalmiddleware.Validate(
-					&ListNoteTagsRequest{},
+					&ListUserNoteTagsRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"PATCH /tags",
+				Controller.AddUserNoteTags,
+				internalmiddleware.Validate(
+					&AddUserNoteTagsRequest{},
+				),
+			)
+			m.RegisterExactRoute(
+				"DELETE /tags",
+				Controller.RemoveUserNoteTags,
+				internalmiddleware.Validate(
+					&RemoveUserNoteTagsRequest{},
 				),
 			)
 			m.RegisterExactRoute(

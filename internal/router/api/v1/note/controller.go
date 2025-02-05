@@ -14,19 +14,19 @@ type (
 	controller struct{}
 )
 
-// CreateNote creates a note
-// @Summary Create a note
-// @Description Creates a note
+// CreateUserNote creates a user note
+// @Summary Create a user note
+// @Description Creates a user note
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body CreateNoteRequest true "Create Note Request"
+// @Param request body CreateUserNoteRequest true "Create User Note Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note [post]
-func (c *controller) CreateNote(
+func (c *controller) CreateUserNote(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -35,20 +35,20 @@ func (c *controller) CreateNote(
 	)
 }
 
-// UpdateNote updates a note
-// @Summary Update a note
-// @Description Updates a note
+// UpdateUserNote updates a user note
+// @Summary Update a user note
+// @Description Updates a user note
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body UpdateNoteRequest true "Update Note Request"
+// @Param request body UpdateUserNoteRequest true "Update User Note Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note [put]
-func (c *controller) UpdateNote(
+func (c *controller) UpdateUserNote(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -57,20 +57,20 @@ func (c *controller) UpdateNote(
 	)
 }
 
-// DeleteNote deletes a note
-// @Summary Delete a note
-// @Description Deletes a note
+// DeleteUserNote deletes a user note
+// @Summary Delete a user note
+// @Description Deletes a user note
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body DeleteNoteRequest true "Delete Note Request"
+// @Param request body DeleteUserNoteRequest true "Delete User Note Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note [delete]
-func (c *controller) DeleteNote(
+func (c *controller) DeleteUserNote(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -79,20 +79,20 @@ func (c *controller) DeleteNote(
 	)
 }
 
-// GetNote gets a note
-// @Summary Get a note
-// @Description Gets a note
+// GetUserNote gets a user note
+// @Summary Get a user note
+// @Description Gets a user note
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body GetNoteRequest true "Get Note Request"
-// @Success 200 {object} GetNoteResponse
+// @Param request body GetUserNoteRequest true "Get User Note Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note [get]
-func (c *controller) GetNote(
+func (c *controller) GetUserNote(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
@@ -101,20 +101,64 @@ func (c *controller) GetNote(
 	)
 }
 
-// ListNoteTags lists note tags
-// @Summary List note tags
-// @Description List note tags
+// ListUserNoteTags lists user note tags
+// @Summary List user note tags
+// @Description List user note tags
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body ListNoteTagsRequest true "List Note Tags Request"
-// @Success 200 {object} ListNoteTagsResponse
+// @Param request body ListUserNoteTagsRequest true "List User Note Tags Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note/tags [get]
-func (c *controller) ListNoteTags(
+func (c *controller) ListUserNoteTags(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// AddUserNoteTags adds user note tags
+// @Summary Add user note tags
+// @Description Adds user note tags
+// @Tags api v1 note
+// @Accept json
+// @Produce json
+// @Param request body AddUserNoteTagsRequest true "Add User Note Tags Request"
+// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 404 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/note/tags [post]
+func (c *controller) AddUserNoteTags(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// RemoveUserNoteTags removes user note tags
+// @Summary Remove user note tags
+// @Description Removes user note tags
+// @Tags api v1 note
+// @Accept json
+// @Produce json
+// @Param request body RemoveUserNoteTagsRequest true "Remove User Note Tags Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 404 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/note/tags [delete]
+func (c *controller) RemoveUserNoteTags(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {

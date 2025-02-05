@@ -47,7 +47,7 @@ var (
 	RevokeUserTOTPRecoveryCodeProc = "CALL revoke_user_totp_recovery_code($1, $2)"
 
 	// VerifyTOTPProc is the query to call the stored procedure to verify TOTP
-	VerifyTOTPProc = "CALL verify_totp($1)"
+	VerifyTOTPProc = "CALL verify_totp($1, $2)"
 
 	// SendEmailVerificationTokenProc is the query to call the stored procedure to send email verification token
 	SendEmailVerificationTokenProc = "CALL send_email_verification_token($1, $2, $3)"
@@ -159,4 +159,28 @@ var (
 
 	// GetUserNoteVersionByNoteVersionIDProc is the query to call the stored procedure to get user note version by note version ID
 	GetUserNoteVersionByNoteVersionIDProc = "CALL get_user_note_version_by_note_version_id($1, $2, $3, $4)"
+
+	// CreateUserNoteProc is the query to call the stored procedure to create user note
+	CreateUserNoteProc = "CALL create_user_note($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+
+	// AddUserNoteTagsProc is the query to call the stored procedure to add user note tags
+	AddUserNoteTagsProc = "CALL add_user_note_tags($1, $2, $3)"
+
+	// ValidateUserTagsIDsProc is the query to call the stored procedure to validate user tags IDs
+	ValidateUserTagsIDsProc = "CALL validate_user_tags($1, $2, $3)"
+
+	// CreateUserTOTPRecoveryCodesProc is the query to call the stored procedure to create user TOTP recovery codes
+	CreateUserTOTPRecoveryCodesProc = "CALL create_user_totp_recovery_codes($1, $2)"
+
+	// DeleteUserNoteProc is the query to call the stored procedure to delete user note
+	DeleteUserNoteProc = "CALL delete_user_note($1, $2)"
+
+	// RemoveUserNoteTagsProc is the query to call the stored procedure to remove user note tags
+	RemoveUserNoteTagsProc = "CALL remove_user_note_tags($1, $2, $3)"
+
+	// UpdateUserNoteProc is the query to call the stored procedure to update user note
+	UpdateUserNoteProc = "CALL update_user_note($1, $2, $3, $4)"
+
+	// GetUserNoteByNoteIDProc is the query to call the stored procedure to get user note by note ID
+	GetUserNoteByNoteIDProc = "CALL get_user_note_by_note_id($1, $2, $3, $4)"
 )

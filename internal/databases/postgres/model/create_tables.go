@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 	encrypted_key TEXT NOT NULL,
     birthdate TIMESTAMP,
     joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	update_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP
 );
 `
@@ -139,9 +140,9 @@ CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
 );
 `
 
-	// CreateNotes is the SQL query to create the notes table
-	CreateNotes = `
-CREATE TABLE IF NOT EXISTS notes (
+	// CreateUserNotes is the SQL query to create the user_notes table
+	CreateUserNotes = `
+CREATE TABLE IF NOT EXISTS user_notes (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -156,26 +157,26 @@ CREATE TABLE IF NOT EXISTS notes (
 );
 `
 
-	// CreateNoteTags is the SQL query to create the note_tags table
-	CreateNoteTags = `
-CREATE TABLE IF NOT EXISTS note_tags (
+	// CreateUserNoteTags is the SQL query to create the user_note_tags table
+	CreateUserNoteTags = `
+CREATE TABLE IF NOT EXISTS user_note_tags (
     id BIGSERIAL PRIMARY KEY,
-    note_id BIGINT NOT NULL,
-    tag_id BIGINT NOT NULL,
+    user_note_id BIGINT NOT NULL,
+    user_tag_id BIGINT NOT NULL,
     assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
-    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+    FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_tag_id) REFERENCES user_tags(id) ON DELETE CASCADE
 );
 `
 
-	// CreateNoteVersions is the SQL query to create the note_versions table
-	CreateNoteVersions = `
-CREATE TABLE IF NOT EXISTS note_versions (
+	// CreateUserNoteVersions is the SQL query to create the user_note_versions table
+	CreateUserNoteVersions = `
+CREATE TABLE IF NOT EXISTS user_note_versions (
     id SERIAL PRIMARY KEY,
-    note_id BIGINT NOT NULL,
+    user_note_id BIGINT NOT NULL,
     encrypted_content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+    FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE
 );
 `
 )
@@ -226,10 +227,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_phone_numbers (phone_number) WHERE 
 `, UserPhoneNumbersUniquePhoneNumber,
 	)
 
-	// CreateTags is the SQL query to create the tags table
-	CreateTags = fmt.Sprintf(
+	// CreateUserTags is the SQL query to create the user_tags table
+	CreateUserTags = fmt.Sprintf(
 		`
-CREATE TABLE IF NOT EXISTS tags (
+CREATE TABLE IF NOT EXISTS user_tags (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     name VARCHAR(50) UNIQUE NOT NULL,
@@ -237,7 +238,7 @@ CREATE TABLE IF NOT EXISTS tags (
 	updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX IF NOT EXISTS %s ON tags (user_id, name);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_tags (user_id, name);
 `, UserTagsUniqueName,
 	)
 )

@@ -176,4 +176,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 `
+
+	// CreateListUserNoteTagsFn is the query to create the function to list user note tags
+	CreateListUserNoteTagsFn = `
+CREATE OR REPLACE FUNCTION list_user_note_tags(
+	in_user_id BIGINT,
+	in_user_note_id BIGINT
+) RETURNS	
+TABLE(
+	out_user_tag_id BIGINT,
+	out_user_note_tag_assigned_at TIMESTAMP
+)
+AS $$	
+BEGIN	
+	-- Return the user note tags
+	RETURN QUERY
+	SELECT
+		user_note_tags.user_tag_id AS out_user_tag_id,
+		user_note_tags.assigned_at AS out_user_note_tag_assigned_at
+	FROM
+		user_note_tags
+	INNER JOIN
+		user_tags ON user_note_tags.user_tag_id = user_tags.id
+	INNER JOIN
+		user_notes ON user_note_tags.user_note_id = user_notes.id
+	WHERE
+		user_notes.user_id = in_user_id
+	AND
+		user_note_tags.user_note_id = in_user_note_id;
+END;	
+$$ LANGUAGE plpgsql;
+`
 )

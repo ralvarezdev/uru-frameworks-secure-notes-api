@@ -73,6 +73,13 @@ func (s *service) SyncUserNoteVersions(
 		panic(err)
 	}
 
+	// Check if the latest note version ID is nil
+	if body.LatestNoteVersionID == nil {
+		// Set the latest note version ID to 0
+		latestNoteVersionID := int64(0)
+		body.LatestNoteVersionID = &latestNoteVersionID
+	}
+
 	// Sync the note versions
 	var userNoteVersions []*internalpostgresmodel.NoteVersionWithID
 	rows, err := internalpostgres.PoolService.Query(

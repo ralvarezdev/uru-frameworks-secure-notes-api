@@ -2,9 +2,7 @@ package totp
 
 import (
 	gocryptototp "github.com/ralvarezdev/go-crypto/otp/totp"
-	internalpostgresqueries "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
-	"strconv"
 )
 
 const (
@@ -59,27 +57,6 @@ func Load() {
 			dest,
 		); err != nil {
 			panic(err)
-		}
-	}
-
-	// Set the InsertUserTOTPRecoveryCodes query based on the recovery codes count
-	internalpostgresqueries.InsertUserTOTPRecoveryCodes = `
-INSERT INTO user_totp_recovery_codes (
-	user_totp_id,
-	code,
-	created_at
-)
-VALUES
-`
-
-	// Set the InsertUserTOTPRecoveryCodes query based on the recovery codes count
-	var j string
-	for i := 0; i < RecoveryCodesCount; i++ {
-		j = strconv.Itoa(i + 2)
-		if i == RecoveryCodesCount-1 {
-			internalpostgresqueries.InsertUserTOTPRecoveryCodes += "($1, $" + j + ", NOW());"
-		} else {
-			internalpostgresqueries.InsertUserTOTPRecoveryCodes += "($1, $" + j + ", NOW()),"
 		}
 	}
 
