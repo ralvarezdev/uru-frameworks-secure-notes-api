@@ -50,10 +50,9 @@ type (
 
 	// NoteVersion is the response DTO for the note version
 	NoteVersion struct {
-		NoteID           uint       `json:"note_id"`
-		EncryptedContent string     `json:"encrypted_content"`
-		CreatedAt        time.Time  `json:"created_at"`
-		UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+		NoteID           *int64    `json:"note_id,omitempty"`
+		EncryptedContent string    `json:"encrypted_content"`
+		CreatedAt        time.Time `json:"created_at"`
 	}
 
 	// NoteVersionWithID is the response DTO for the note version with ID
@@ -64,16 +63,8 @@ type (
 
 	// LoadedNote is the request DTO for the sync note
 	LoadedNote struct {
-		NoteID               uint   `json:"note_id"`
-		LoadedNoteVersionsID []uint `json:"loaded_note_versions_id"`
-	}
-
-	// SyncNoteVersion is the response DTO for the sync note version
-	SyncNoteVersion struct {
-		NoteVersionID    uint       `json:"note_version_id"`
-		EncryptedContent string     `json:"encrypted_content"`
-		CreatedAt        time.Time  `json:"created_at"`
-		UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+		NoteID               int64   `json:"note_id"`
+		LoadedNoteVersionsID []int64 `json:"loaded_note_versions_id"`
 	}
 
 	// SyncNote is the response DTO for the sync note

@@ -12,4 +12,10 @@ var (
 
 	// ListUserTagsFn is the SQL query to list user tags
 	ListUserTagsFn = "SELECT * FROM list_user_tags($1);"
+
+	// ListUserNoteVersionsFn is the SQL query to list user note versions
+	ListUserNoteVersionsFn = "SELECT * FROM list_user_note_versions($1, $2);"
+
+	// SyncUserNoteVersionsFn is the SQL query to sync user note versions
+	SyncUserNoteVersionsFn = "SELECT * FROM sync_user_note_versions($1, $2, $3);"
 )

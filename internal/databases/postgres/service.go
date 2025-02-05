@@ -64,6 +64,7 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateListUserRefreshTokensFn,
 		internalpostgresmodel.CreateListUserTokensFn,
 		internalpostgresmodel.CreateListUserTagsFn,
+		internalpostgresmodel.CreateListUserNoteVersionsFn,
 		internalpostgresmodel.CreateGetUserEmailIDProc,
 		internalpostgresmodel.CreateRevokeUserEmailVerificationTokenProc,
 		internalpostgresmodel.CreateSendEmailVerificationTokenProc,

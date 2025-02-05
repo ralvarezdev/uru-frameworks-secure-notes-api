@@ -1,23 +1,28 @@
 package versions
 
 import (
-	internalapiv1common "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/_common"
+	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
 type (
-	// ListNoteVersionsResponse is the response DTO to list note versions
-	ListNoteVersionsResponse struct {
-		NoteVersionsID []string `json:"note_versions_id"`
+	// ListUserNoteVersionsRequest is the request DTO to list user note versions
+	ListUserNoteVersionsRequest struct {
+		NoteID int64 `json:"note_id"`
 	}
 
-	// SyncNoteVersionsRequest is the request DTO to sync note versions
-	SyncNoteVersionsRequest struct {
-		NoteID               int64   `json:"note_id"`
-		LoadedNoteVersionsID []int64 `json:"loaded_note_versions_id"`
+	// ListUserNoteVersionsResponse is the response DTO to list user note versions
+	ListUserNoteVersionsResponse struct {
+		NoteVersionsID []int64 `json:"note_versions_id"`
 	}
 
-	// SyncNoteVersionsResponse is the response DTO to sync note versions
-	SyncNoteVersionsResponse struct {
-		SyncNoteVersions []internalapiv1common.SyncNoteVersion `json:"sync_note_versions"`
+	// SyncUserNoteVersionsRequest is the request DTO to sync note versions
+	SyncUserNoteVersionsRequest struct {
+		NoteID              int64 `json:"note_id"`
+		LatestNoteVersionID int64 `json:"latest_note_version_id"`
+	}
+
+	// SyncUserNoteVersionsResponse is the response DTO to sync user note versions
+	SyncUserNoteVersionsResponse struct {
+		NoteVersions []*internalpostgresmodel.NoteVersionWithID `json:"note_versions"`
 	}
 )

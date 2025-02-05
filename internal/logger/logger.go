@@ -379,3 +379,22 @@ func (l *Logger) GetUserNoteVersionByNoteVersionID(id, noteVersionID int64) {
 		fmt.Sprintf("note version id: %d", noteVersionID),
 	)
 }
+
+// ListUserNoteVersions logs the list user note versions event
+func (l *Logger) ListUserNoteVersions(id, noteID int64) {
+	l.logger.Info(
+		"user listed note versions",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// SyncUserNoteVersions logs the sync user note versions event
+func (l *Logger) SyncUserNoteVersions(id, noteID, latestNoteVersionID int64) {
+	l.logger.Info(
+		"user synced note versions",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+		fmt.Sprintf("latest note version id: %d", latestNoteVersionID),
+	)
+}

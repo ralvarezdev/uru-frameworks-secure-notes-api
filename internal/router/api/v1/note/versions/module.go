@@ -21,12 +21,13 @@ var (
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.ListNoteVersions,
+				Controller.ListUserNoteVersions,
+				internalmiddleware.Validate(&ListUserNoteVersionsRequest{}),
 			)
 			m.RegisterExactRoute(
 				"POST /sync",
-				Controller.SyncNoteVersions,
-				internalmiddleware.Validate(&SyncNoteVersionsRequest{}),
+				Controller.SyncUserNoteVersions,
+				internalmiddleware.Validate(&SyncUserNoteVersionsRequest{}),
 			)
 		},
 	}

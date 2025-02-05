@@ -115,4 +115,65 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 `
+
+	// CreateListUserNoteVersionsFn is the query to create the function to list user note versions
+	CreateListUserNoteVersionsFn = `
+CREATE OR REPLACE FUNCTION list_user_note_versions(
+	in_user_id BIGINT,
+	in_user_note_id BIGINT
+) RETURNS
+TABLE(
+	out_user_note_version_id BIGINT
+)
+AS $$
+BEGIN
+	-- Return the user note versions
+	RETURN QUERY
+	SELECT
+		user_note_versions.id AS out_user_note_version_id
+	FROM
+		user_note_versions
+	INNER JOIN
+		user_notes ON user_note_versions.user_note_id = user_notes.id
+	WHERE
+		user_notes.user_id = in_user_id
+	AND
+		user_note_versions.user_note_id = in_user_note_id;
+END;
+$$ LANGUAGE plpgsql;
+`
+
+	// CreateSyncUserNoteVersionsFn is the query to create the function to sync user note versions
+	CreateSyncUserNoteVersionsFn = `
+CREATE OR REPLACE FUNCTION sync_user_note_versions(
+	in_user_id BIGINT,
+	in_user_note_id BIGINT,
+	in_latest_user_note_version_id BIGINT
+) RETURNS
+TABLE(
+	out_user_note_version_id BIGINT,
+	out_user_note_version_encrypted_content TEXT,
+	out_user_note_version_created_at TIMESTAMP
+)
+AS $$
+BEGIN
+	-- Return the user note versions
+	RETURN QUERY
+	SELECT
+		user_note_versions.id AS out_user_note_version_id,
+		user_note_versions.encrypted_content AS out_user_note_version_encrypted_content,
+		user_note_versions.created_at AS out_user_note_version_created_at
+	FROM
+		user_note_versions
+	INNER JOIN
+		user_notes ON user_note_versions.user_note_id = user_notes.id
+	WHERE
+		user_notes.user_id = in_user_id
+	AND
+		user_note_versions.user_note_id = in_user_note_id
+	AND
+		user_note_versions.id > in_latest_user_note_version_id;
+END;
+$$ LANGUAGE plpgsql;
+`
 )
