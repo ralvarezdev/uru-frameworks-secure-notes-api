@@ -19,21 +19,22 @@ type (
 		UserRefreshToken
 	}
 
-	// Tag is the response DTO for the tag
-	Tag struct {
-		Name      string    `json:"name"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
+	// UserTag is the response DTO for the user tag
+	UserTag struct {
+		Name      string     `json:"name"`
+		CreatedAt time.Time  `json:"created_at"`
+		UpdatedAt time.Time  `json:"updated_at"`
+		DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	}
 
-	// TagWithID is the response DTO for the tag with ID
-	TagWithID struct {
+	// UserTagWithID is the response DTO for the user tag with ID
+	UserTagWithID struct {
 		ID int64 `json:"id"`
-		Tag
+		UserTag
 	}
 
-	// Note is the response DTO for the note
-	Note struct {
+	// UserNote is the response DTO for the user note
+	UserNote struct {
 		Title               string     `json:"title"`
 		NoteTagsID          []string   `json:"note_tags_id"`
 		Color               *string    `json:"color,omitempty"`
@@ -46,39 +47,50 @@ type (
 		LatestNoteVersionID *int64     `json:"latest_note_version_id,omitempty"`
 	}
 
-	// NoteWithID is the response DTO for the note with ID
-	NoteWithID struct {
+	// UserNoteWithID is the response DTO for the user note with ID
+	UserNoteWithID struct {
 		ID int64 `json:"id"`
-		Note
+		UserNote
 	}
 
-	// NoteVersion is the response DTO for the note version
-	NoteVersion struct {
-		NoteID           *int64    `json:"note_id,omitempty"`
-		EncryptedContent string    `json:"encrypted_content"`
-		CreatedAt        time.Time `json:"created_at"`
+	// UserNoteVersion is the response DTO for the user note version
+	UserNoteVersion struct {
+		NoteID           *int64     `json:"note_id,omitempty"`
+		EncryptedContent string     `json:"encrypted_content"`
+		CreatedAt        time.Time  `json:"created_at"`
+		DeletedAt        *time.Time `json:"deleted_at,omitempty"`
 	}
 
-	// NoteVersionWithID is the response DTO for the note version with ID
-	NoteVersionWithID struct {
+	// UserNoteVersionWithID is the response DTO for the user note version with ID
+	UserNoteVersionWithID struct {
 		ID int64 `json:"id"`
-		NoteVersion
+		UserNoteVersion
 	}
 
-	// SyncNote is the response DTO for the sync note
-	SyncNote struct {
-		Title            *string           `json:"title,omitempty"`
-		NoteTags         []string          `json:"note_tags"`
-		IsPinned         *bool             `json:"is_pinned,omitempty"`
-		Color            *string           `json:"color,omitempty"`
-		CreatedAt        *time.Time        `json:"created_at,omitempty"`
-		UpdatedAt        *time.Time        `json:"updated_at,omitempty"`
-		SyncNoteVersions []SyncNoteVersion `json:"sync_note_versions"`
+	// UserNoteTag is the response DTO for the user note tag
+	UserNoteTag struct {
+		TagID      int64      `json:"tag_id"`
+		AssignedAt time.Time  `json:"assigned_at"`
+		DeletedAt  *time.Time `json:"deleted_at,omitempty"`
 	}
 
-	// NoteTag is the response DTO for the note tag
-	NoteTag struct {
-		TagID      int64     `json:"tag_id"`
-		AssignedAt time.Time `json:"assigned_at"`
+	// UserNoteTagWithID is the response DTO for the user note tag with ID
+	UserNoteTagWithID struct {
+		ID int64 `json:"id"`
+		UserNoteTag
+	}
+
+	// SyncUserNote is the response DTO for the sync user note
+	SyncUserNote struct {
+		Title            *string                  `json:"title,omitempty"`
+		Color            *string                  `json:"color,omitempty"`
+		CreatedAt        *time.Time               `json:"created_at,omitempty"`
+		UpdatedAt        *time.Time               `json:"updated_at,omitempty"`
+		IsPinned         *bool                    `json:"is_pinned,omitempty"`
+		IsStarred        *bool                    `json:"is_starred,omitempty"`
+		IsArchived       *bool                    `json:"is_archived,omitempty"`
+		IsTrashed        *bool                    `json:"is_trashed,omitempty"`
+		SyncNoteVersions []*UserNoteVersionWithID `json:"sync_note_versions"`
+		SyncNoteTags     []*UserNoteTagWithID     `json:"sync_note_tags"`
 	}
 )

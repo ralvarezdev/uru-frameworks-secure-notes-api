@@ -21,7 +21,7 @@ func (s *service) ListUserTags(r *http.Request) (int64, *ListUserTagsResponse) {
 	}
 
 	// Get the user tags
-	var userTags []*internalpostgresmodel.TagWithID
+	var userTags []*internalpostgresmodel.UserTagWithID
 	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.ListUserTagsFn,
 		userID,
@@ -33,7 +33,7 @@ func (s *service) ListUserTags(r *http.Request) (int64, *ListUserTagsResponse) {
 
 	// Iterate over the rows
 	for rows.Next() {
-		var tag internalpostgresmodel.TagWithID
+		var tag internalpostgresmodel.UserTagWithID
 		if err = rows.Scan(
 			&tag.ID,
 			&tag.Name,

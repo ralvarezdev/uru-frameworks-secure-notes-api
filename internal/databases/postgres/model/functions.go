@@ -16,9 +16,18 @@ var (
 	// ListUserNoteVersionsFn is the SQL query to list user note versions
 	ListUserNoteVersionsFn = "SELECT * FROM list_user_note_versions($1, $2);"
 
-	// SyncUserNoteVersionsFn is the SQL query to sync user note versions
-	SyncUserNoteVersionsFn = "SELECT * FROM sync_user_note_versions($1, $2, $3);"
-
 	// ListUserNotesTagsFn is the SQL query to list user notes tags
 	ListUserNotesTagsFn = "SELECT * FROM list_user_notes_tags($1, $2);"
+
+	// SyncUserNoteVersionsByLastSyncedAtFn is the SQL query to sync user note versions by last synced at
+	SyncUserNoteVersionsByLastSyncedAtFn = "SELECT * FROM sync_user_note_versions_by_last_synced_at($1, $2, $3);"
+
+	// SyncUserNotesByLastSyncedAtFn is the SQL query to sync user notes by last synced at
+	SyncUserNotesByLastSyncedAtFn = "SELECT * FROM sync_user_notes_by_last_synced_at($1, $2);"
+
+	// SyncUserNoteTagsByLastSyncedAtFn is the SQL query to sync user note tags by last synced at
+	SyncUserNoteTagsByLastSyncedAtFn = "SELECT * FROM sync_user_note_tags_by_last_synced_at($1, $2);"
+
+	// SyncUserTagsByLastSyncedAtFn is the SQL query to sync user tags by last synced at
+	SyncUserTagsByLastSyncedAtFn = "SELECT * FROM sync_user_tags_by_last_synced_at($1, $2);"
 )

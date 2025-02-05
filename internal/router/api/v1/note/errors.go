@@ -8,25 +8,25 @@ import (
 var (
 	ErrUpdateUserNoteStarNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
-		"Note ID not found",
+		"UserNote ID not found",
 		nil,
 		http.StatusNotFound,
 	)
 	ErrUpdateUserNoteTrashNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
-		"Note ID not found",
+		"UserNote ID not found",
 		nil,
 		http.StatusNotFound,
 	)
 	ErrUpdateUserNoteArchiveNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
-		"Note ID not found",
+		"UserNote ID not found",
 		nil,
 		http.StatusNotFound,
 	)
 	ErrUpdateUserNotePinNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
-		"Note ID not found",
+		"UserNote ID not found",
 		nil,
 		http.StatusNotFound,
 	)

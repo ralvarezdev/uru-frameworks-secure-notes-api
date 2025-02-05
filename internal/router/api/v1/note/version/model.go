@@ -23,6 +23,6 @@ type (
 
 	// GetUserNoteVersionByNoteVersionIDResponse is the response DTO to get a user note version by note version ID
 	GetUserNoteVersionByNoteVersionIDResponse struct {
-		NoteVersion *internalpostgresmodel.NoteVersion `json:"note_version"`
+		NoteVersion *internalpostgresmodel.UserNoteVersion `json:"note_version"`
 	}
 )

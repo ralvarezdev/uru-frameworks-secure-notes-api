@@ -25,18 +25,6 @@ type (
 		Color  *string `json:"color,omitempty"`
 	}
 
-	// AddUserNoteTagsRequest is the request DTO to add a tags to a user note
-	AddUserNoteTagsRequest struct {
-		NoteID int64  `json:"note_id"`
-		TagID  string `json:"tag_id"`
-	}
-
-	// RemoveUserNoteTagsRequest is the request DTO to remove a tags from a user note
-	RemoveUserNoteTagsRequest struct {
-		NoteID int64  `json:"note_id"`
-		TagID  string `json:"tag_id"`
-	}
-
 	// DeleteUserNoteRequest is the request DTO to delete a user note
 	DeleteUserNoteRequest struct {
 		NoteID int64 `json:"note_id"`
@@ -49,17 +37,7 @@ type (
 
 	// GetUserNoteResponse is the response DTO to get a user note
 	GetUserNoteResponse struct {
-		Note internalpostgresmodel.Note `json:"note"`
-	}
-
-	// ListUserNoteTagsRequest is the request DTO to list user note tags
-	ListUserNoteTagsRequest struct {
-		NoteID int64 `json:"note_id"`
-	}
-
-	// ListNoteTagsResponse is the response DTO to list user note tags
-	ListNoteTagsResponse struct {
-		NoteTags []internalpostgresmodel.NoteTag `json:"note_tags"`
+		Note internalpostgresmodel.UserNote `json:"note"`
 	}
 
 	// UpdateUserNotePinRequest is the request DTO to pin/unpin a note

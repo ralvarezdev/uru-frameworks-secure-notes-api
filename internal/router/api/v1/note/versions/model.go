@@ -23,6 +23,6 @@ type (
 
 	// SyncUserNoteVersionsResponse is the response DTO to sync user note versions
 	SyncUserNoteVersionsResponse struct {
-		NoteVersions []*internalpostgresmodel.NoteVersionWithID `json:"note_versions"`
+		NoteVersions []*internalpostgresmodel.UserNoteVersionWithID `json:"note_versions"`
 	}
 )

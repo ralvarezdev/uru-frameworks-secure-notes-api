@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS user_notes (
 	starred_at TIMESTAMP,
 	archived_at TIMESTAMP,
 	trashed_at TIMESTAMP,
+	deleted_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
@@ -164,6 +165,7 @@ CREATE TABLE IF NOT EXISTS user_note_tags (
     user_note_id BIGINT NOT NULL,
     user_tag_id BIGINT NOT NULL,
     assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	deleted_at TIMESTAMP,
     FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE,
     FOREIGN KEY (user_tag_id) REFERENCES user_tags(id) ON DELETE CASCADE
 );
@@ -176,6 +178,7 @@ CREATE TABLE IF NOT EXISTS user_note_versions (
     user_note_id BIGINT NOT NULL,
     encrypted_content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	delete_at TIMESTAMP,
     FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE
 );
 `
@@ -236,6 +239,7 @@ CREATE TABLE IF NOT EXISTS user_tags (
     name VARCHAR(50) UNIQUE NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	deleted_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_tags (user_id, name);

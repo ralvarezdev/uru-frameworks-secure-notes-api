@@ -106,7 +106,7 @@ func (s *service) GetUserNoteVersionByNoteVersionID(
 	}
 
 	// Get the note version
-	var noteVersion internalpostgresmodel.NoteVersion
+	var noteVersion internalpostgresmodel.UserNoteVersion
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetUserNoteVersionByNoteVersionIDProc,
 		userID,

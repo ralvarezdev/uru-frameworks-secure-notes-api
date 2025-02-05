@@ -54,27 +54,6 @@ var (
 				),
 			)
 			m.RegisterExactRoute(
-				"GET /tags",
-				Controller.ListUserNoteTags,
-				internalmiddleware.Validate(
-					&ListUserNoteTagsRequest{},
-				),
-			)
-			m.RegisterExactRoute(
-				"PATCH /tags",
-				Controller.AddUserNoteTags,
-				internalmiddleware.Validate(
-					&AddUserNoteTagsRequest{},
-				),
-			)
-			m.RegisterExactRoute(
-				"DELETE /tags",
-				Controller.RemoveUserNoteTags,
-				internalmiddleware.Validate(
-					&RemoveUserNoteTagsRequest{},
-				),
-			)
-			m.RegisterExactRoute(
 				"PUT /pin",
 				Controller.UpdateUserNotePin,
 				internalmiddleware.Validate(

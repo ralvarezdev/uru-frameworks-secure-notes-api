@@ -19,7 +19,7 @@ type (
 // @Tags api v1 note versions
 // @Accept json
 // @Produce json
-// @Param request body ListUserNoteVersionsRequest true "List User Note Versions Request"
+// @Param request body ListUserNoteVersionsRequest true "List User UserNote Versions Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -50,7 +50,7 @@ func (c *controller) ListUserNoteVersions(
 // @Tags api v1 note versions
 // @Accept json
 // @Produce json
-// @Param request body SyncUserNoteVersionsRequest true "Sync User Note Versions Request"
+// @Param request body SyncUserNoteVersionsRequest true "Sync User UserNote Versions Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -69,7 +69,7 @@ func (c *controller) SyncUserNoteVersions(
 	internallogger.Api.SyncUserNoteVersions(
 		userID,
 		body.NoteID,
-		body.LatestNoteVersionID,
+		*body.LatestNoteVersionID,
 	)
 
 	// Handle the response

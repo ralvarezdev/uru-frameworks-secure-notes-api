@@ -139,7 +139,7 @@ func (s *service) GetUserTagByTagID(
 	}
 
 	// Get the tag
-	var tag internalpostgresmodel.Tag
+	var tag internalpostgresmodel.UserTag
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetUserTagByTagIDProc,
 		userID,

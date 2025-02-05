@@ -1469,7 +1469,9 @@ BEGIN
 	WHERE
 		user_tag.id = in_user_tag_id
 	AND
-		user_tag.user_id = in_user_id;
+		user_tag.user_id = in_user_id
+	AND
+		user_tag.deleted_at IS NULL;
 END;	
 $$;
 `
@@ -1483,13 +1485,17 @@ CREATE OR REPLACE PROCEDURE delete_user_tag(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Delete the user tag
-	DELETE FROM
+	-- Update the user_tags table
+	UPDATE
 		user_tag
+	SET
+		deleted_at = NOW()
 	WHERE
 		user_tag.id = in_user_tag_id
 	AND
-		user_tag.user_id = in_user_id;
+		user_tag.user_id = in_user_id
+	AND
+		user_tag.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1520,7 +1526,9 @@ BEGIN
 	WHERE
 		user_tag.id = in_user_tag_id
 	AND
-		user_tag.user_id = in_user_id;
+		user_tag.user_id = in_user_id
+	AND
+		user_tag.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1546,7 +1554,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1572,7 +1582,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 END;	
 $$;
 `
@@ -1598,7 +1610,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1624,7 +1638,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1651,7 +1667,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 
 	-- If the user note ID is valid, insert into user_note_versions table
 	IF out_user_note_id_is_valid THEN
@@ -1682,15 +1700,20 @@ CREATE OR REPLACE PROCEDURE delete_user_note_version(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Delete the user note version
-	DELETE FROM
+	-- Update the user_note_versions table
+	UPDATE
 		user_note_versions
+	SET
+		encrypted_content = NULL,
+		deleted_at = NOW()
 	INNER JOIN
 		user_notes ON user_note_versions.note_id = user_notes.id
 	WHERE
 		user_note_versions.id = in_user_note_version_id
 	AND
-		user_note_versions.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;		
 END;
 $$;
 `
@@ -1720,7 +1743,9 @@ BEGIN
 	WHERE
 		user_note_versions.id = in_user_note_version_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1746,6 +1771,8 @@ BEGIN
 				user_tag.user_id = in_user_id
 			AND
 				user_tag.id = ANY(in_user_tag_ids)
+			AND
+				user_tag.deleted_at IS NULL
 		)
 	INTO
 		out_valid_user_tag_ids;
@@ -1883,31 +1910,52 @@ CREATE OR REPLACE PROCEDURE delete_user_note(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Delete the user note versions
-	DELETE FROM
-		user_note_versions
-	WHERE
-		user_note_versions.note_id = in_user_note_id
-	AND
-		user_note_versions.user_id = in_user_id;
-
-	-- Delete the user note tags
-	DELETE FROM
-		user_note_tags
-	INNER JOIN
-		user_notes ON user_note_tags.note_id = user_notes.id
-	WHERE
-		user_note_tags.note_id = in_user_note_id
-	AND
-		user_notes.user_id = in_user_id;
-
-	-- Delete the user note
-	DELETE FROM
+	-- Update the user_notes table
+	UPDATE
 		user_notes
+	SET
+		title = '',
+		color = NULL,
+		pinned_at = NULL,
+		archived_at = NULL,
+		trashed_at = NULL,
+		starred_at = NULL,
+		deleted_at = NOW()
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
+
+	-- Update the user_note_versions table
+	UPDATE
+		user_note_versions
+	SET
+		encrypted_content = NULL,
+		deleted_at = NOW()
+	INNER JOIN
+		user_notes ON user_note_versions.note_id = user_notes.id
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_note_versions.deleted_at IS NULL;
+
+	-- Update the user_note_tags table
+	UPDATE
+		user_note_tags
+	SET
+		deleted_at = NOW()
+	INNER JOIN
+		user_notes ON user_note_tags.note_id = user_notes.id
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_note_tags.deleted_at IS NULL;
 END;
 $$;
 `
@@ -2034,6 +2082,8 @@ BEGIN
 		user_note_versions.note_id = in_user_note_id
 	AND
 		user_note_versions.user_id = in_user_id
+	AND
+		user_note_versions.deleted_at IS NULL
 	ORDER BY
 		user_note_versions.created_at DESC
 	LIMIT 1;

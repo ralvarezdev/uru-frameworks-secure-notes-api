@@ -143,40 +143,6 @@ END;
 $$ LANGUAGE plpgsql;
 `
 
-	// CreateSyncUserNoteVersionsFn is the query to create the function to sync user note versions
-	CreateSyncUserNoteVersionsFn = `
-CREATE OR REPLACE FUNCTION sync_user_note_versions(
-	in_user_id BIGINT,
-	in_user_note_id BIGINT,
-	in_latest_user_note_version_id BIGINT
-) RETURNS
-TABLE(
-	out_user_note_version_id BIGINT,
-	out_user_note_version_encrypted_content TEXT,
-	out_user_note_version_created_at TIMESTAMP
-)
-AS $$
-BEGIN
-	-- Return the user note versions
-	RETURN QUERY
-	SELECT
-		user_note_versions.id AS out_user_note_version_id,
-		user_note_versions.encrypted_content AS out_user_note_version_encrypted_content,
-		user_note_versions.created_at AS out_user_note_version_created_at
-	FROM
-		user_note_versions
-	INNER JOIN
-		user_notes ON user_note_versions.user_note_id = user_notes.id
-	WHERE
-		user_notes.user_id = in_user_id
-	AND
-		user_note_versions.user_note_id = in_user_note_id
-	AND
-		user_note_versions.id > in_latest_user_note_version_id;
-END;
-$$ LANGUAGE plpgsql;
-`
-
 	// CreateListUserNoteTagsFn is the query to create the function to list user note tags
 	CreateListUserNoteTagsFn = `
 CREATE OR REPLACE FUNCTION list_user_note_tags(
@@ -205,6 +171,208 @@ BEGIN
 	AND
 		user_note_tags.user_note_id = in_user_note_id;
 END;	
+$$ LANGUAGE plpgsql;
+`
+
+	// CreateSyncUserNoteVersionsByLastSyncedAtFn is the query to create the function to sync user note versions by last synced at
+	CreateSyncUserNoteVersionsByLastSyncedAtFn = `
+CREATE OR REPLACE FUNCTION sync_user_note_versions_by_last_synced_at(
+	in_user_id BIGINT,
+	in_user_note_id BIGINT,
+	in_last_synced_at TIMESTAMP
+) RETURNS
+TABLE(
+	out_user_note_version_id BIGINT,
+	out_user_note_version_encrypted_content TEXT,
+	out_user_note_version_created_at TIMESTAMP,
+	out_user_note_version_deleted_at TIMESTAMP
+)
+AS $$
+BEGIN	
+	-- Return the user note versions
+	RETURN QUERY
+	SELECT
+		user_note_versions.id AS out_user_note_version_id,
+		user_note_versions.encrypted_content AS out_user_note_version_encrypted_content,
+		user_note_versions.created_at AS out_user_note_version_created_at,
+		user_note_versions.deleted_at AS out_user_note_version_deleted_at
+	FROM
+		user_note_versions
+	INNER JOIN
+		user_notes ON user_note_versions.user_note_id = user_notes.id
+	WHERE
+		user_notes.user_id = in_user_id
+	AND
+		user_note_versions.user_note_id = in_user_note_id
+	AND (
+		user_note_versions.created_at > in_last_synced_at
+	OR
+		user_note_versions.deleted_at > in_last_synced_at
+	);
+END;
+$$ LANGUAGE plpgsql;
+`
+
+	// CreateSyncUserTagsByLastSyncedAtFn is the query to create the function to sync user tags by last synced at
+	CreateSyncUserTagsByLastSyncedAtFn = `
+CREATE OR REPLACE FUNCTION sync_user_tags_by_last_synced_at(
+	in_user_id BIGINT,
+	in_last_synced_at TIMESTAMP
+) RETURNS
+TABLE(	
+	out_user_tag_id BIGINT,
+	out_user_tag_name VARCHAR,
+	out_user_tag_created_at TIMESTAMP,
+	out_user_tag_updated_at TIMESTAMP,
+	out_user_tag_deleted_at TIMESTAMP
+)
+AS $$
+BEGIN
+	-- Return the user tags
+	RETURN QUERY
+	SELECT
+		user_tags.id AS out_user_tag_id,
+		user_tags.name AS out_user_tag_name,
+		user_tags.created_at AS out_user_tag_created_at,
+		user_tags.updated_at AS out_user_tag_updated_at,
+		user_tags.deleted_at AS out_user_tag_deleted_at
+	FROM
+		user_tags
+	WHERE
+		user_tags.user_id = in_user_id
+	AND (
+		user_tags.created_at > in_last_synced_at
+	OR
+		user_tags.updated_at > in_last_synced_at
+	OR
+		user_tags.deleted_at > in_last_synced_at
+	);
+END;
+$$ LANGUAGE plpgsql;
+`
+
+	// CreateSyncUserNoteTagsByLastSyncedAtFn is the query to create the function to sync user note tags by last synced at
+	CreateSyncUserNoteTagsByLastSyncedAtFn = `
+CREATE OR REPLACE FUNCTION sync_user_note_tags_by_last_synced_at(
+	in_user_id BIGINT,
+	in_last_synced_at TIMESTAMP
+) RETURNS	
+TABLE(	
+	out_user_note_tag_id BIGINT,
+	out_user_note_tag_user_note_id BIGINT,
+	out_user_note_tag_user_tag_id BIGINT,
+	out_user_note_tag_assigned_at TIMESTAMP,
+	out_user_note_tag_deleted_at TIMESTAMP
+)
+AS $$	
+BEGIN	
+	-- Return the user note tags
+	RETURN QUERY
+	SELECT
+		user_note_tags.id AS out_user_note_tag_id,
+		user_note_tags.user_note_id AS out_user_note_tag_user_note_id,
+		user_note_tags.user_tag_id AS out_user_note_tag_user_tag_id,
+		user_note_tags.assigned_at AS out_user_note_tag_assigned_at,
+		user_note_tags.deleted_at AS out_user_note_tag_deleted_at
+	FROM
+		user_note_tags
+	INNER JOIN
+		user_tags ON user_note_tags.user_tag_id = user_tags.id
+	INNER JOIN
+		user_notes ON user_note_tags.user_note_id = user_notes.id
+	WHERE
+		user_notes.user_id = in_user_id
+	AND (
+		user_note_tags.assigned_at > in_last_synced_at
+	OR
+		user_note_tags.deleted_at > in_last_synced_at
+	);
+END;
+$$ LANGUAGE plpgsql;
+`
+
+	// CreateSyncUserNotesByLastSyncedAtFn is the query to create the function to sync user notes by last synced at
+	CreateSyncUserNotesByLastSyncedAtFn = `
+CREATE OR REPLACE FUNCTION sync_user_notes_by_last_synced_at(
+	in_user_id BIGINT,
+	in_last_synced_at TIMESTAMP
+) RETURNS
+TABLE(
+	out_user_note_id BIGINT,
+	out_user_note_title VARCHAR,
+	out_user_note_color VARCHAR,
+	out_user_note_created_at TIMESTAMP,
+	out_user_note_updated_at TIMESTAMP,
+	out_user_note_pinned_at TIMESTAMP,
+	out_user_note_starred_at TIMESTAMP,
+	out_user_note_archived_at TIMESTAMP,
+	out_user_note_trashed_at TIMESTAMP,
+	out_user_note_has_to_sync_note_tags BOOLEAN,
+	out_user_note_has_to_sync_note_versions BOOLEAN
+)
+AS $$
+BEGIN
+	-- Return the user notes
+	RETURN QUERY
+	SELECT *
+	FROM (
+		SELECT
+			user_notes.id AS out_user_note_id,
+			user_notes.title AS out_user_note_title,
+			user_notes.color AS out_user_note_color,
+			user_notes.created_at AS out_user_note_created_at,
+			user_notes.updated_at AS out_user_note_updated_at,
+			user_notes.pinned_at AS out_user_note_pinned_at,
+			user_notes.starred_at AS out_user_note_starred_at,
+			user_notes.archived_at AS out_user_note_archived_at,
+			user_notes.trashed_at AS out_user_note_trashed_at,
+			CASE
+				WHEN EXISTS (
+					SELECT
+						1
+					FROM
+						user_note_tags
+					WHERE
+						user_note_tags.user_note_id = user_notes.id
+					AND	 (
+						user_note_tags.assigned_at > in_last_synced_at
+					OR
+						user_note_tags.deleted_at > in_last_synced_at
+					)	
+				) THEN TRUE
+				ELSE FALSE
+			END AS out_user_note_has_to_sync_note_tags,
+			CASE
+				WHEN EXISTS (
+					SELECT
+						1
+					FROM
+						user_note_versions
+					WHERE
+						user_note_versions.user_note_id = user_notes.id
+					AND	(
+						user_note_versions.created_at > in_last_synced_at
+					OR	
+						user_note_versions.deleted_at > in_last_synced_at
+					)	
+				) THEN TRUE	
+				ELSE FALSE
+			END AS out_user_note_has_to_sync_note_versions
+		FROM
+			user_notes
+		WHERE
+			user_notes.user_id = in_user_id;
+	) AS user_notes
+	WHERE (
+		user_notes.out_user_note_has_to_sync_note_tags = TRUE
+	OR
+		user_notes.out_user_note_has_to_sync_note_versions = TRUE
+	OR
+		user_notes.out_user_note_created_at > in_last_synced_at
+	OR
+		user_notes.out_user_note_updated_at > in_last_synced_at
+	);
+END;
 $$ LANGUAGE plpgsql;
 `
 )

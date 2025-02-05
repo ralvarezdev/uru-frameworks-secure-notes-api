@@ -81,7 +81,7 @@ func (s *service) SyncUserNoteVersions(
 	}
 
 	// Sync the note versions
-	var userNoteVersions []*internalpostgresmodel.NoteVersionWithID
+	var userNoteVersions []*internalpostgresmodel.UserNoteVersionWithID
 	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.SyncUserNoteVersionsFn,
 		userID,
@@ -95,7 +95,7 @@ func (s *service) SyncUserNoteVersions(
 
 	// Iterate through the note versions
 	for rows.Next() {
-		var userNoteVersion internalpostgresmodel.NoteVersionWithID
+		var userNoteVersion internalpostgresmodel.UserNoteVersionWithID
 		if err = rows.Scan(
 			&userNoteVersion.ID,
 			&userNoteVersion.EncryptedContent,

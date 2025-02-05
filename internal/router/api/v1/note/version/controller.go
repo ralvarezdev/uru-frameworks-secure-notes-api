@@ -19,7 +19,7 @@ type (
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
-// @Param request body CreateUserNoteVersionRequest true "Create User Note Version Request"
+// @Param request body CreateUserNoteVersionRequest true "Create User UserNote Version Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -54,7 +54,7 @@ func (c *controller) CreateUserNoteVersion(
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
-// @Param request body DeleteUserNoteVersionRequest true "Delete User Note Version Request"
+// @Param request body DeleteUserNoteVersionRequest true "Delete User UserNote Version Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -86,7 +86,7 @@ func (c *controller) DeleteUserNoteVersion(
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
-// @Param request body GetUserNoteVersionByNoteVersionIDRequest true "Get User Note Version By Note Version ID Request"
+// @Param request body GetUserNoteVersionByNoteVersionIDRequest true "Get User UserNote Version By UserNote Version ID Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody

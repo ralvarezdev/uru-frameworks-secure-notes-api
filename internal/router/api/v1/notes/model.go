@@ -11,8 +11,8 @@ type (
 		NotesID []int64 `json:"notes"`
 	}
 
-	// SyncNotesResponse is the response DTO to sync user notes
-	SyncNotesResponse struct {
-		SyncNotes []internalpostgresmodel.SyncNote `json:"sync_notes"`
+	// SyncUserNotesResponse is the response DTO to sync user notes
+	SyncUserNotesResponse struct {
+		SyncNotes []internalpostgresmodel.SyncUserNote `json:"sync_notes"`
 	}
 )

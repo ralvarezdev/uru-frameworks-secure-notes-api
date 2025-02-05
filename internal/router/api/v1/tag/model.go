@@ -29,6 +29,6 @@ type (
 
 	// GetUserTagByTagIDResponse is the response DTO to get a user tag by tag ID
 	GetUserTagByTagIDResponse struct {
-		Tag internalpostgresmodel.Tag `json:"tag"`
+		Tag internalpostgresmodel.UserTag `json:"tag"`
 	}
 )

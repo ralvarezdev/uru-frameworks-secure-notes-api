@@ -8,13 +8,13 @@ import (
 var (
 	ErrListUserNoteVersionsNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
-		"Note ID not found",
+		"UserNote ID not found",
 		nil,
 		http.StatusNotFound,
 	)
 	ErrSyncUserNoteVersionsNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
-		"Note ID not found",
+		"UserNote ID not found",
 		nil,
 		http.StatusNotFound,
 	)
