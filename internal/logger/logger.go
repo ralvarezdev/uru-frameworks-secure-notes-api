@@ -311,3 +311,43 @@ func (l *Logger) GetUserTagByTagID(id, tagID int64) {
 		fmt.Sprintf("tag id: %d", tagID),
 	)
 }
+
+// UpdateUserNoteStar logs the update user note star event
+func (l *Logger) UpdateUserNoteStar(id, noteID int64, star bool) {
+	l.logger.Info(
+		"user updated note star",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+		fmt.Sprintf("star: %t", star),
+	)
+}
+
+// UpdateUserNoteTrash logs the update user note trash event
+func (l *Logger) UpdateUserNoteTrash(id, noteID int64, trash bool) {
+	l.logger.Info(
+		"user updated note trash",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+		fmt.Sprintf("trash: %t", trash),
+	)
+}
+
+// UpdateUserNoteArchive logs the update user note archive event
+func (l *Logger) UpdateUserNoteArchive(id, noteID int64, archive bool) {
+	l.logger.Info(
+		"user updated note archive",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+		fmt.Sprintf("archive: %t", archive),
+	)
+}
+
+// UpdateUserNotePin logs the update user note pin event
+func (l *Logger) UpdateUserNotePin(id, noteID int64, pin bool) {
+	l.logger.Info(
+		"user updated note pin",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+		fmt.Sprintf("pin: %t", pin),
+	)
+}

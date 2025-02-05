@@ -1518,4 +1518,104 @@ BEGIN
 END;
 $$;
 `
+
+	// CreateUpdateUserNotePinProc is the query to create the stored procedure to update user note pin
+	CreateUpdateUserNotePinProc = `
+CREATE OR REPLACE PROCEDURE update_user_note_pin(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_pin BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the notes table
+	UPDATE
+		notes
+	SET
+		pinned_at = CASE
+			WHEN in_user_note_pin THEN NOW()
+			ELSE NULL
+	WHERE
+		notes.id = in_user_note_id
+	AND
+		notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateUpdateUserNoteArchiveProc is the query to create the stored procedure to update user note archive
+	CreateUpdateUserNoteArchiveProc = `
+CREATE OR REPLACE PROCEDURE update_user_note_archive(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_archive BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the notes table
+	UPDATE
+		notes
+	SET
+		archived_at = CASE
+			WHEN in_user_note_archive THEN NOW()
+			ELSE NULL
+	WHERE
+		notes.id = in_user_note_id
+	AND
+		notes.user_id = in_user_id;
+END;	
+$$;
+`
+
+	// CreateUpdateUserNoteTrashProc is the query to create the stored procedure to update user note trash
+	CreateUpdateUserNoteTrashProc = `
+CREATE OR REPLACE PROCEDURE update_user_note_trash(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_trash BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the notes table
+	UPDATE
+		notes
+	SET
+		trashed_at = CASE
+			WHEN in_user_note_trash THEN NOW()
+			ELSE NULL
+	WHERE
+		notes.id = in_user_note_id
+	AND
+		notes.user_id = in_user_id;
+END;
+$$;
+`
+
+	// CreateUpdateUserNoteStarProc is the query to create the stored procedure to update user note star
+	CreateUpdateUserNoteStarProc = `
+CREATE OR REPLACE PROCEDURE update_user_note_star(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT,
+	IN in_user_note_star BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the notes table
+	UPDATE
+		notes
+	SET
+		starred_at = CASE
+			WHEN in_user_note_star THEN NOW()
+			ELSE NULL
+	WHERE
+		notes.id = in_user_note_id
+	AND
+		notes.user_id = in_user_id;
+END;
+$$;
+`
 )

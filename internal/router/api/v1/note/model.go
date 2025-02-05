@@ -45,43 +45,27 @@ type (
 		NoteTags []internalapiv1common.TagWithID `json:"note_tags"`
 	}
 
-	// PinNoteRequest is the request DTO to pin a note
-	PinNoteRequest struct {
+	// UpdateUserNotePinRequest is the request DTO to pin/unpin a note
+	UpdateUserNotePinRequest struct {
 		NoteID int64 `json:"note_id"`
+		Pin    bool  `json:"pin"`
 	}
 
-	// UnpinNoteRequest is the request DTO to unpin a note
-	UnpinNoteRequest struct {
-		NoteID int64 `json:"note_id"`
+	// UpdateUserNoteArchiveRequest is the request DTO to archive/unarchive a note
+	UpdateUserNoteArchiveRequest struct {
+		NoteID  int64 `json:"note_id"`
+		Archive bool  `json:"archive"`
 	}
 
-	// ArchiveNoteRequest is the request DTO to archive a note
-	ArchiveNoteRequest struct {
+	// UpdateUserNoteStarRequest is the request DTO to star/unstar a note
+	UpdateUserNoteStarRequest struct {
 		NoteID int64 `json:"note_id"`
+		Star   bool  `json:"star"`
 	}
 
-	// UnarchiveNoteRequest is the request DTO to unarchive a note
-	UnarchiveNoteRequest struct {
+	// UpdateUserNoteTrashRequest is the request DTO to trash/untrash a note
+	UpdateUserNoteTrashRequest struct {
 		NoteID int64 `json:"note_id"`
-	}
-
-	// StarNoteRequest is the request DTO to star a note
-	StarNoteRequest struct {
-		NoteID int64 `json:"note_id"`
-	}
-
-	// UnstarNoteRequest is the request DTO to unstar a note
-	UnstarNoteRequest struct {
-		NoteID int64 `json:"note_id"`
-	}
-
-	// TrashNoteRequest is the request DTO to trash a note
-	TrashNoteRequest struct {
-		NoteID int64 `json:"note_id"`
-	}
-
-	// UntrashNoteRequest is the request DTO to untrash a note
-	UntrashNoteRequest struct {
-		NoteID int64 `json:"note_id"`
+		Trash  bool  `json:"trash"`
 	}
 )

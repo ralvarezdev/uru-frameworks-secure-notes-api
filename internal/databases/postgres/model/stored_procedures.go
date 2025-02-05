@@ -138,4 +138,16 @@ var (
 
 	// GetUserTagProc is the query to call the stored procedure to get user tag
 	GetUserTagProc = "CALL get_user_tag($1, $2, $3, $4, $5)"
+
+	// UpdateUserNoteTrashProc is the query to call the stored procedure to update user note trash
+	UpdateUserNoteTrashProc = "CALL update_user_note_trash($1, $2, $3)"
+
+	// UpdateUserNoteStarProc is the query to call the stored procedure to update user note star
+	UpdateUserNoteStarProc = "CALL update_user_note_star($1, $2, $3)"
+
+	// UpdateUserNoteArchiveProc is the query to call the stored procedure to update user note archive
+	UpdateUserNoteArchiveProc = "CALL update_user_note_archive($1, $2, $3)"
+
+	// UpdateUserNotePinProc is the query to call the stored procedure to update user note pin
+	UpdateUserNotePinProc = "CALL update_user_note_pin($1, $2, $3)"
 )

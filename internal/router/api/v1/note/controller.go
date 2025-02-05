@@ -1,8 +1,11 @@
 package note
 
 import (
+	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
@@ -120,178 +123,130 @@ func (c *controller) ListNoteTags(
 	)
 }
 
-// PinNote pins a note
-// @Summary Pin a note
-// @Description Pins a note
+// UpdateUserNotePin updates a user note as pinned or unpinned
+// @Summary Update a user note as pinned or unpinned
+// @Description Updates a user note as pinned or unpinned
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body PinNoteRequest true "Pin Note Request"
+// @Param request body UpdateUserNotePinRequest true "Update User Note Pin Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note/pin [put]
-func (c *controller) PinNote(
+func (c *controller) UpdateUserNotePin(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNotePinRequest)
+
+	// Update the user note pin
+	userID := Service.UpdateUserNotePin(r, body)
+
+	// Log the user note pin update
+	internallogger.Api.UpdateUserNotePin(userID, body.NoteID, body.Pin)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }
 
-// UnpinNote unpins a note
-// @Summary Unpin a note
-// @Description Unpins a note
+// UpdateUserNoteArchive updates a user note as archived or unarchived
+// @Summary Update a user note as archived or unarchived
+// @Description Updates a user note as archived or unarchived
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body UnpinNoteRequest true "Unpin Note Request"
+// @Param request body UpdateUserNoteArchiveRequest true "Update User Note Archive Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/pin [delete]
-func (c *controller) UnpinNote(
+// @Router /api/v1/note/archive [put]
+func (c *controller) UpdateUserNoteArchive(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteArchiveRequest)
+
+	// Update the user note archive
+	userID := Service.UpdateUserNoteArchive(r, body)
+
+	// Log the user note archive update
+	internallogger.Api.UpdateUserNotePin(userID, body.NoteID, body.Archive)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }
 
-// ArchiveNote archives a note
-// @Summary Archive a note
-// @Description Archives a note
+// UpdateUserNoteTrash updates a user note as trashed or untrashed
+// @Summary Update a user note as trashed or untrashed
+// @Description Updates a user note as trashed or untrashed
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body ArchiveNoteRequest true "Archive Note Request"
+// @Param request body UpdateUserNoteTrashRequest true "Update User Note Trash Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/archive [post]
-func (c *controller) ArchiveNote(
+// @Router /api/v1/note/trash [put]
+func (c *controller) UpdateUserNoteTrash(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteTrashRequest)
+
+	// Update the user note trash
+	userID := Service.UpdateUserNoteTrash(r, body)
+
+	// Log the user note trash update
+	internallogger.Api.UpdateUserNoteTrash(userID, body.NoteID, body.Trash)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }
 
-// UnarchiveNote unarchives a note
-// @Summary Unarchive a note
-// @Description Unarchives a note
+// UpdateUserNoteStar updates a user note as starred or unstarred
+// @Summary Update a user note as starred or unstarred
+// @Description Updates a user note as starred or unstarred
 // @Tags api v1 note
 // @Accept json
 // @Produce json
-// @Param request body UnarchiveNoteRequest true "Unarchive Note Request"
+// @Param request body UpdateUserNoteStarRequest true "Update User Note Star Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/archive [delete]
-func (c *controller) UnarchiveNote(
+// @Router /api/v1/note/star [put]
+func (c *controller) UpdateUserNoteStar(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteStarRequest)
 
-// TrashNote trashes a note
-// @Summary Trash a note
-// @Description Trashes a note
-// @Tags api v1 note
-// @Accept json
-// @Produce json
-// @Param request body TrashNoteRequest true "Trash Note Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 404 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/trash [post]
-func (c *controller) TrashNote(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
+	// Update the user note star
+	userID := Service.UpdateUserNoteStar(r, body)
 
-// UntrashNote untrashes a note
-// @Summary Untrash a note
-// @Description Untrashes a note
-// @Tags api v1 note
-// @Accept json
-// @Produce json
-// @Param request body UntrashNoteRequest true "Untrash Note Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 404 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/trash [delete]
-func (c *controller) UntrashNote(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
+	// Log the user note star update
+	internallogger.Api.UpdateUserNoteStar(userID, body.NoteID, body.Star)
 
-// StarNote stars a note
-// @Summary Star a note
-// @Description Stars a note
-// @Tags api v1 note
-// @Accept json
-// @Produce json
-// @Param request body StarNoteRequest true "Star Note Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 404 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/star [post]
-func (c *controller) StarNote(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
-	)
-}
-
-// UnstarNote unstars a note
-// @Summary Unstar a note
-// @Description Unstars a note
-// @Tags api v1 note
-// @Accept json
-// @Produce json
-// @Param request body UnstarNoteRequest true "Unstar Note Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 404 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/star [delete]
-func (c *controller) UnstarNote(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }

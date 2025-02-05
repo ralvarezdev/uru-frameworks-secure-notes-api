@@ -19,7 +19,7 @@ type (
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
-// @Param request body CreateUserTagRequest true "Create Tag Request"
+// @Param request body CreateUserTagRequest true "Create User Tag Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -50,7 +50,7 @@ func (c *controller) CreateUserTag(
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
-// @Param request body UpdateUserTagRequest true "Update Tag Request"
+// @Param request body UpdateUserTagRequest true "Update User Tag Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
@@ -81,7 +81,7 @@ func (c *controller) UpdateUserTag(
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
-// @Param request body DeleteUserTagRequest true "Delete Tag Request"
+// @Param request body DeleteUserTagRequest true "Delete User Tag Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
@@ -112,7 +112,7 @@ func (c *controller) DeleteUserTag(
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
-// @Param request body GetUserTagByTagIDRequest true "Get Tag Request"
+// @Param request body GetUserTagByTagIDRequest true "Get Tag By Tag ID Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody

@@ -61,59 +61,31 @@ var (
 				),
 			)
 			m.RegisterExactRoute(
-				"POST /pin",
-				Controller.PinNote,
+				"PUT /pin",
+				Controller.UpdateUserNotePin,
 				internalmiddleware.Validate(
-					&PinNoteRequest{},
+					&UpdateUserNotePinRequest{},
 				),
 			)
 			m.RegisterExactRoute(
-				"DELETE /pin",
-				Controller.UnpinNote,
+				"PUT /archive",
+				Controller.UpdateUserNoteArchive,
 				internalmiddleware.Validate(
-					&UnpinNoteRequest{},
+					&UpdateUserNoteArchiveRequest{},
 				),
 			)
 			m.RegisterExactRoute(
-				"POST /archive",
-				Controller.ArchiveNote,
+				"PUT /trash",
+				Controller.UpdateUserNoteTrash,
 				internalmiddleware.Validate(
-					&ArchiveNoteRequest{},
+					&UpdateUserNoteTrashRequest{},
 				),
 			)
 			m.RegisterExactRoute(
-				"DELETE /archive",
-				Controller.UnarchiveNote,
+				"PUT /star",
+				Controller.UpdateUserNoteStar,
 				internalmiddleware.Validate(
-					&UnarchiveNoteRequest{},
-				),
-			)
-			m.RegisterExactRoute(
-				"POST /trash",
-				Controller.TrashNote,
-				internalmiddleware.Validate(
-					&TrashNoteRequest{},
-				),
-			)
-			m.RegisterExactRoute(
-				"DELETE /trash",
-				Controller.UntrashNote,
-				internalmiddleware.Validate(
-					&UntrashNoteRequest{},
-				),
-			)
-			m.RegisterExactRoute(
-				"POST /star",
-				Controller.StarNote,
-				internalmiddleware.Validate(
-					&StarNoteRequest{},
-				),
-			)
-			m.RegisterExactRoute(
-				"DELETE /star",
-				Controller.UnstarNote,
-				internalmiddleware.Validate(
-					&UnstarNoteRequest{},
+					&UpdateUserNoteStarRequest{},
 				),
 			)
 		},
