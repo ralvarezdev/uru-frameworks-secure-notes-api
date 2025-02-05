@@ -24,11 +24,6 @@ var (
 				Controller.ListUserNoteVersions,
 				internalmiddleware.Validate(&ListUserNoteVersionsRequest{}),
 			)
-			m.RegisterExactRoute(
-				"POST /sync",
-				Controller.SyncUserNoteVersions,
-				internalmiddleware.Validate(&SyncUserNoteVersionsRequest{}),
-			)
 		},
 	}
 )

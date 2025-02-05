@@ -40,13 +40,6 @@ var (
 					&ListUserNoteTagsRequest{},
 				),
 			)
-			m.RegisterExactRoute(
-				"GET /sync",
-				Controller.SyncUserNoteTags,
-				internalmiddleware.Validate(
-					&SyncUserNoteTagsRequest{},
-				),
-			)
 		},
 	}
 )

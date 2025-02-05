@@ -43,37 +43,3 @@ func (c *controller) ListUserNoteVersions(
 		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }
-
-// SyncUserNoteVersions syncs user note versions
-// @Summary Sync user note versions
-// @Description Sync user note versions
-// @Tags api v1 note versions
-// @Accept json
-// @Produce json
-// @Param request body SyncUserNoteVersionsRequest true "Sync User UserNote Versions Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 401 {object} gonethttpresponse.JSendFailBody
-// @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/versions/sync [post]
-func (c *controller) SyncUserNoteVersions(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
-	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*SyncUserNoteVersionsRequest)
-
-	// Sync the user note versions
-	userID, data := Service.SyncUserNoteVersions(r, body)
-
-	// Log the user note versions sync
-	internallogger.Api.SyncUserNoteVersions(
-		userID,
-		body.NoteID,
-		*body.LatestNoteVersionID,
-	)
-
-	// Handle the response
-	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
-	)
-}

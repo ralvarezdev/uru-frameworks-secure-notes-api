@@ -50,9 +50,17 @@ var (
 		Path:     "/",
 	}
 
-	// Sync is the cookies attributes for the sync cookie
-	Sync = &gonethttpcookie.Attributes{
-		Name:     "sync",
+	// SyncNotes is the cookies attributes for the sync notes cookie
+	SyncNotes = &gonethttpcookie.Attributes{
+		Name:     "sync_notes",
+		HTTPOnly: true,
+		Secure:   Secure,
+		Path:     "/",
+	}
+
+	// SyncTags is the cookies attributes for the sync tags cookie
+	SyncTags = &gonethttpcookie.Attributes{
+		Name:     "sync_tags",
 		HTTPOnly: true,
 		Secure:   Secure,
 		Path:     "/",

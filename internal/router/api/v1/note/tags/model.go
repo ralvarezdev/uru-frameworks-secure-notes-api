@@ -26,14 +26,4 @@ type (
 	ListNoteTagsResponse struct {
 		NoteTags []internalpostgresmodel.UserNoteTag `json:"note_tags"`
 	}
-
-	// SyncUserNoteTagsRequest is the request DTO to sync note tags
-	SyncUserNoteTagsRequest struct {
-		NoteID int64 `json:"note_id"`
-	}
-
-	// SyncUserNoteTagsResponse is the response DTO to sync user note tags
-	SyncUserNoteTagsResponse struct {
-		NoteTags []*internalpostgresmodel.UserNoteTagWithID `json:"note_tags"`
-	}
 )

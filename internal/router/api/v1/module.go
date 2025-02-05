@@ -28,6 +28,10 @@ var (
 				"GET /ping",
 				Controller.Ping,
 			)
+			m.RegisterExactRoute(
+				"POST /sync",
+				Controller.Sync,
+			)
 		},
 	}
 )
