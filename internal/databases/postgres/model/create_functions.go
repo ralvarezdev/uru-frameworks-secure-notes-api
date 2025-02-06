@@ -211,6 +211,8 @@ BEGIN
 	AND
 		user_note_versions.user_note_id = in_user_note_id
 	AND (
+		last_synced_at IS NULL
+	OR
 		user_note_versions.created_at > in_last_synced_at
 	OR
 		user_note_versions.deleted_at > in_last_synced_at
@@ -247,6 +249,8 @@ BEGIN
 	WHERE
 		user_tags.user_id = in_user_id
 	AND (
+		in_last_synced_at IS NULL
+	OR
 		user_tags.created_at > in_last_synced_at
 	OR
 		user_tags.updated_at > in_last_synced_at
@@ -289,6 +293,8 @@ BEGIN
 	WHERE
 		user_notes.user_id = in_user_id
 	AND (
+		in_last_synced_at IS NULL
+	OR
 		user_note_tags.assigned_at > in_last_synced_at
 	OR
 		user_note_tags.deleted_at > in_last_synced_at
@@ -370,6 +376,8 @@ BEGIN
 			user_notes.user_id = in_user_id;
 	) AS user_notes
 	WHERE (
+		in_last_synced_at IS NULL
+	OR
 		user_notes.out_user_note_has_to_sync_note_tags = TRUE
 	OR
 		user_notes.out_user_note_has_to_sync_note_versions = TRUE

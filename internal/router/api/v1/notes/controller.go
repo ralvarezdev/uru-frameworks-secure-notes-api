@@ -39,18 +39,17 @@ func (c *controller) ListUserNotes(
 	)
 }
 
-// SyncUserNotes syncs user notes
-// @Summary Sync user notes
-// @Description Sync user notes
+// SyncUserNotesByLastSyncedAt syncs user notes by last synced at timestamp
+// @Summary Sync user notes by last synced at timestamp
+// @Description Sync user notes by last synced at timestamp
 // @Tags api v1 notes
 // @Accept json
 // @Produce json
-// @Param request body SyncUserNotesRequest true "Sync User Notes Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/notes/sync [post]
-func (c *controller) SyncUserNotes(
+func (c *controller) SyncUserNotesByLastSyncedAt(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {

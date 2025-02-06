@@ -25,7 +25,7 @@ var (
 			)
 			m.RegisterExactRoute(
 				"POST /sync",
-				Controller.SyncUserNotes,
+				Controller.SyncUserNotesByLastSyncedAt,
 			)
 		},
 	}

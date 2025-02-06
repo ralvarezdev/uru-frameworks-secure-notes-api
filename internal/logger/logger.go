@@ -5,6 +5,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	gologgermode "github.com/ralvarezdev/go-logger/mode"
 	gologgermodenamed "github.com/ralvarezdev/go-logger/mode/named"
+	"time"
 )
 
 // Logger is the logger for the API server
@@ -467,5 +468,47 @@ func (l *Logger) ListUserNotes(id int64) {
 	l.logger.Info(
 		"user listed notes",
 		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// SyncUserNotesByLastSyncedAt logs the sync user notes by last synced at event
+func (l *Logger) SyncUserNotesByLastSyncedAt(
+	id int64,
+	lastSyncedAt *time.Time,
+	refreshTokenID int64,
+) {
+	l.logger.Info(
+		"user synced notes by last synced at",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("last synced at: %v", lastSyncedAt),
+		fmt.Sprintf("refresh token id: %d", refreshTokenID),
+	)
+}
+
+// SyncUserTagsByLastSyncedAt logs the sync user tags by last synced at event
+func (l *Logger) SyncUserTagsByLastSyncedAt(
+	id int64,
+	lastSyncedAt *time.Time,
+	refreshTokenID int64,
+) {
+	l.logger.Info(
+		"user synced tags by last synced at",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("last synced at: %v", lastSyncedAt),
+		fmt.Sprintf("refresh token id: %d", refreshTokenID),
+	)
+}
+
+// SyncByLastSyncedAt logs the sync by last synced at event
+func (l *Logger) SyncByLastSyncedAt(
+	id int64,
+	lastSyncedAt *time.Time,
+	refreshTokenID int64,
+) {
+	l.logger.Info(
+		"user synced by last synced at",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("last synced at: %v", lastSyncedAt),
+		fmt.Sprintf("refresh token id: %d", refreshTokenID),
 	)
 }

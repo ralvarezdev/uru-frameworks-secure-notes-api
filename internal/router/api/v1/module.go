@@ -30,7 +30,7 @@ var (
 			)
 			m.RegisterExactRoute(
 				"POST /sync",
-				Controller.Sync,
+				Controller.SyncByLastSyncedAt,
 			)
 		},
 	}

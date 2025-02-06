@@ -13,7 +13,6 @@ import (
 	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gonethttp "github.com/ralvarezdev/go-net/http"
-	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -369,18 +368,8 @@ func (s *service) LogIn(
 	}
 
 	// Set the user salt and encrypted key cookies
-	gonethttpcookie.SetCookie(
-		w,
-		internalcookie.Salt,
-		userSalt.String,
-		userRefreshTokenInfo.ExpiresAt,
-	)
-	gonethttpcookie.SetCookie(
-		w,
-		internalcookie.EncryptedKey,
-		userEncryptedKey.String,
-		userRefreshTokenInfo.ExpiresAt,
-	)
+	internalcookie.SetSaltCookie(w, userSalt.String)
+	internalcookie.SetEncryptedKeyCookie(w, userEncryptedKey.String)
 	return userID.Int64
 }
 

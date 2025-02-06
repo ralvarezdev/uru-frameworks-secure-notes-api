@@ -2,6 +2,7 @@ package v1
 
 import (
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	"net/http"
 )
@@ -25,5 +26,24 @@ func (c *controller) Ping(w http.ResponseWriter, r *http.Request) {
 		w, gonethttpresponse.NewSuccessResponse(
 			nil, http.StatusOK,
 		),
+	)
+}
+
+// SyncByLastSyncedAt synchronizes user notes and tags by the last synced at timestamp
+// @Summary Synchronize user notes and tags by the last synced at timestamp
+// @Description Synchronizes user notes and tags by the last synced at timestamp
+// @Tags api v1
+// @Accept json
+// @Produce json
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/sync [post]
+func (c *controller) SyncByLastSyncedAt(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
 	)
 }

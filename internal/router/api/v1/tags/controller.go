@@ -37,3 +37,36 @@ func (c *controller) ListUserTags(
 		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }
+
+// SyncUserTagsByLastSyncedAt synchronizes tags of the authenticated user by last synced at timestamp
+// @Summary Synchronize tags of the authenticated user by last synced at timestamp
+// @Description Synchronizes tags of the authenticated user by last synced at timestamp
+// @Tags api v1 tags
+// @Accept json
+// @Produce json
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/tags/sync [post]
+func (c *controller) SyncUserTagsByLastSyncedAt(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Synchronize the list of tags by last synced at timestamp
+	userID, userRefreshTokenID, lastSyncedAt, data := Service.SyncUserTagsByLastSyncedAt(
+		w,
+		r,
+	)
+
+	// Log the list of tags synchronization by last synced at timestamp
+	internallogger.Api.SyncUserTagsByLastSyncedAt(
+		userID,
+		lastSyncedAt,
+		userRefreshTokenID,
+	)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+	)
+}

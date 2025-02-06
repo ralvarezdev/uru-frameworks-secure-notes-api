@@ -154,51 +154,94 @@ func SetTokensCookies(
 	return nil
 }
 
+// SetSaltCookie sets the salt cookie
+func SetSaltCookie(w http.ResponseWriter, salt string) {
+	gonethttpcookie.SetCookie(
+		w,
+		Salt,
+		salt,
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
+// SetEncryptedKeyCookie sets the encrypted key cookie
+func SetEncryptedKeyCookie(w http.ResponseWriter, encryptedKey string) {
+	gonethttpcookie.SetCookie(
+		w,
+		EncryptedKey,
+		encryptedKey,
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
+// SetSyncNotesCookie sets the sync notes cookie
+func SetSyncNotesCookie(w http.ResponseWriter, lastSyncedAt time.Time) {
+	gonethttpcookie.SetTimestampCookie(
+		w,
+		SyncNotes,
+		lastSyncedAt,
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
+// SetSyncTagsCookie sets the sync tags cookie
+func SetSyncTagsCookie(w http.ResponseWriter, lastSyncedAt time.Time) {
+	gonethttpcookie.SetTimestampCookie(
+		w,
+		SyncTags,
+		lastSyncedAt,
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
+// GetSyncNotesCookie gets the sync notes cookie
+func GetSyncNotesCookie(r *http.Request) (*time.Time, error) {
+	return gonethttpcookie.GetTimestampCookie(r, SyncNotes)
+}
+
+// GetSyncTagsCookie gets the sync tags cookie
+func GetSyncTagsCookie(r *http.Request) (*time.Time, error) {
+	return gonethttpcookie.GetTimestampCookie(r, SyncTags)
+}
+
 // ClearCookies clears the user cookies
 func ClearCookies(w http.ResponseWriter) {
-	// Remove the cookies
-	for _, cookie := range []*gonethttpcookie.Attributes{
-		RefreshToken,
+	gonethttpcookie.DeleteCookies(
+		w, RefreshToken,
 		AccessToken,
 		Salt,
 		EncryptedKey,
-	} {
-		gonethttpcookie.SetCookie(
-			w,
-			cookie,
-			"",
-			time.Now().Add(-time.Hour),
-		)
-	}
+		SyncTags,
+		SyncNotes,
+	)
 }
 
 // RenovateCookie creates a new cookie with the same value and a new expiration time
 func RenovateCookie(
 	w http.ResponseWriter,
 	r *http.Request,
-	cookie *gonethttpcookie.Attributes,
+	attributes *gonethttpcookie.Attributes,
 	expiresAt time.Time,
 ) error {
-	cookieValue, err := r.Cookie(cookie.Name)
-	if err != nil {
-		// Clear the cookies
-		ClearCookies(w)
+	return gonethttpcookie.RenovateCookie(
+		w, r, attributes, expiresAt,
+		func(
+			w http.ResponseWriter,
+			attributes *gonethttpcookie.Attributes,
+			err error,
+		) error {
+			// Clear the cookies
+			ClearCookies(w)
 
-		// An essential cookie is missing, so the user must log in again
-		return gonethttpresponse.NewCookieError(
-			cookie.Name,
-			"cookie not found, please log in again",
-			gonethttp.ErrCodeCookieNotFound,
-			http.StatusInternalServerError,
-		)
-	}
-	gonethttpcookie.SetCookie(
-		w,
-		cookie,
-		cookieValue.Value,
-		expiresAt,
+			// An essential cookie is missing, so the user must log in again
+			return gonethttpresponse.NewCookieError(
+				attributes.Name,
+				"cookie not found, please log in again",
+				gonethttp.ErrCodeCookieNotFound,
+				http.StatusInternalServerError,
+			)
+		},
 	)
-	return nil
 }
 
 // RefreshTokenFn function to refresh the user tokens
@@ -254,6 +297,8 @@ func RefreshTokenFn(w http.ResponseWriter, r *http.Request) int64 {
 	for _, cookie := range []*gonethttpcookie.Attributes{
 		Salt,
 		EncryptedKey,
+		SyncTags,
+		SyncNotes,
 	} {
 		if err = RenovateCookie(
 			w,

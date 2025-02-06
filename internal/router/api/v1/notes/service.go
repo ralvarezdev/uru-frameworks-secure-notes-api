@@ -44,3 +44,30 @@ func (s *service) ListUserNotes(r *http.Request) (
 
 	return userID, &ListUserNotesResponse{NotesID: parsedUserNotesID}
 }
+
+// SyncUserNotesByLastSyncedAt returns the notes of the user by the last synced at timestamp
+func (s *service) SyncUserNotesByLastSyncedAt(
+	r *http.Request,
+) (
+	int64,
+	*SyncUserNotesResponse,
+) {
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the notes
+	var syncNotes []internalpostgresmodel.SyncUserNote
+	if _, err = internalpostgres.PoolService.Exec(
+		&internalpostgresmodel.SyncUserNotesByLastSyncedAtFn,
+		userID,
+		body.LastSyncedAt,
+		&syncNotes,
+	); err != nil {
+		panic(err)
+	}
+
+	return userID, &SyncUserNotesResponse{SyncNotes: syncNotes}
+}
