@@ -1,8 +1,10 @@
 package tags
 
 import (
-	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
+	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
@@ -28,8 +30,21 @@ func (c *controller) ListUserNoteTags(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*ListUserNoteTagsRequest)
+
+	// List the user note tags
+	userID, data := Service.ListUserNoteTags(r, body)
+
+	// Log the user note tags listing
+	internallogger.Api.ListUserNoteTags(
+		userID,
+		body.NoteID,
+	)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }
 
@@ -45,13 +60,26 @@ func (c *controller) ListUserNoteTags(
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/note/tags [post]
+// @Router /api/v1/note/tags [patch]
 func (c *controller) AddUserNoteTags(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*AddUserNoteTagsRequest)
+
+	// Add the user note tags
+	userID := Service.AddUserNoteTags(r, body)
+
+	// Log the user note tags addition
+	internallogger.Api.AddUserNoteTags(
+		userID,
+		body.NoteID,
+	)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusCreated),
 	)
 }
 
@@ -72,7 +100,20 @@ func (c *controller) RemoveUserNoteTags(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	body, _ := gonethttpctx.GetCtxBody(r).(*RemoveUserNoteTagsRequest)
+
+	// Remove the user note tags
+	userID := Service.RemoveUserNoteTags(r, body)
+
+	// Log the user note tags removal
+	internallogger.Api.RemoveUserNoteTags(
+		userID,
+		body.NoteID,
+	)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(nil, http.StatusOK),
 	)
 }

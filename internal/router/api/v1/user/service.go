@@ -135,19 +135,20 @@ func (s *service) GetMyProfile(r *http.Request) (int64, *GetMyProfileResponse) {
 
 	// Get the user profile
 	var (
-		firstName       string
-		lastName        string
+		firstName       sql.NullString
+		lastName        sql.NullString
 		birthdate       sql.NullTime
-		username        string
-		email           string
-		emailIsVerified bool
+		username        sql.NullString
+		email           sql.NullString
+		emailIsVerified sql.NullBool
 		phone           sql.NullString
 		phoneIsVerified sql.NullBool
-		hasTOTPEnabled  bool
+		hasTOTPEnabled  sql.NullBool
 	)
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetMyProfileProc,
 		userID,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	).Scan(
 		&firstName,
 		&lastName,
@@ -164,14 +165,14 @@ func (s *service) GetMyProfile(r *http.Request) (int64, *GetMyProfileResponse) {
 
 	// Return the user profile
 	return userID, &GetMyProfileResponse{
-		FirstName:       firstName,
-		LastName:        lastName,
+		FirstName:       firstName.String,
+		LastName:        lastName.String,
 		Birthdate:       &birthdate.Time,
-		Username:        username,
-		Email:           email,
-		EmailIsVerified: emailIsVerified,
+		Username:        username.String,
+		Email:           email.String,
+		EmailIsVerified: emailIsVerified.Bool,
 		Phone:           &phone.String,
 		PhoneIsVerified: &phoneIsVerified.Bool,
-		HasTOTPEnabled:  hasTOTPEnabled,
+		HasTOTPEnabled:  hasTOTPEnabled.Bool,
 	}
 }

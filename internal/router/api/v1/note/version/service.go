@@ -89,10 +89,10 @@ func (s *service) DeleteUserNoteVersion(
 // GetUserNoteVersionByNoteVersionID gets a note version by note version ID
 func (s *service) GetUserNoteVersionByNoteVersionID(
 	r *http.Request,
-	body *GetUserNoteVersionByNoteVersionIDRequest,
+	body *GetUserNoteVersionByIDRequest,
 ) (
 	int64,
-	*GetUserNoteVersionByNoteVersionIDResponse,
+	*GetUserNoteVersionByIDResponse,
 ) {
 	// Check if the request body is nil
 	if body == nil {
@@ -106,22 +106,28 @@ func (s *service) GetUserNoteVersionByNoteVersionID(
 	}
 
 	// Get the note version
-	var noteVersion internalpostgresmodel.UserNoteVersion
+	var userNoteID sql.NullInt64
+	var userNoteVersionEncryptedContent sql.NullString
+	var userNoteVersionCreatedAt sql.NullTime
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetUserNoteVersionByIDProc,
 		userID,
 		body.NoteVersionID,
 	).Scan(
-		&noteVersion.NoteID,
-		&noteVersion.EncryptedContent,
-		&noteVersion.CreatedAt,
+		&userNoteID,
+		&userNoteVersionEncryptedContent,
+		&userNoteVersionCreatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			panic(ErrGetUserNoteVersionByNoteVersionIDNotFound)
 		}
 		panic(err)
 	}
-	return userID, &GetUserNoteVersionByNoteVersionIDResponse{
-		NoteVersion: &noteVersion,
+	return userID, &GetUserNoteVersionByIDResponse{
+		NoteVersion: &internalpostgresmodel.UserNoteVersion{
+			NoteID:           &userNoteID.Int64,
+			EncryptedContent: userNoteVersionEncryptedContent.String,
+			CreatedAt:        userNoteVersionCreatedAt.Time,
+		},
 	}
 }

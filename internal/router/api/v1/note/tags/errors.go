@@ -1,4 +1,4 @@
-package versions
+package tags
 
 import (
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrListUserNoteVersionsNotFound = gonethttpresponse.NewFieldError(
+	ErrListUserNoteTagsNotFound = gonethttpresponse.NewFieldError(
 		"note_id",
 		"note not found",
 		nil,

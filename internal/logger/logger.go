@@ -398,3 +398,30 @@ func (l *Logger) SyncUserNoteVersions(id, noteID, latestNoteVersionID int64) {
 		fmt.Sprintf("latest note version id: %d", latestNoteVersionID),
 	)
 }
+
+// ListUserNoteTags logs the list user note tags event
+func (l *Logger) ListUserNoteTags(id, noteID int64) {
+	l.logger.Info(
+		"user listed note tags",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// AddUserNoteTags logs the add user note tags event
+func (l *Logger) AddUserNoteTags(id, noteID int64) {
+	l.logger.Info(
+		"user added note tag",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// RemoveUserNoteTags logs the remove user note tags event
+func (l *Logger) RemoveUserNoteTags(id, noteID int64) {
+	l.logger.Info(
+		"user removed note tag",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}

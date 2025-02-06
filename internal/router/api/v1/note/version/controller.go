@@ -19,7 +19,7 @@ type (
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
-// @Param request body CreateUserNoteVersionRequest true "Create User UserNote Version Request"
+// @Param request body CreateUserNoteVersionRequest true "Create User Note Version Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -54,7 +54,7 @@ func (c *controller) CreateUserNoteVersion(
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
-// @Param request body DeleteUserNoteVersionRequest true "Delete User UserNote Version Request"
+// @Param request body DeleteUserNoteVersionRequest true "Delete User Note Version Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -80,25 +80,25 @@ func (c *controller) DeleteUserNoteVersion(
 	)
 }
 
-// GetUserNoteVersionByNoteVersionID gets a user note version by note version ID
+// GetUserNoteVersionByID gets a user note version by note version ID
 // @Summary Get a user note version by note version ID
 // @Description Gets a user note version by note version ID
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
-// @Param request body GetUserNoteVersionByNoteVersionIDRequest true "Get User UserNote Version By UserNote Version ID Request"
+// @Param request body GetUserNoteVersionByIDRequest true "Get User Note Version By ID Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/note/version [get]
-func (c *controller) GetUserNoteVersionByNoteVersionID(
+func (c *controller) GetUserNoteVersionByID(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*GetUserNoteVersionByNoteVersionIDRequest)
+	body, _ := gonethttpctx.GetCtxBody(r).(*GetUserNoteVersionByIDRequest)
 
 	// Get the user note version by note version ID
 	userID, data := Service.GetUserNoteVersionByNoteVersionID(r, body)

@@ -41,9 +41,9 @@ var (
 			)
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.GetUserTagByTagID,
+				Controller.GetUserTagByID,
 				internalmiddleware.Validate(
-					&GetUserTagByTagIDRequest{},
+					&GetUserTagByIDRequest{},
 				),
 			)
 		},

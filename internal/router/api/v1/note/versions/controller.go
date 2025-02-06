@@ -19,7 +19,7 @@ type (
 // @Tags api v1 note versions
 // @Accept json
 // @Produce json
-// @Param request body ListUserNoteVersionsRequest true "List User UserNote Versions Request"
+// @Param request body ListUserNoteVersionsRequest true "List User Note Versions Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody

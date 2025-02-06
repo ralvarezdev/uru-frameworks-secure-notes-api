@@ -119,13 +119,13 @@ func (s *service) DeleteUserTag(
 	return userID
 }
 
-// GetUserTagByTagID gets a tag for the authenticated user by tag ID
-func (s *service) GetUserTagByTagID(
+// GetUserTagByID gets a tag for the authenticated user by tag ID
+func (s *service) GetUserTagByID(
 	r *http.Request,
-	body *GetUserTagByTagIDRequest,
+	body *GetUserTagByIDRequest,
 ) (
 	int64,
-	*GetUserTagByTagIDResponse,
+	*GetUserTagByIDResponse,
 ) {
 	// Check if the request body is nil
 	if body == nil {
@@ -139,22 +139,27 @@ func (s *service) GetUserTagByTagID(
 	}
 
 	// Get the tag
-	var tag internalpostgresmodel.UserTag
+	var userTagName sql.NullString
+	var userTagCreatedAt, userTagUpdatedAt sql.NullTime
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetUserTagByIDProc,
 		userID,
 		body.TagID,
 	).Scan(
-		&tag.Name,
-		&tag.CreatedAt,
-		&tag.UpdatedAt,
+		&userTagName,
+		&userTagCreatedAt,
+		&userTagUpdatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			panic(ErrGetUserTagByTagIDNotFound)
 		}
 		panic(err)
 	}
-	return userID, &GetUserTagByTagIDResponse{
-		Tag: tag,
+	return userID, &GetUserTagByIDResponse{
+		Tag: internalpostgresmodel.UserTag{
+			Name:      userTagName.String,
+			CreatedAt: userTagCreatedAt.Time,
+			UpdatedAt: userTagUpdatedAt.Time,
+		},
 	}
 }

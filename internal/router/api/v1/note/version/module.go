@@ -35,9 +35,9 @@ var (
 			)
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.GetUserNoteVersionByNoteVersionID,
+				Controller.GetUserNoteVersionByID,
 				internalmiddleware.Validate(
-					&GetUserNoteVersionByNoteVersionIDRequest{},
+					&GetUserNoteVersionByIDRequest{},
 				),
 			)
 		},

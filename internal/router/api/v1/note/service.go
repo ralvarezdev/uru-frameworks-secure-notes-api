@@ -148,3 +148,46 @@ func (s *service) UpdateUserNoteTrash(
 	}
 	return userID
 }
+
+// GetUserNote gets a note for the authenticated user
+func (s *service) GetUserNote(
+	r *http.Request,
+	body *GetUserNoteRequest,
+) (
+	int64,
+	*GetUserNoteResponse,
+) {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the note
+	var note internalpostgresmodel.UserNote
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.GetUserNoteByIDProc,
+		userID,
+		body.NoteID,
+	).Scan(
+		&note.ID,
+		&note.Title,
+		&note.Content,
+		&note.Star,
+		&note.Archive,
+		&note.Pin,
+		&note.Trash,
+		&note.CreatedAt,
+		&note.UpdatedAt,
+	); err != nil {
+		panic(err)
+	}
+	return userID, &GetUserNoteResponse{
+		Note: note,
+	}, nil
+}

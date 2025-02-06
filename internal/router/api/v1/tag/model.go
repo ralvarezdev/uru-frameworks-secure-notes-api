@@ -21,13 +21,13 @@ type (
 		TagID int64 `json:"tag_id"`
 	}
 
-	// GetUserTagByTagIDRequest is the request DTO to get a user tag by tag ID
-	GetUserTagByTagIDRequest struct {
+	// GetUserTagByIDRequest is the request DTO to get a user tag by tag ID
+	GetUserTagByIDRequest struct {
 		TagID int64 `json:"tag_id"`
 	}
 
-	// GetUserTagByTagIDResponse is the response DTO to get a user tag by tag ID
-	GetUserTagByTagIDResponse struct {
+	// GetUserTagByIDResponse is the response DTO to get a user tag by tag ID
+	GetUserTagByIDResponse struct {
 		Tag internalpostgresmodel.UserTag `json:"tag"`
 	}
 )

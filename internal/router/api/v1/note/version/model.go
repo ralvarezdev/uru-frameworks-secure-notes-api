@@ -16,13 +16,13 @@ type (
 		NoteVersionID int64 `json:"note_version_id"`
 	}
 
-	// GetUserNoteVersionByNoteVersionIDRequest is the request DTO to get a user note version
-	GetUserNoteVersionByNoteVersionIDRequest struct {
+	// GetUserNoteVersionByIDRequest is the request DTO to get a user note version
+	GetUserNoteVersionByIDRequest struct {
 		NoteVersionID int64 `json:"note_version_id"`
 	}
 
-	// GetUserNoteVersionByNoteVersionIDResponse is the response DTO to get a user note version by note version ID
-	GetUserNoteVersionByNoteVersionIDResponse struct {
+	// GetUserNoteVersionByIDResponse is the response DTO to get a user note version by note version ID
+	GetUserNoteVersionByIDResponse struct {
 		NoteVersion *internalpostgresmodel.UserNoteVersion `json:"note_version"`
 	}
 )
