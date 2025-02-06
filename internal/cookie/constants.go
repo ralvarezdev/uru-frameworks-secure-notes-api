@@ -1,14 +1,18 @@
 package cookie
 
 import (
+	"database/sql"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
+	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
+	internaljwtinfo "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/info"
 	"net/http"
 	"strconv"
 	"time"
@@ -67,16 +71,40 @@ var (
 	}
 )
 
+// GenerateTokensInfo generates the user tokens info
+func GenerateTokensInfo() (
+	*internaljwtinfo.TokenInfo,
+	*internaljwtinfo.TokenInfo,
+) {
+	// Get the current time
+	currentTime := time.Now().UTC()
+
+	// Create the user tokens info
+	userRefreshTokenInfo := internaljwtinfo.TokenInfo{
+		Type:             gojwttoken.RefreshToken,
+		CookieAttributes: RefreshToken,
+		IssuedAt:         currentTime,
+		ExpiresAt:        currentTime.Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	}
+	userAccessTokenInfo := internaljwtinfo.TokenInfo{
+		Type:             gojwttoken.AccessToken,
+		CookieAttributes: AccessToken,
+		IssuedAt:         currentTime,
+		ExpiresAt:        currentTime.Add(internaljwt.Durations[gojwttoken.AccessToken]),
+	}
+	return &userRefreshTokenInfo, &userAccessTokenInfo
+}
+
 // SetTokensCookies generates user refresh token and user access token cookies
 func SetTokensCookies(
 	w http.ResponseWriter,
 	userID int64,
 	userRefreshToken,
-	userAccessToken *internaljwt.TokenInfo,
+	userAccessToken *internaljwtinfo.TokenInfo,
 ) error {
 	// Set the tokens in the cache as valid
 	go func() {
-		for _, token := range []*internaljwt.TokenInfo{
+		for _, token := range []*internaljwtinfo.TokenInfo{
 			userRefreshToken,
 			userAccessToken,
 		} {
@@ -105,7 +133,7 @@ func SetTokensCookies(
 	)
 
 	// Create the user token claims and set the cookies
-	for _, userToken := range []*internaljwt.TokenInfo{
+	for _, userToken := range []*internaljwtinfo.TokenInfo{
 		userRefreshToken,
 		userAccessToken,
 	} {
@@ -170,4 +198,71 @@ func RenovateCookie(
 		cookieValue.Value,
 		expiresAt,
 	)
+	return nil
+}
+
+// RefreshTokenFn function to refresh the user tokens
+func RefreshTokenFn(w http.ResponseWriter, r *http.Request) int64 {
+	// Get the user ID and the user refresh token ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+	oldUserRefreshTokenID, err := internaljwtclaims.GetID(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the client IP
+	clientIP := gonethttp.GetClientIP(r)
+
+	// Create the user tokens info
+	userRefreshTokenInfo, userAccessTokenInfo := GenerateTokensInfo()
+
+	// Call the refresh token stored procedure
+	var userRefreshTokenID, userAccessTokenID sql.NullInt64
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.RefreshTokenProc,
+		userID,
+		oldUserRefreshTokenID,
+		clientIP,
+		userRefreshTokenInfo.ExpiresAt,
+		userAccessTokenInfo.ExpiresAt,
+		nil, nil,
+	).Scan(
+		&userRefreshTokenID,
+		&userAccessTokenID,
+	); err != nil {
+		panic(err)
+	}
+
+	// Set the token ID to its respective token info
+	userRefreshTokenInfo.ID = userRefreshTokenID.Int64
+	userAccessTokenInfo.ID = userAccessTokenID.Int64
+
+	// Set the user tokens cookies
+	if err = SetTokensCookies(
+		w,
+		userID,
+		userRefreshTokenInfo,
+		userAccessTokenInfo,
+	); err != nil {
+		panic(err)
+	}
+
+	// Renovate the user salt and encrypted key cookies
+	for _, cookie := range []*gonethttpcookie.Attributes{
+		Salt,
+		EncryptedKey,
+	} {
+		if err = RenovateCookie(
+			w,
+			r,
+			cookie,
+			userAccessTokenInfo.ExpiresAt,
+		); err != nil {
+			panic(err)
+		}
+	}
+	return userID
 }

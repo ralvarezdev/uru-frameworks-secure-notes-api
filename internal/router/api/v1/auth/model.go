@@ -65,7 +65,7 @@ type (
 
 	// ForgotPasswordRequest is the request DTO to forgot password
 	ForgotPasswordRequest struct {
-		Username string `json:"username"`
+		Email string `json:"email"`
 	}
 
 	// ResetPasswordRequest is the request DTO to reset password

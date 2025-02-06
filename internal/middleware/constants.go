@@ -66,10 +66,15 @@ func Load() {
 	AuthenticateAccessToken = authenticator.AuthenticateFromCookie(
 		gojwttoken.AccessToken,
 		internalcookie.AccessToken.Name,
+		func(w http.ResponseWriter, r *http.Request) error {
+			_ = internalcookie.RefreshTokenFn(w, r)
+			return nil
+		},
 	)
 	AuthenticateRefreshToken = authenticator.AuthenticateFromCookie(
 		gojwttoken.RefreshToken,
 		internalcookie.RefreshToken.Name,
+		nil,
 	)
 
 	// Create API request validator middleware

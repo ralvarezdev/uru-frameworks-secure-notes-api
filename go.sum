@@ -40,6 +40,7 @@ github.com/ralvarezdev/go-logger v0.4.6 h1:eZalm0WAdNuhzbaVh5D7gC6AFztdpqE/GQfjH
 github.com/ralvarezdev/go-logger v0.4.6/go.mod h1:zxuMDHqtV2eoJYtmo219lima0ZSk4p/AGj/cCc390P8=
 github.com/ralvarezdev/go-net v0.9.1 h1:fIt621rXV3veBlg0z4pp0r66FKGlW74eTmakEcD+8uQ=
 github.com/ralvarezdev/go-net v0.9.1/go.mod h1:6e9tIYyD9jBLc7TTA9kLa+vq6pyHOwZPvvtWv/5KUio=
+github.com/ralvarezdev/go-net v0.9.2/go.mod h1:6e9tIYyD9jBLc7TTA9kLa+vq6pyHOwZPvvtWv/5KUio=
 github.com/ralvarezdev/go-reflect v0.2.4 h1:PLyzbrdNvUiRzpxSHuI9b7hJEhFes22gjNLZkbjn5AQ=
 github.com/ralvarezdev/go-reflect v0.2.4/go.mod h1:jv3EqQfUixWtNeJd/Rnzf0IDcYZ1z3GApRdAGQHdHZQ=
 github.com/ralvarezdev/go-security-headers v0.1.1 h1:tuZ66YhmOb4JJluhJCwo63i4fvZfmm4mfPUcya9tT/c=

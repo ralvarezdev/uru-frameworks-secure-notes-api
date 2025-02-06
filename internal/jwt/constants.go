@@ -1,13 +1,10 @@
 package jwt
 
 import (
-	"github.com/golang-jwt/jwt/v5"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gojwtissuer "github.com/ralvarezdev/go-jwt/token/issuer"
 	gojwtvalidator "github.com/ralvarezdev/go-jwt/token/validator"
-	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
-	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
@@ -42,39 +39,6 @@ var (
 	// Issuer is the JWT issuer
 	Issuer gojwtissuer.Issuer
 )
-
-type (
-	// TokenInfo struct with the token information and the cookie attributes
-	TokenInfo struct {
-		Type             gojwttoken.Token
-		ID               int64
-		CookieAttributes *gonethttpcookie.Attributes
-		IssuedAt         time.Time
-		ExpiresAt        time.Time
-		Claims           jwt.Claims
-	}
-)
-
-// GenerateTokensInfo generates the user tokens info
-func GenerateTokensInfo() (*TokenInfo, *TokenInfo) {
-	// Get the current time
-	currentTime := time.Now().UTC()
-
-	// Create the user tokens info
-	userRefreshTokenInfo := TokenInfo{
-		Type:             gojwttoken.RefreshToken,
-		CookieAttributes: internalcookie.RefreshToken,
-		IssuedAt:         currentTime,
-		ExpiresAt:        currentTime.Add(Durations[gojwttoken.RefreshToken]),
-	}
-	userAccessTokenInfo := TokenInfo{
-		Type:             gojwttoken.AccessToken,
-		CookieAttributes: internalcookie.AccessToken,
-		IssuedAt:         currentTime,
-		ExpiresAt:        currentTime.Add(Durations[gojwttoken.AccessToken]),
-	}
-	return &userRefreshTokenInfo, &userAccessTokenInfo
-}
 
 // Load loads the JWT constants
 func Load() {

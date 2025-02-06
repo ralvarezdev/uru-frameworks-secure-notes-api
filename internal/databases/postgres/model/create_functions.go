@@ -111,7 +111,9 @@ BEGIN
 	FROM
 		user_tags
 	WHERE
-		user_tags.user_id = in_user_id;
+		user_tags.user_id = in_user_id
+	AND
+		user_tags.deleted_at IS NULL;
 END;
 $$ LANGUAGE plpgsql;
 `
@@ -138,7 +140,9 @@ BEGIN
 	WHERE
 		user_notes.user_id = in_user_id
 	AND
-		user_note_versions.user_note_id = in_user_note_id;
+		user_note_versions.user_note_id = in_user_note_id
+	AND
+		user_note_versions.deleted_at IS NULL;
 END;
 $$ LANGUAGE plpgsql;
 `
@@ -169,7 +173,9 @@ BEGIN
 	WHERE
 		user_notes.user_id = in_user_id
 	AND
-		user_note_tags.user_note_id = in_user_note_id;
+		user_note_tags.user_note_id = in_user_note_id
+	AND
+		user_note_tags.deleted_at IS NULL;
 END;	
 $$ LANGUAGE plpgsql;
 `

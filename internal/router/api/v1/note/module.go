@@ -3,8 +3,9 @@ package note
 import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
-	internalrouteapiv1noteversion "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/version"
-	internalrouteapiv1noteversions "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/versions"
+	internalrouterapiv1notetags "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/tags"
+	internalrouterapiv1noteversion "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/version"
+	internalrouterapiv1noteversions "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/versions"
 	"net/http"
 )
 
@@ -21,8 +22,9 @@ var (
 			}
 		},
 		Submodules: gonethttp.NewSubmodules(
-			internalrouteapiv1noteversion.Module,
-			internalrouteapiv1noteversions.Module,
+			internalrouterapiv1noteversion.Module,
+			internalrouterapiv1noteversions.Module,
+			internalrouterapiv1notetags.Module,
 		),
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(

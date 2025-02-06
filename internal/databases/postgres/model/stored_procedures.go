@@ -19,8 +19,8 @@ var (
 	// RevokeUserTokensProc is the query to call the stored procedure to revoke user tokens
 	RevokeUserTokensProc = "CALL revoke_user_tokens($1)"
 
-	// GetAccessTokenByRefreshTokenIDProc is the query to call the stored procedure to get access token by refresh token ID
-	GetAccessTokenByRefreshTokenIDProc = "CALL get_access_token_by_refresh_token_id($1, $2)"
+	// GetUserAccessTokenByUserRefreshTokenIDProc is the query to call the stored procedure to get user access token by user refresh token ID
+	GetUserAccessTokenByUserRefreshTokenIDProc = "CALL get_user_access_token_by_user_refresh_token_id($1, $2)"
 
 	// PreLogInProc is the query to call the stored procedure to pre-login
 	PreLogInProc = "CALL pre_log_in($1, $2, $3, $4, $5, $6, $7);"
@@ -28,10 +28,10 @@ var (
 	// RegisterFailedLogInAttemptProc is the query to call the stored procedure to register failed login attempt
 	RegisterFailedLogInAttemptProc = "CALL register_failed_log_in_attempt($1, $2, $3, $4)"
 
-	// GetUserTOTPProc is the query to call the stored procedure to get user TOTP by user ID
+	// GetUserTOTPProc is the query to call the stored procedure to get user TOTP
 	GetUserTOTPProc = "CALL get_user_totp($1, $2, $3, $4)"
 
-	// GetUserEmailProc is the query to call the stored procedure to get user email by user ID
+	// GetUserEmailProc is the query to call the stored procedure to get user email
 	GetUserEmailProc = "CALL get_user_email($1, $2)"
 
 	// GenerateTOTPUrlProc is the query to call the stored procedure to generate TOTP URL
@@ -71,7 +71,7 @@ var (
 	ChangeEmailProc = "CALL change_email($1, $2, $3, $4, $5, $6)"
 
 	// ForgotPasswordProc is the query to call the stored procedure to forgot password
-	ForgotPasswordProc = "CALL forgot_password($1, $2, $3, $4, $5, $6, $7)"
+	ForgotPasswordProc = "CALL forgot_password($1, $2, $3, $4, $5, $6)"
 
 	// RevokeUserResetPasswordTokenProc is the query to call the stored procedure to revoke user reset password token
 	RevokeUserResetPasswordTokenProc = "CALL revoke_user_reset_password_token($1)"
@@ -81,9 +81,6 @@ var (
 
 	// ResetPasswordProc is the query to call the stored procedure to reset password
 	ResetPasswordProc = "CALL reset_password($1, $2, $3, $4)"
-
-	// RevokeUserTokensExceptRefreshTokenIDProc is the query to call the stored procedure to revoke user tokens except refresh token ID
-	RevokeUserTokensExceptRefreshTokenIDProc = "CALL revoke_user_tokens_except_refresh_token_id($1, $2)"
 
 	// ChangePasswordProc is the query to call the stored procedure to change password
 	ChangePasswordProc = "CALL change_password($1, $2, $3)"
@@ -136,8 +133,8 @@ var (
 	// UpdateUserTagProc is the query to call the stored procedure to update user tag
 	UpdateUserTagProc = "CALL update_user_tag($1, $2, $3)"
 
-	// GetUserTagByTagIDProc is the query to call the stored procedure to get user tag by tag ID
-	GetUserTagByTagIDProc = "CALL get_user_tag_by_tag_id($1, $2, $3, $4, $5)"
+	// GetUserTagByIDProc is the query to call the stored procedure to get user tag by tag ID
+	GetUserTagByIDProc = "CALL get_user_tag_by_id($1, $2, $3, $4, $5)"
 
 	// UpdateUserNoteTrashProc is the query to call the stored procedure to update user note trash
 	UpdateUserNoteTrashProc = "CALL update_user_note_trash($1, $2, $3)"
@@ -157,8 +154,8 @@ var (
 	// DeleteUserNoteVersionProc is the query to call the stored procedure to delete user note version
 	DeleteUserNoteVersionProc = "CALL delete_user_note_version($1, $2)"
 
-	// GetUserNoteVersionByNoteVersionIDProc is the query to call the stored procedure to get user note version by note version ID
-	GetUserNoteVersionByNoteVersionIDProc = "CALL get_user_note_version_by_note_version_id($1, $2, $3, $4)"
+	// GetUserNoteVersionByIDProc is the query to call the stored procedure to get user note version by note version ID
+	GetUserNoteVersionByIDProc = "CALL get_user_note_version_by_id($1, $2, $3, $4)"
 
 	// CreateUserNoteProc is the query to call the stored procedure to create user note
 	CreateUserNoteProc = "CALL create_user_note($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
@@ -181,6 +178,6 @@ var (
 	// UpdateUserNoteProc is the query to call the stored procedure to update user note
 	UpdateUserNoteProc = "CALL update_user_note($1, $2, $3, $4)"
 
-	// GetUserNoteByNoteIDProc is the query to call the stored procedure to get user note by note ID
-	GetUserNoteByNoteIDProc = "CALL get_user_note_by_note_id($1, $2, $3, $4)"
+	// GetUserNoteByIDProc is the query to call the stored procedure to get user note by note ID
+	GetUserNoteByIDProc = "CALL get_user_note_by_id($1, $2, $3, $4)"
 )

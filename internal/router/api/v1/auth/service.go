@@ -22,7 +22,6 @@ import (
 	internaltoken "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/token"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
-	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
 	internalmailersend "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/mailersend"
@@ -336,7 +335,7 @@ func (s *service) LogIn(
 	}
 
 	// Create the user tokens info
-	userRefreshTokenInfo, userAccessTokenInfo := internaljwt.GenerateTokensInfo()
+	userRefreshTokenInfo, userAccessTokenInfo := internalcookie.GenerateTokensInfo()
 
 	// Call the refresh token stored procedure
 	var userAccessTokenID, userRefreshTokenID sql.NullInt64
@@ -465,72 +464,6 @@ func (s *service) RevokeRefreshTokens(
 	// Clear cookies
 	internalcookie.ClearCookies(w)
 
-	return userID
-}
-
-// RefreshToken refreshes a user token
-func (s *service) RefreshToken(w http.ResponseWriter, r *http.Request) int64 {
-	// Get the user ID and the user refresh token ID from the request
-	userID, err := internaljwtclaims.GetSubject(r)
-	if err != nil {
-		panic(err)
-	}
-	oldUserRefreshTokenID, err := internaljwtclaims.GetID(r)
-	if err != nil {
-		panic(err)
-	}
-
-	// Get the client IP
-	clientIP := gonethttp.GetClientIP(r)
-
-	// Create the user tokens info
-	userRefreshTokenInfo, userAccessTokenInfo := internaljwt.GenerateTokensInfo()
-
-	// Call the refresh token stored procedure
-	var userRefreshTokenID, userAccessTokenID sql.NullInt64
-	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.RefreshTokenProc,
-		userID,
-		oldUserRefreshTokenID,
-		clientIP,
-		userRefreshTokenInfo.ExpiresAt,
-		userAccessTokenInfo.ExpiresAt,
-		nil, nil,
-	).Scan(
-		&userRefreshTokenID,
-		&userAccessTokenID,
-	); err != nil {
-		panic(err)
-	}
-
-	// Set the token ID to its respective token info
-	userRefreshTokenInfo.ID = userRefreshTokenID.Int64
-	userAccessTokenInfo.ID = userAccessTokenID.Int64
-
-	// Set the user tokens cookies
-	if err = internalcookie.SetTokensCookies(
-		w,
-		userID,
-		userRefreshTokenInfo,
-		userAccessTokenInfo,
-	); err != nil {
-		panic(err)
-	}
-
-	// Renovate the user salt and encrypted key cookies
-	for _, cookie := range []*gonethttpcookie.Attributes{
-		internalcookie.Salt,
-		internalcookie.EncryptedKey,
-	} {
-		if err = internalcookie.RenovateCookie(
-			w,
-			r,
-			cookie,
-			userAccessTokenInfo.ExpiresAt,
-		); err != nil {
-			panic(err)
-		}
-	}
 	return userID
 }
 
@@ -903,10 +836,10 @@ func (s *service) ForgotPassword(
 
 	// Run the SQL stored procedure to send the forgot password email
 	var userID sql.NullInt64
-	var userFirstName, userLastName, userEmail sql.NullString
+	var userFirstName, userLastName sql.NullString
 	if err := internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.ForgotPasswordProc,
-		body.Username,
+		body.Email,
 		resetPasswordToken,
 		resetPasswordTokenExpiresAt,
 		nil,
@@ -916,7 +849,6 @@ func (s *service) ForgotPassword(
 		&userID,
 		&userFirstName,
 		&userLastName,
-		&userEmail,
 	); err != nil {
 		panic(err)
 	}
@@ -924,7 +856,7 @@ func (s *service) ForgotPassword(
 	// Send reset password email
 	go internalmailersend.SendResetPasswordEmail(
 		userFirstName.String+" "+userLastName.String,
-		userEmail.String,
+		body.Email,
 		resetPasswordToken,
 	)
 

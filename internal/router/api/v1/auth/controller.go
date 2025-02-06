@@ -5,6 +5,7 @@ import (
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
 	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
+	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
@@ -248,7 +249,7 @@ func (c *controller) RevokeRefreshTokens(
 // @Router /api/v1/auth/refresh-token [post]
 func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Refresh the token
-	userID := Service.RefreshToken(w, r)
+	userID := internalcookie.RefreshTokenFn(w, r)
 
 	// Log the successful token refresh
 	internallogger.Api.RefreshToken(userID)

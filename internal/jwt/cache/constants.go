@@ -79,7 +79,7 @@ func Load(mode *goflagsmode.Flag) {
 		// Get the user access token ID by the user refresh token ID
 		var userAccessTokenID sql.NullInt64
 		if err := internalpostgres.PoolService.QueryRow(
-			&internalpostgresmodel.GetAccessTokenByRefreshTokenIDProc,
+			&internalpostgresmodel.GetUserAccessTokenByUserRefreshTokenIDProc,
 			userRefreshTokenID,
 			nil,
 		).Scan(

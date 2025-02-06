@@ -1,6 +1,30 @@
 package model
 
 const (
+	// CreateGetUserEmailIDProc is the query to create the stored procedure to get user email ID by user ID
+	CreateGetUserEmailIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_email_id(
+	IN in_user_id BIGINT,
+	OUT out_user_email_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN	
+	-- Select the user email ID by user ID
+	SELECT
+		user_emails.id
+	INTO
+		out_user_email_id
+	FROM
+		user_emails
+	WHERE
+		user_emails.user_id = in_user_id
+	AND
+		user_emails.revoked_at IS NULL;
+END;	
+$$;
+`
+
 	// CreateRevokeUserEmailVerificationTokenProc is the query to create the stored procedure to revoke user email verification token
 	CreateRevokeUserEmailVerificationTokenProc = `
 CREATE OR REPLACE PROCEDURE revoke_user_email_verification_token(
@@ -300,9 +324,9 @@ END;
 $$;
 `
 
-	// CreateGetAccessTokenIDByRefreshTokenIDProc is the query to create the stored procedure to get access token ID by refresh token ID
-	CreateGetAccessTokenIDByRefreshTokenIDProc = `
-CREATE OR REPLACE PROCEDURE get_access_token_id_by_refresh_token_id(
+	// CreateGetUserAccessTokenIDByUserRefreshTokenIDProc is the query to create the stored procedure to get user access token ID by user refresh token ID
+	CreateGetUserAccessTokenIDByUserRefreshTokenIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_access_token_id_by_user_refresh_token_id(
 	IN in_user_refresh_token_id BIGINT,
 	OUT out_user_access_token_id BIGINT
 )
@@ -471,30 +495,6 @@ END;
 $$;
 `
 
-	// CreateGetUserEmailIDProc is the query to create the stored procedure to get user email ID by user ID
-	CreateGetUserEmailIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_email_id(
-	IN in_user_id BIGINT,
-	OUT out_email_id BIGINT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN	
-	-- Select the user email ID by user ID
-	SELECT
-		user_emails.id
-	INTO
-		out_email_id
-	FROM
-		user_emails
-	WHERE
-		user_emails.user_id = in_user_id
-	AND
-		user_emails.revoked_at IS NULL;
-END;	
-$$;
-`
-
 	// CreateGenerateTOTPUrlProc is the query to create the stored procedure to generate TOTP URL
 	CreateGenerateTOTPUrlProc = `
 CREATE OR REPLACE PROCEDURE generate_totp_url(
@@ -515,12 +515,12 @@ BEGIN
 	CALL get_user_totp(in_user_id, out_old_user_totp_id, out_old_user_totp_secret, out_old_user_totp_verified_at);
 
 	-- If the TOTP is not verified, revoke it
-	IF out_old_totp_verified_at IS NULL THEN
+	IF out_old_totp_id IS NOT NULL AND out_old_totp_verified_at IS NULL THEN
 		CALL revoke_user_totp(in_user_id);
 	END IF;
 
 	-- If the TOTP wasn't active or verified, insert a new TOTP
-	IF out_old_totp_id IS NULL OR out_old_totp_verified_at IS NULL THEN
+	IF out_old_totp_verified_at IS NULL THEN
 		-- Insert into user_totps table
 		INSERT INTO user_totps (
 			user_id,
@@ -752,7 +752,9 @@ BEGIN
 	WHERE
 		user_emails.user_id = in_user_id
 	AND
-		user_emails.revoked_at IS NULL;
+		user_emails.revoked_at IS NULL
+	AND
+		users.deleted_at IS NULL;
 END;
 $$;
 `
@@ -831,7 +833,9 @@ BEGIN
 	FROM
 		users
 	WHERE
-		users.id = in_user_id;
+		users.id = in_user_id
+	AND
+		users.deleted_at IS NULL;
 END;
 $$;
 `
@@ -856,17 +860,14 @@ BEGIN
 END;
 $$;
 `
-
-	// CreateForgotPasswordProc is the query to create the stored procedure to forgot password
 	CreateForgotPasswordProc = `
 CREATE OR REPLACE PROCEDURE forgot_password(
-	IN in_user_username VARCHAR,
+	IN in_user_email VARCHAR,
 	IN in_user_reset_password_token VARCHAR,
 	IN in_user_reset_password_token_expires_at TIMESTAMP,
 	OUT out_user_id BIGINT,
 	OUT out_user_first_name VARCHAR,
-	OUT out_user_last_name VARCHAR,
-	OUT out_user_email VARCHAR
+	OUT out_user_last_name VARCHAR
 )
 LANGUAGE plpgsql	
 AS $$
@@ -876,22 +877,16 @@ BEGIN
 		users.id,
 		users.first_name,
 		users.last_name,
-		user_emails.email
 	INTO
 		out_user_id
 		out_user_first_name,
-		out_user_last_name,
-		out_user_email
+		out_user_last_name
 	FROM
 		users
 	INNER JOIN
-		user_usernames ON users.id = user_usernames.user_id
-	INNER JOIN
 		user_emails ON users.id = user_emails.user_id
 	WHERE
-		user_usernames.username = in_user_username
-	AND
-		user_usernames.revoked_at IS NULL
+		user_emails.email = in_user_email
 	AND
 		user_emails.revoked_at IS NULL
 	AND
@@ -990,42 +985,6 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTokensExceptRefreshTokenIDProc is the query to create the stored procedure to revoke user tokens except refresh token ID
-	CreateRevokeUserTokensExceptRefreshTokenIDProc = `
-CREATE OR REPLACE PROCEDURE revoke_user_tokens_except_refresh_token_id(
-	IN in_user_id BIGINT,
-	IN in_user_refresh_token_id BIGINT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-	-- Update the user_refresh_tokens table
-	UPDATE
-		user_refresh_tokens
-	SET	
-		revoked_at = NOW()
-	WHERE
-		user_refresh_tokens.user_id = in_user_id
-	AND 
-		user_refresh_tokens.revoked_at IS NULL
-	AND
-		user_refresh_tokens.id != in_user_refresh_token_id;
-
-	-- Update the user_access_tokens table
-	UPDATE
-		user_access_tokens
-	SET
-		revoked_at = NOW()
-	WHERE
-		user_access_tokens.user_id = in_user_id
-	AND
-		user_access_tokens.revoked_at IS NULL
-	AND
-		user_access_tokens.user_refresh_token_id != in_user_refresh_token_id;
-END;
-$$;
-`
-
 	// CreateGetUserPasswordHashProc is the query to create the stored procedure to get user password hash
 	CreateGetUserPasswordHashProc = `
 CREATE OR REPLACE PROCEDURE get_user_password_hash(
@@ -1072,9 +1031,6 @@ BEGIN
 		in_user_id,
 		in_new_user_password_hash
 	);
-
-	-- Revoke the user tokens, except the current access token and refresh token
-	CALL revoke_user_tokens_except_refresh_token_id(in_user_id, in_user_refresh_token_id);
 END;
 $$;
 `
@@ -1170,35 +1126,57 @@ BEGIN
 	SET
 		deleted_at = NOW()
 	WHERE
-		users.id = in_user_id;
+		users.id = in_user_id
+	AND
+		users.deleted_at IS NULL;
 
-	-- Delete the user tags
-	DELETE FROM
-		user_tags
+	-- Update the user_tags table
+	UPDATE
+		user_tags	
+	SET
+		deleted_at = NOW()
 	WHERE
-		user_tags.user_id = in_user_id;
+		user_tags.user_id = in_user_id
+	AND
+		user_tags.deleted_at IS NULL;
 
-	-- Delete the user note tags
-	DELETE FROM
+	-- Update the user_note_tags table
+	UPDATE
 		user_note_tags
-	INNER JOIN
-		user_notes ON user_note_tags.note_id = user_notes.id
-	WHERE
-		user_notes.user_id = in_user_id;
-	
-	-- Delete the user note versions
-	DELETE FROM
-		user_note_versions
-	INNER JOIN
-		user_notes ON user_note_versions.note_id = user_notes.id
-	WHERE
-		user_notes.user_id = in_user_id;
-
-	-- Delete the user notes
-	DELETE FROM
+	SET
+		deleted_at = NOW()
+	FROM
 		user_notes
 	WHERE
-		user_notes.user_id = in_user_id;
+		user_note_tags.note_id = user_notes.id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_note_tags.deleted_at IS NULL;
+	
+	-- Update the user_note_versions table
+	UPDATE
+		user_note_versions
+	SET
+		deleted_at = NOW()
+	FROM
+		user_notes
+	WHERE
+		user_note_versions.note_id = user_notes.id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_note_versions.deleted_at IS NULL;
+
+	-- Update the user_notes table
+	UPDATE
+		user_notes
+	SET
+		deleted_at = NOW()
+	WHERE
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1251,7 +1229,9 @@ BEGIN
 	FROM
 		users
 	WHERE
-		users.id = in_user_id;
+		users.id = in_user_id
+	AND
+		users.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1283,7 +1263,9 @@ BEGIN
 		birthdate = COALESCE(in_user_birthdate, out_birthdate),
 		update_at = NOW()
 	WHERE
-		users.id = in_user_id;
+		users.id = in_user_id
+	AND
+		users.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1436,7 +1418,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Insert into user_tags table
-	INSERT INTO user_tag (
+	INSERT INTO user_tags (
 		user_id,
 		name
 	)
@@ -1462,16 +1444,16 @@ AS $$
 BEGIN	
 	-- Update the user_tags table
 	UPDATE
-		user_tag
+		user_tags
 	SET
 		name = in_user_tag_name,
 		updated_at = NOW()
 	WHERE
-		user_tag.id = in_user_tag_id
+		user_tags.id = in_user_tag_id
 	AND
-		user_tag.user_id = in_user_id
+		user_tags.user_id = in_user_id
 	AND
-		user_tag.deleted_at IS NULL;
+		user_tags.deleted_at IS NULL;
 END;	
 $$;
 `
@@ -1487,22 +1469,22 @@ AS $$
 BEGIN
 	-- Update the user_tags table
 	UPDATE
-		user_tag
+		user_tags
 	SET
 		deleted_at = NOW()
 	WHERE
-		user_tag.id = in_user_tag_id
+		user_tags.id = in_user_tag_id
 	AND
-		user_tag.user_id = in_user_id
+		user_tags.user_id = in_user_id
 	AND
-		user_tag.deleted_at IS NULL;
+		user_tags.deleted_at IS NULL;
 END;
 $$;
 `
 
-	// CreateGetUserTagByTagIDProc is the query to create the stored procedure to get user tag by tag ID
-	CreateGetUserTagByTagIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_tag_by_tag_id(
+	// CreateGetUserTagByIDProc is the query to create the stored procedure to get user tag by tag ID
+	CreateGetUserTagByIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_tag_by_id(
 	IN in_user_id BIGINT,
 	IN in_user_tag_id BIGINT,
 	OUT out_user_tag_name VARCHAR
@@ -1514,21 +1496,21 @@ AS $$
 BEGIN
 	-- Select the user tag name, created at, and updated at by user ID and tag ID
 	SELECT
-		user_tag.name,
-		user_tag.created_at,
-		user_tag.updated_at
+		user_tags.name,
+		user_tags.created_at,
+		user_tags.updated_at
 	INTO
 		out_user_tag_name,
 		out_user_tag_created_at,
 		out_user_tag_updated_at
 	FROM
-		user_tag
+		user_tags
 	WHERE
-		user_tag.id = in_user_tag_id
+		user_tags.id = in_user_tag_id
 	AND
-		user_tag.user_id = in_user_id
+		user_tags.user_id = in_user_id
 	AND
-		user_tag.deleted_at IS NULL;
+		user_tags.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1713,14 +1695,16 @@ BEGIN
 	AND
 		user_notes.user_id = in_user_id
 	AND
-		user_notes.deleted_at IS NULL;		
+		user_notes.deleted_at IS NULL
+	AND
+		user_note_versions.deleted_at IS NULL;		
 END;
 $$;
 `
 
-	// CreateGetUserNoteVersionByNoteVersionIDProc is the query to create the stored procedure to get user note version by note version ID
-	CreateGetUserNoteVersionByNoteVersionIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_note_version_by_note_version_id(
+	// CreateGetUserNoteVersionByIDProc is the query to create the stored procedure to get user note version by note version ID
+	CreateGetUserNoteVersionByIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_note_version_by_id(
 	IN in_user_id BIGINT,
 	IN in_user_note_version_id BIGINT,	
 	OUT out_user_note_version_encrypted_content TEXT,
@@ -1745,7 +1729,9 @@ BEGIN
 	AND
 		user_notes.user_id = in_user_id
 	AND
-		user_notes.deleted_at IS NULL;
+		user_notes.deleted_at IS NULL
+	AND
+		user_note_versions.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1764,15 +1750,15 @@ BEGIN
 	SELECT
 		ARRAY(
 			SELECT
-				user_tag.id
+				user_tags.id
 			FROM
-				user_tag
+				user_tags
 			WHERE
-				user_tag.user_id = in_user_id
+				user_tags.user_id = in_user_id
 			AND
-				user_tag.id = ANY(in_user_tag_ids)
+				user_tags.id = ANY(in_user_tag_ids)
 			AND
-				user_tag.deleted_at IS NULL
+				user_tags.deleted_at IS NULL
 		)
 	INTO
 		out_valid_user_tag_ids;
@@ -1794,7 +1780,7 @@ BEGIN
 	CALL validate_user_tag_ids(in_user_id, in_user_note_tag_ids, out_valid_user_note_tag_ids);
 
 	-- Insert into note_tags table
-	FOREACH valid_user_note_tag_id IN ARRAY out_valid_user_note_tag_ids
+	FOREACH out_valid_user_note_tag_id IN ARRAY out_valid_user_note_tag_ids
 	LOOP
 		INSERT INTO user_note_tags (
 			note_id,
@@ -1802,7 +1788,7 @@ BEGIN
 		)
 		VALUES (
 			out_user_note_id,
-			valid_user_note_tag_id
+			out_valid_user_note_tag_id
 		);
 	END LOOP;
 END;
@@ -1886,7 +1872,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Insert into user_totp_recovery_codes table
-	FOREACH user_totp_recovery_code IN ARRAY in_user_totp_recovery_codes
+	FOREACH in_user_totp_recovery_code IN ARRAY in_user_totp_recovery_codes
 	LOOP
 		INSERT INTO user_totp_recovery_codes (
 			user_totp_id,
@@ -1894,7 +1880,7 @@ BEGIN
 		)
 		VALUES (
 			in_user_totp_id,
-			user_totp_recovery_code
+			in_user_totp_recovery_code
 		);
 	END LOOP;
 END;
@@ -1947,6 +1933,7 @@ BEGIN
 	UPDATE
 		user_note_tags
 	SET
+		assigned_at = NULL,
 		deleted_at = NOW()
 	INNER JOIN
 		user_notes ON user_note_tags.note_id = user_notes.id
@@ -1973,13 +1960,17 @@ BEGIN
 	-- Check if the user tag IDs are valid
 	CALL validate_user_tag_ids(in_user_id, in_user_note_tag_ids, out_valid_user_note_tag_ids);
 
-	-- Delete the user note tags
-	DELETE FROM
+	-- Update the user_note_tags table
+	UPDATE
 		user_note_tags
+	SET
+		deleted_at = NOW()
 	WHERE
 		user_note_tags.note_id = in_user_note_id
 	AND
-		user_note_tags.tag_id = ANY(out_valid_user_note_tag_ids);
+		user_note_tags.tag_id = ANY(out_valid_user_note_tag_ids)
+	AND
+		user_note_tags.deleted_at IS NULL;
 END;
 $$;
 `
@@ -2010,7 +2001,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 
 	-- Update the user_notes table
 	UPDATE
@@ -2027,9 +2020,9 @@ END;
 $$;
 `
 
-	// CreateGetUserNoteByNoteIDProc is the query to create the stored procedure to get user note by note ID
-	CreateGetUserNoteByNoteIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_note_by_note_id(
+	// CreateGetUserNoteByIDProc is the query to create the stored procedure to get user note by note ID
+	CreateGetUserNoteByIDProc = `
+CREATE OR REPLACE PROCEDURE get_user_note_by_id(
 	IN in_user_id BIGINT,
 	IN in_user_note_id BIGINT,
 	OUT out_user_note_title VARCHAR,
@@ -2069,7 +2062,9 @@ BEGIN
 	WHERE
 		user_notes.id = in_user_note_id
 	AND
-		user_notes.user_id = in_user_id;
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL;
 
 	-- Select the user note latest user note version ID by user ID and user note ID
 	SELECT
