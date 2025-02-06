@@ -104,7 +104,7 @@ func (c *controller) GetUserNoteVersionByID(
 	userID, data := Service.GetUserNoteVersionByNoteVersionID(r, body)
 
 	// Log the user note version by note version ID
-	internallogger.Api.GetUserNoteVersionByNoteVersionID(
+	internallogger.Api.GetUserNoteVersionByID(
 		userID,
 		body.NoteVersionID,
 	)

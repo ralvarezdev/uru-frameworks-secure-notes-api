@@ -276,7 +276,7 @@ func (l *Logger) ListUserTags(id int64) {
 	)
 }
 
-// CreateUserTag logs the create user tag event
+// CreateUserTag logs the user tag creation event
 func (l *Logger) CreateUserTag(id, tagID int64) {
 	l.logger.Info(
 		"user created tag",
@@ -303,8 +303,8 @@ func (l *Logger) DeleteUserTag(id, tagID int64) {
 	)
 }
 
-// GetUserTagByTagID logs the get user tag by tag ID event
-func (l *Logger) GetUserTagByTagID(id, tagID int64) {
+// GetUserTagByID logs the get user tag by ID event
+func (l *Logger) GetUserTagByID(id, tagID int64) {
 	l.logger.Info(
 		"user got tag",
 		fmt.Sprintf("user id: %d", id),
@@ -352,7 +352,7 @@ func (l *Logger) UpdateUserNotePin(id, noteID int64, pin bool) {
 	)
 }
 
-// CreateUserNoteVersion logs the create user note version event
+// CreateUserNoteVersion logs the user note version creation event
 func (l *Logger) CreateUserNoteVersion(id, noteID, noteVersionID int64) {
 	l.logger.Info(
 		"user created note version",
@@ -371,8 +371,8 @@ func (l *Logger) DeleteUserNoteVersion(id, noteVersionID int64) {
 	)
 }
 
-// GetUserNoteVersionByNoteVersionID logs the get user note version by note version ID event
-func (l *Logger) GetUserNoteVersionByNoteVersionID(id, noteVersionID int64) {
+// GetUserNoteVersionByID logs the get user note version by ID event
+func (l *Logger) GetUserNoteVersionByID(id, noteVersionID int64) {
 	l.logger.Info(
 		"user got note version",
 		fmt.Sprintf("user id: %d", id),
@@ -423,5 +423,49 @@ func (l *Logger) RemoveUserNoteTags(id, noteID int64) {
 		"user removed note tag",
 		fmt.Sprintf("user id: %d", id),
 		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// GetUserNoteByID logs the get user note by ID event
+func (l *Logger) GetUserNoteByID(id, noteID int64) {
+	l.logger.Info(
+		"user got note",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// CreateUserNote logs the user note creation event
+func (l *Logger) CreateUserNote(id, noteID int64) {
+	l.logger.Info(
+		"user created note",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// UpdateUserNote logs the update user note event
+func (l *Logger) UpdateUserNote(id, noteID int64) {
+	l.logger.Info(
+		"user updated note",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// DeleteUserNote logs the delete user note event
+func (l *Logger) DeleteUserNote(id, noteID int64) {
+	l.logger.Info(
+		"user deleted note",
+		fmt.Sprintf("user id: %d", id),
+		fmt.Sprintf("note id: %d", noteID),
+	)
+}
+
+// ListUserNotes logs the list user notes event
+func (l *Logger) ListUserNotes(id int64) {
+	l.logger.Info(
+		"user listed notes",
+		fmt.Sprintf("user id: %d", id),
 	)
 }

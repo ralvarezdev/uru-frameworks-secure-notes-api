@@ -1,6 +1,8 @@
 package note
 
 import (
+	"database/sql"
+	"errors"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
@@ -40,7 +42,7 @@ func (s *service) UpdateUserNoteStar(
 		panic(err)
 	}
 
-	// Check if the note exists
+	// Check if the note ID exists
 	if commandTag.RowsAffected() == 0 {
 		panic(ErrUpdateUserNoteStarNotFound)
 	}
@@ -74,7 +76,7 @@ func (s *service) UpdateUserNoteArchive(
 		panic(err)
 	}
 
-	// Check if the note exists
+	// Check if the note ID exists
 	if commandTag.RowsAffected() == 0 {
 		panic(ErrUpdateUserNoteArchiveNotFound)
 	}
@@ -108,7 +110,7 @@ func (s *service) UpdateUserNotePin(
 		panic(err)
 	}
 
-	// Check if the note exists
+	// Check if the note ID exists
 	if commandTag.RowsAffected() == 0 {
 		panic(ErrUpdateUserNotePinNotFound)
 	}
@@ -142,20 +144,20 @@ func (s *service) UpdateUserNoteTrash(
 		panic(err)
 	}
 
-	// Check if the note exists
+	// Check if the note ID exists
 	if commandTag.RowsAffected() == 0 {
 		panic(ErrUpdateUserNoteTrashNotFound)
 	}
 	return userID
 }
 
-// GetUserNote gets a note for the authenticated user
-func (s *service) GetUserNote(
+// GetUserNoteByID gets a note by ID for the authenticated user
+func (s *service) GetUserNoteByID(
 	r *http.Request,
-	body *GetUserNoteRequest,
+	body *GetUserNoteByIDRequest,
 ) (
 	int64,
-	*GetUserNoteResponse,
+	*GetUserNoteByIDResponse,
 ) {
 	// Check if the request body is nil
 	if body == nil {
@@ -169,25 +171,146 @@ func (s *service) GetUserNote(
 	}
 
 	// Get the note
-	var note internalpostgresmodel.UserNote
+	var userNoteLatestNoteVersionID sql.NullInt64
+	var userNoteTitle, userNoteColor sql.NullString
+	var userNoteCreatedAt, userNoteUpdatedAt, userNotePinnedAt, userNoteArchivedAt, userNoteTrashedAt, userNoteStarredAt sql.NullTime
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GetUserNoteByIDProc,
 		userID,
 		body.NoteID,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	).Scan(
-		&note.ID,
-		&note.Title,
-		&note.Content,
-		&note.Star,
-		&note.Archive,
-		&note.Pin,
-		&note.Trash,
-		&note.CreatedAt,
-		&note.UpdatedAt,
+		&userNoteTitle,
+		&userNoteColor,
+		&userNoteCreatedAt,
+		&userNoteUpdatedAt,
+		&userNotePinnedAt,
+		&userNoteArchivedAt,
+		&userNoteTrashedAt,
+		&userNoteStarredAt,
+		&userNoteLatestNoteVersionID,
 	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			panic(ErrGetUserNoteNotFound)
+		}
 		panic(err)
 	}
-	return userID, &GetUserNoteResponse{
-		Note: note,
-	}, nil
+
+	return userID, &GetUserNoteByIDResponse{
+		Note: internalpostgresmodel.UserNote{
+			Title:               userNoteTitle.String,
+			Color:               &userNoteColor.String,
+			CreatedAt:           userNoteCreatedAt.Time,
+			UpdatedAt:           &userNoteUpdatedAt.Time,
+			PinnedAt:            &userNotePinnedAt.Time,
+			ArchivedAt:          &userNoteArchivedAt.Time,
+			TrashedAt:           &userNoteTrashedAt.Time,
+			StarredAt:           &userNoteStarredAt.Time,
+			LatestNoteVersionID: &userNoteLatestNoteVersionID.Int64,
+		},
+	}
+}
+
+// CreateUserNote creates a note for the authenticated user
+func (s *service) CreateUserNote(
+	r *http.Request,
+	body *CreateUserNoteRequest,
+) (int64, int64) {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create the note
+	var userNoteID sql.NullInt64
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.CreateUserNoteProc,
+		userID,
+		body.Title,
+		body.Color,
+		body.Pinned,
+		body.Archived,
+		body.Trashed,
+		body.Starred,
+		body.EncryptedContent,
+		body.NoteTagsID,
+		nil,
+	).Scan(&userNoteID); err != nil {
+		panic(err)
+	}
+	return userID, userNoteID.Int64
+}
+
+// UpdateUserNote updates a note for the authenticated user
+func (s *service) UpdateUserNote(
+	r *http.Request,
+	body *UpdateUserNoteRequest,
+) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Update the note
+	commandTag, err := internalpostgres.PoolService.Exec(
+		&internalpostgresmodel.UpdateUserNoteProc,
+		userID,
+		body.NoteID,
+		body.Title,
+		body.Color,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// Check if the note ID exists
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrUpdateUserNoteNotFound)
+	}
+	return userID
+}
+
+// DeleteUserNote deletes a note for the authenticated user
+func (s *service) DeleteUserNote(
+	r *http.Request,
+	body *DeleteUserNoteRequest,
+) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
+	// Get the user ID from the request
+	userID, err := internaljwtclaims.GetSubject(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Delete the note
+	commandTag, err := internalpostgres.PoolService.Exec(
+		&internalpostgresmodel.DeleteUserNoteProc,
+		userID,
+		body.NoteID,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// Check if the note ID exists
+	if commandTag.RowsAffected() == 0 {
+		panic(ErrDeleteUserNoteNotFound)
+	}
+	return userID
 }

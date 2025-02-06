@@ -163,8 +163,8 @@ var (
 	// AddUserNoteTagsProc is the query to call the stored procedure to add user note tags
 	AddUserNoteTagsProc = "CALL add_user_note_tags($1, $2, $3)"
 
-	// ValidateUserTagsIDsProc is the query to call the stored procedure to validate user tags IDs
-	ValidateUserTagsIDsProc = "CALL validate_user_tags($1, $2, $3)"
+	// ValidateUserTagsIDProc is the query to call the stored procedure to validate user tags ID
+	ValidateUserTagsIDProc = "CALL validate_user_tags_id($1, $2, $3)"
 
 	// CreateUserTOTPRecoveryCodesProc is the query to call the stored procedure to create user TOTP recovery codes
 	CreateUserTOTPRecoveryCodesProc = "CALL create_user_totp_recovery_codes($1, $2)"
@@ -179,5 +179,8 @@ var (
 	UpdateUserNoteProc = "CALL update_user_note($1, $2, $3, $4)"
 
 	// GetUserNoteByIDProc is the query to call the stored procedure to get user note by note ID
-	GetUserNoteByIDProc = "CALL get_user_note_by_id($1, $2, $3, $4)"
+	GetUserNoteByIDProc = "CALL get_user_note_by_id($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
+
+	// ListUserNotesProc is the query to call the stored procedure to list user notes
+	ListUserNotesProc = "CALL list_user_notes($1, $2)"
 )

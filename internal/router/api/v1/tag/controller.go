@@ -129,7 +129,7 @@ func (c *controller) GetUserTagByID(
 	userID, data := Service.GetUserTagByID(r, body)
 
 	// Log the user tag retrieval
-	internallogger.Api.GetUserTagByTagID(userID, body.TagID)
+	internallogger.Api.GetUserTagByID(userID, body.TagID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(

@@ -30,13 +30,13 @@ type (
 		NoteID int64 `json:"note_id"`
 	}
 
-	// GetUserNoteRequest is the request DTO to get a user note
-	GetUserNoteRequest struct {
+	// GetUserNoteByIDRequest is the request DTO to get a user note by ID
+	GetUserNoteByIDRequest struct {
 		NoteID int64 `json:"note_id"`
 	}
 
-	// GetUserNoteResponse is the response DTO to get a user note
-	GetUserNoteResponse struct {
+	// GetUserNoteByIDResponse is the response DTO to get a user note by ID
+	GetUserNoteByIDResponse struct {
 		Note internalpostgresmodel.UserNote `json:"note"`
 	}
 

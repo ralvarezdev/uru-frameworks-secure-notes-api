@@ -1736,17 +1736,17 @@ END;
 $$;
 `
 
-	// CreateValidateUserTagIDsProc is the query to create the stored procedure to validate user tag IDs
-	CreateValidateUserTagIDsProc = `
-CREATE OR REPLACE PROCEDURE validate_user_tag_ids(
+	// CreateValidateUserTagsIDProc is the query to create the stored procedure to validate user tags ID
+	CreateValidateUserTagsIDProc = `
+CREATE OR REPLACE PROCEDURE validate_user_tags_id(
 	IN in_user_id BIGINT,
-	IN in_user_tag_ids BIGINT[],
-	OUT out_valid_user_tag_ids BIGINT[]
+	IN in_user_tags_id BIGINT[],
+	OUT out_valid_user_tags_id BIGINT[]
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Check if the user tag IDs are valid
+	-- Check if the user tags ID are valid
 	SELECT
 		ARRAY(
 			SELECT
@@ -1756,12 +1756,12 @@ BEGIN
 			WHERE
 				user_tags.user_id = in_user_id
 			AND
-				user_tags.id = ANY(in_user_tag_ids)
+				user_tags.id = ANY(in_user_tags_id)
 			AND
 				user_tags.deleted_at IS NULL
 		)
 	INTO
-		out_valid_user_tag_ids;
+		out_valid_user_tags_id;
 END;
 $$;
 `
@@ -1771,16 +1771,16 @@ $$;
 CREATE OR REPLACE PROCEDURE add_user_note_tags(
 	IN in_user_id BIGINT,
 	IN in_user_note_id BIGINT,
-	IN in_user_note_tag_ids BIGINT[]
+	IN in_user_note_tags_id BIGINT[]
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Check if the user tag IDs are valid
-	CALL validate_user_tag_ids(in_user_id, in_user_note_tag_ids, out_valid_user_note_tag_ids);
+	-- Check if the user tags ID are valid
+	CALL validate_user_tags_id(in_user_id, in_user_note_tags_id, out_valid_user_note_tags_id);
 
 	-- Insert into note_tags table
-	FOREACH out_valid_user_note_tag_id IN ARRAY out_valid_user_note_tag_ids
+	FOREACH out_valid_user_note_tag_id IN ARRAY out_valid_user_note_tags_id
 	LOOP
 		INSERT INTO user_note_tags (
 			note_id,
@@ -1800,19 +1800,19 @@ $$;
 CREATE OR REPLACE PROCEDURE create_user_note(
 	IN in_user_id BIGINT,
 	IN in_user_note_title VARCHAR,
-	IN in_user_note_tag_ids BIGINT[],
 	IN in_user_note_color VARCHAR,
 	IN in_user_note_pinned BOOLEAN,
 	IN in_user_note_archived BOOLEAN,
 	IN in_user_note_trashed BOOLEAN,
 	IN in_user_note_starred BOOLEAN,
 	IN in_user_note_encrypted_content TEXT,
+	IN in_user_note_tags_id BIGINT[],
 	OUT out_user_note_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	out_valid_user_note_tag_ids BIGINT[];
+	out_valid_user_note_tags_id BIGINT[];
 BEGIN
 	-- Insert into user_notes table
 	INSERT INTO user_notes (
@@ -1857,7 +1857,7 @@ BEGIN
 	);
 
 	-- Add user note tags
-	CALL add_user_note_tags(in_user_id, out_user_note_id, in_user_note_tag_ids);
+	CALL add_user_note_tags(in_user_id, out_user_note_id, in_user_note_tags_id);
 END;
 $$;
 `
@@ -1952,13 +1952,13 @@ $$;
 CREATE OR REPLACE PROCEDURE remove_user_note_tags(
 	IN in_user_id BIGINT,
 	IN in_user_note_id BIGINT,
-	IN in_user_note_tag_ids BIGINT[]
+	IN in_user_note_tags_id BIGINT[]
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Check if the user tag IDs are valid
-	CALL validate_user_tag_ids(in_user_id, in_user_note_tag_ids, out_valid_user_note_tag_ids);
+	-- Check if the user tags ID are valid
+	CALL validate_user_tags_id(in_user_id, in_user_note_tags_id, out_valid_user_note_tags_id);
 
 	-- Update the user_note_tags table
 	UPDATE
@@ -1968,7 +1968,7 @@ BEGIN
 	WHERE
 		user_note_tags.note_id = in_user_note_id
 	AND
-		user_note_tags.tag_id = ANY(out_valid_user_note_tag_ids)
+		user_note_tags.tag_id = ANY(out_valid_user_note_tags_id)
 	AND
 		user_note_tags.deleted_at IS NULL;
 END;
@@ -2082,6 +2082,33 @@ BEGIN
 	ORDER BY
 		user_note_versions.created_at DESC
 	LIMIT 1;
+END;
+$$;
+`
+
+	// CreateListUserNotesProc is the query to create the stored procedure to list user notes
+	CreateListUserNotesProc = `
+CREATE OR REPLACE PROCEDURE list_user_notes(
+	IN in_user_id BIGINT,
+	OUT out_user_notes_id BIGINT[]
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user notes ID by user ID
+	SELECT
+		ARRAY(
+			SELECT
+				user_notes.id
+			FROM
+				user_notes	
+			WHERE
+				user_notes.user_id = in_user_id
+			AND
+				user_notes.deleted_at IS NULL
+		)
+	INTO
+		out_user_notes_id;
 END;
 $$;
 `

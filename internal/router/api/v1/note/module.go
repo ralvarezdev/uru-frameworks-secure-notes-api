@@ -50,9 +50,9 @@ var (
 			)
 			m.RegisterExactRoute(
 				"GET /",
-				Controller.GetUserNote,
+				Controller.GetUserNoteByID,
 				internalmiddleware.Validate(
-					&GetUserNoteRequest{},
+					&GetUserNoteByIDRequest{},
 				),
 			)
 			m.RegisterExactRoute(

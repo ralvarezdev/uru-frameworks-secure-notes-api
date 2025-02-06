@@ -1,8 +1,10 @@
 package notes
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
@@ -25,8 +27,15 @@ func (c *controller) ListUserNotes(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// List the user notes
+	userID, data := Service.ListUserNotes(r)
+
+	// Log the user notes list
+	internallogger.Api.ListUserNotes(userID)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }
 
