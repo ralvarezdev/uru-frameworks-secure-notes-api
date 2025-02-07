@@ -23,7 +23,7 @@ var (
 	SyncUserNoteVersionsByLastSyncedAtFn = "SELECT * FROM sync_user_note_versions_by_last_synced_at($1, $2, $3);"
 
 	// SyncUserNotesByLastSyncedAtFn is the SQL query to sync user notes by last synced at
-	SyncUserNotesByLastSyncedAtFn = "SELECT * FROM sync_user_notes_by_last_synced_at($1, $2);"
+	SyncUserNotesByLastSyncedAtFn = "SELECT * FROM sync_user_notes_by_last_synced_at($1, $2, $3);"
 
 	// SyncUserNoteTagsByLastSyncedAtFn is the SQL query to sync user note tags by last synced at
 	SyncUserNoteTagsByLastSyncedAtFn = "SELECT * FROM sync_user_note_tags_by_last_synced_at($1, $2);"

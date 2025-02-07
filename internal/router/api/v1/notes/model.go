@@ -12,6 +12,6 @@ type (
 
 	// SyncUserNotesResponse is the response DTO to sync user notes
 	SyncUserNotesResponse struct {
-		SyncNotes []internalpostgresmodel.SyncUserNote `json:"sync_notes"`
+		SyncNotes []*internalpostgresmodel.SyncUserNoteWithID `json:"sync_notes"`
 	}
 )

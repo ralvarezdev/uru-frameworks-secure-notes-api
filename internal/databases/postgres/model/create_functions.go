@@ -265,11 +265,10 @@ $$ LANGUAGE plpgsql;
 	CreateSyncUserNoteTagsByLastSyncedAtFn = `
 CREATE OR REPLACE FUNCTION sync_user_note_tags_by_last_synced_at(
 	in_user_id BIGINT,
-	in_last_synced_at TIMESTAMP
+	in_last_synced_at TIMESTAMP,
+	in_user_note_id BIGINT
 ) RETURNS	
 TABLE(	
-	out_user_note_tag_id BIGINT,
-	out_user_note_tag_user_note_id BIGINT,
 	out_user_note_tag_user_tag_id BIGINT,
 	out_user_note_tag_assigned_at TIMESTAMP,
 	out_user_note_tag_deleted_at TIMESTAMP
@@ -279,8 +278,6 @@ BEGIN
 	-- Return the user note tags
 	RETURN QUERY
 	SELECT
-		user_note_tags.id AS out_user_note_tag_id,
-		user_note_tags.user_note_id AS out_user_note_tag_user_note_id,
 		user_note_tags.user_tag_id AS out_user_note_tag_user_tag_id,
 		user_note_tags.assigned_at AS out_user_note_tag_assigned_at,
 		user_note_tags.deleted_at AS out_user_note_tag_deleted_at
@@ -292,6 +289,8 @@ BEGIN
 		user_notes ON user_note_tags.user_note_id = user_notes.id
 	WHERE
 		user_notes.user_id = in_user_id
+	AND
+		user_note_tags.user_note_id = in_user_note_id
 	AND (
 		in_last_synced_at IS NULL
 	OR

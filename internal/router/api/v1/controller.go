@@ -2,8 +2,8 @@ package v1
 
 import (
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
-	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
+	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
 	"net/http"
 )
 
@@ -43,7 +43,22 @@ func (c *controller) SyncByLastSyncedAt(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Synchronize the list of notes and tags by last synced at timestamp
+	userID, userRefreshTokenID, userTagsLastSyncedAt, userNotesLastSyncedAt, data := Service.SyncByLastSyncedAt(
+		w,
+		r,
+	)
+
+	// Log the list of notes and tags synchronization by last synced at timestamp
+	internallogger.Api.SyncByLastSyncedAt(
+		userID,
+		userTagsLastSyncedAt,
+		userNotesLastSyncedAt,
+		userRefreshTokenID,
+	)
+
+	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
 	)
 }

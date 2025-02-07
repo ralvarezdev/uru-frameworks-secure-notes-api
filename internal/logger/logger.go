@@ -502,13 +502,15 @@ func (l *Logger) SyncUserTagsByLastSyncedAt(
 // SyncByLastSyncedAt logs the sync by last synced at event
 func (l *Logger) SyncByLastSyncedAt(
 	id int64,
-	lastSyncedAt *time.Time,
+	userTagsLastSyncedAt,
+	userNotesLastSyncedAt *time.Time,
 	refreshTokenID int64,
 ) {
 	l.logger.Info(
 		"user synced by last synced at",
 		fmt.Sprintf("user id: %d", id),
-		fmt.Sprintf("last synced at: %v", lastSyncedAt),
+		fmt.Sprintf("user tags last synced at: %v", userTagsLastSyncedAt),
+		fmt.Sprintf("user notes last synced at: %v", userNotesLastSyncedAt),
 		fmt.Sprintf("refresh token id: %d", refreshTokenID),
 	)
 }

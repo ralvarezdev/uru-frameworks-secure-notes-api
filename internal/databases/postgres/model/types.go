@@ -86,11 +86,17 @@ type (
 		Color            *string                  `json:"color,omitempty"`
 		CreatedAt        *time.Time               `json:"created_at,omitempty"`
 		UpdatedAt        *time.Time               `json:"updated_at,omitempty"`
-		IsPinned         *bool                    `json:"is_pinned,omitempty"`
-		IsStarred        *bool                    `json:"is_starred,omitempty"`
-		IsArchived       *bool                    `json:"is_archived,omitempty"`
-		IsTrashed        *bool                    `json:"is_trashed,omitempty"`
+		PinnedAt         *time.Time               `json:"pinned_at,omitempty"`
+		StarredAt        *time.Time               `json:"starred_at,omitempty"`
+		ArchivedAt       *time.Time               `json:"archived_at,omitempty"`
+		TrashedAt        *time.Time               `json:"trashed_at,omitempty"`
 		SyncNoteVersions []*UserNoteVersionWithID `json:"sync_note_versions"`
-		SyncNoteTags     []*UserNoteTagWithID     `json:"sync_note_tags"`
+		SyncNoteTags     []*UserNoteTag           `json:"sync_note_tags"`
+	}
+
+	// SyncUserNoteWithID is the response DTO for the sync user note with ID
+	SyncUserNoteWithID struct {
+		ID int64 `json:"id"`
+		SyncUserNote
 	}
 )

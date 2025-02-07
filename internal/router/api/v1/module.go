@@ -11,10 +11,12 @@ import (
 )
 
 var (
+	Service    = &service{}
 	Controller = &controller{}
 	Module     = &gonethttp.Module{
 		Pattern:    "/v1",
 		Controller: Controller,
+		Service:    Service,
 		Submodules: gonethttp.NewSubmodules(
 			internalrouterapiv1auth.Module,
 			internalrouterapiv1note.Module,

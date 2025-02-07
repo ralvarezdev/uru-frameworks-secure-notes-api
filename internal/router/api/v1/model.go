@@ -7,7 +7,7 @@ import (
 type (
 	// SyncResponse is the response DTO to sync user notes
 	SyncResponse struct {
-		SyncTags  []*internalpostgresmodel.UserTagWithID `json:"sync_tags"`
-		SyncNotes []*internalpostgresmodel.SyncUserNote  `json:"sync_notes"`
+		SyncTags  []*internalpostgresmodel.UserTagWithID      `json:"sync_tags"`
+		SyncNotes []*internalpostgresmodel.SyncUserNoteWithID `json:"sync_notes"`
 	}
 )

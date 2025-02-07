@@ -95,17 +95,17 @@ func (s *service) SyncUserTagsByLastSyncedAt(
 
 	// Iterate over the rows
 	for rows.Next() {
-		var tag internalpostgresmodel.UserTagWithID
+		var userTag internalpostgresmodel.UserTagWithID
 		if err = rows.Scan(
-			&tag.ID,
-			&tag.Name,
-			&tag.CreatedAt,
-			&tag.UpdatedAt,
-			&tag.DeletedAt,
+			&userTag.ID,
+			&userTag.Name,
+			&userTag.CreatedAt,
+			&userTag.UpdatedAt,
+			&userTag.DeletedAt,
 		); err != nil {
 			panic(err)
 		}
-		userTags = append(userTags, &tag)
+		userTags = append(userTags, &userTag)
 	}
 
 	// Set the last sync at cookie
