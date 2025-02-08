@@ -39,8 +39,8 @@ func (s *service) SyncByLastSyncedAt(
 	return userID, userRefreshTokenID, userTagsLastSyncedAt, userNotesLastSyncedAt, &SyncByLastSyncedAtResponseBody{
 		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
 		Data: SyncByLastSyncedAtResponseData{
-			SyncTags:  syncUserTags.SyncTags,
-			SyncNotes: syncUserNotes.SyncNotes,
+			SyncTags:  syncUserTags.Data.SyncTags,
+			SyncNotes: syncUserNotes.Data.SyncNotes,
 		},
 	}
 }

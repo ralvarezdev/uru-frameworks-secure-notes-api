@@ -234,7 +234,7 @@ func RenovateCookie(
 			ClearCookies(w)
 
 			// An essential cookie is missing, so the user must log in again
-			return gonethttpresponse.NewCookieError(
+			return gonethttpresponse.NewFailResponseError(
 				attributes.Name,
 				"cookie not found, please log in again",
 				gonethttp.ErrCodeCookieNotFound,

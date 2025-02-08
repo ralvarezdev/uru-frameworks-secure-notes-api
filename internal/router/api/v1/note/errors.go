@@ -6,43 +6,43 @@ import (
 )
 
 var (
-	ErrUpdateUserNoteStarNotFound = gonethttpresponse.NewFieldError(
+	ErrUpdateUserNoteStarNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrUpdateUserNoteTrashNotFound = gonethttpresponse.NewFieldError(
+	ErrUpdateUserNoteTrashNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrUpdateUserNoteArchiveNotFound = gonethttpresponse.NewFieldError(
+	ErrUpdateUserNoteArchiveNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrUpdateUserNotePinNotFound = gonethttpresponse.NewFieldError(
+	ErrUpdateUserNotePinNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrGetUserNoteNotFound = gonethttpresponse.NewFieldError(
+	ErrGetUserNoteNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrUpdateUserNoteNotFound = gonethttpresponse.NewFieldError(
+	ErrUpdateUserNoteNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrDeleteUserNoteNotFound = gonethttpresponse.NewFieldError(
+	ErrDeleteUserNoteNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,

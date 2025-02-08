@@ -6,25 +6,25 @@ import (
 )
 
 var (
-	ErrCreateUserTagAlreadyExists = gonethttpresponse.NewFieldError(
+	ErrCreateUserTagAlreadyExists = gonethttpresponse.NewFailResponseError(
 		"name",
 		"tag already exists",
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrUpdateUserTagNotFound = gonethttpresponse.NewFieldError(
+	ErrUpdateUserTagNotFound = gonethttpresponse.NewFailResponseError(
 		"tag_id",
 		"tag not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrDeleteUserTagNotFound = gonethttpresponse.NewFieldError(
+	ErrDeleteUserTagNotFound = gonethttpresponse.NewFailResponseError(
 		"tag_id",
 		"tag not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrGetUserTagByTagIDNotFound = gonethttpresponse.NewFieldError(
+	ErrGetUserTagByTagIDNotFound = gonethttpresponse.NewFailResponseError(
 		"tag_id",
 		"tag not found",
 		nil,

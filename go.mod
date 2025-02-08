@@ -14,11 +14,10 @@ require (
 	github.com/ralvarezdev/go-jwt v0.4.10
 	github.com/ralvarezdev/go-loader v0.2.14
 	github.com/ralvarezdev/go-logger v0.4.6
-	github.com/ralvarezdev/go-net v0.9.7
+	github.com/ralvarezdev/go-net v0.9.11
 	github.com/ralvarezdev/go-security-headers v0.1.1
 	github.com/ralvarezdev/go-strings v0.1.8
 	github.com/ralvarezdev/go-validator v0.5.29
-	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4
 )
 
@@ -37,9 +36,7 @@ require (
 	github.com/ralvarezdev/go-cache v0.1.2 // indirect
 	github.com/ralvarezdev/go-reflect v0.2.4 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	github.com/swaggo/files v1.0.1 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect

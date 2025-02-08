@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrListUserNoteTagsNotFound = gonethttpresponse.NewFieldError(
+	ErrListUserNoteTagsNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,

@@ -24,6 +24,14 @@ func NewLogger(header string, modeLogger gologgermode.Logger) (*Logger, error) {
 	return &Logger{logger: namedLogger}, nil
 }
 
+// ServingSwaggerUI logs the serving swagger UI event
+func (l *Logger) ServingSwaggerUI(docsPath string) {
+	l.logger.Info(
+		"serving swagger UI",
+		fmt.Sprintf("docs path: %s", docsPath),
+	)
+}
+
 // ServerStarted logs a success message when the server starts
 func (l *Logger) ServerStarted(port string) {
 	l.logger.Info(

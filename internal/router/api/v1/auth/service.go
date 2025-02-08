@@ -507,7 +507,7 @@ func (s *service) GenerateTOTPUrl(r *http.Request) (
 	}
 	return userID, &GenerateTOTPUrlResponseBody{
 		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
-		Data: &GenerateTOTPUrlResponseData{
+		Data: GenerateTOTPUrlResponseData{
 			TOTPUrl: totpUrl,
 		},
 	}

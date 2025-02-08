@@ -6,13 +6,13 @@ import (
 )
 
 var (
-	ErrDeleteUserInvalidPassword = gonethttpresponse.NewFieldError(
+	ErrDeleteUserInvalidPassword = gonethttpresponse.NewFailResponseError(
 		"password",
 		"invalid password",
 		nil,
 		http.StatusUnauthorized,
 	)
-	ErrChangeUsernameAlreadyRegistered = gonethttpresponse.NewFieldError(
+	ErrChangeUsernameAlreadyRegistered = gonethttpresponse.NewFailResponseError(
 		"username",
 		"username is already registered",
 		nil,

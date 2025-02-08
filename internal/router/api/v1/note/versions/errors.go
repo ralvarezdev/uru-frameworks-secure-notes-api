@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrListUserNoteVersionsNotFound = gonethttpresponse.NewFieldError(
+	ErrListUserNoteVersionsNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,

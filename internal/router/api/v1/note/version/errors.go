@@ -6,19 +6,19 @@ import (
 )
 
 var (
-	ErrCreateUserNoteVersionNoteIDIsNotValid = gonethttpresponse.NewFieldError(
+	ErrCreateUserNoteVersionNoteIDIsNotValid = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrDeleteUserNoteVersionNotFound = gonethttpresponse.NewFieldError(
+	ErrDeleteUserNoteVersionNotFound = gonethttpresponse.NewFailResponseError(
 		"note_version_id",
 		"note version not found",
 		nil,
 		http.StatusNotFound,
 	)
-	ErrGetUserNoteVersionByNoteVersionIDNotFound = gonethttpresponse.NewFieldError(
+	ErrGetUserNoteVersionByNoteVersionIDNotFound = gonethttpresponse.NewFailResponseError(
 		"note_version_id",
 		"note version not found",
 		nil,

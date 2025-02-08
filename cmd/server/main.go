@@ -5,7 +5,6 @@ import (
 	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
-	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/docs"
 	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -22,9 +21,9 @@ import (
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalrouter "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
-	swaggohttpswagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
+	"path/filepath"
 )
 
 // init initializes the flags and calls the load functions
@@ -80,22 +79,17 @@ func main() {
 		panic(err)
 	}
 
-	// Dynamically set the Swagger host
-	docs.SwaggerInfo.Host = internallistener.Host
+	// Log the serving of the Swagger UI
+	absPath, err := filepath.Abs("./docs")
+	if err != nil {
+		panic(err)
+	}
+	internallogger.Api.ServingSwaggerUI(absPath)
 
-	/*
-		r.Get(
-			"/swagger/*", httpSwagger.Handler(
-				httpSwagger.URL("http://localhost:1323/swagger/doc.json"), // The url pointing to API definition
-			),
-		)
-
-		// Serve the Swaggers docs
-		router.RegisterHandler(
-			"/swagger",
-			swaggohttpswagger.
-		)
-	*/
+	// Serve the Swaggers docs
+	router.ServeStaticFiles(
+		"/docs/", absPath,
+	)
 
 	// Create the main router module
 	if err = internalrouter.Module.Create(router); err != nil {
@@ -104,9 +98,9 @@ func main() {
 
 	// Serve the API server
 	internallogger.Api.ServerStarted(internallistener.Port)
-	if err := http.ListenAndServe(
+	if err = http.ListenAndServe(
 		":"+internallistener.Port,
-		internalrouter.Module.Handler(),
+		router.Handler(),
 	); err != nil {
 		panic(err)
 	}
