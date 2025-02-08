@@ -19,6 +19,7 @@ type (
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body CreateUserNoteVersionRequest true "Create User Note Version Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -30,15 +31,15 @@ func (c *controller) CreateUserNoteVersion(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*CreateUserNoteVersionRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*CreateUserNoteVersionRequest)
 
 	// Create the user note version
-	userID, userNoteVersionID := Service.CreateUserNoteVersion(r, body)
+	userID, userNoteVersionID := Service.CreateUserNoteVersion(r, requestBody)
 
 	// Log the user note version creation
 	internallogger.Api.CreateUserNoteVersion(
 		userID,
-		body.NoteID,
+		requestBody.NoteID,
 		userNoteVersionID,
 	)
 
@@ -54,6 +55,7 @@ func (c *controller) CreateUserNoteVersion(
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body DeleteUserNoteVersionRequest true "Delete User Note Version Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -66,13 +68,13 @@ func (c *controller) DeleteUserNoteVersion(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserNoteVersionRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserNoteVersionRequest)
 
 	// Delete the user note version
-	userID := Service.DeleteUserNoteVersion(r, body)
+	userID := Service.DeleteUserNoteVersion(r, requestBody)
 
 	// Log the user note version deletion
-	internallogger.Api.DeleteUserNoteVersion(userID, body.NoteVersionID)
+	internallogger.Api.DeleteUserNoteVersion(userID, requestBody.NoteVersionID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -86,6 +88,7 @@ func (c *controller) DeleteUserNoteVersion(
 // @Tags api v1 note version
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body GetUserNoteVersionByIDRequest true "Get User Note Version By ID Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -98,19 +101,22 @@ func (c *controller) GetUserNoteVersionByID(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*GetUserNoteVersionByIDRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*GetUserNoteVersionByIDRequest)
 
 	// Get the user note version by note version ID
-	userID, data := Service.GetUserNoteVersionByNoteVersionID(r, body)
+	userID, responseBody := Service.GetUserNoteVersionByNoteVersionID(
+		r,
+		requestBody,
+	)
 
 	// Log the user note version by note version ID
 	internallogger.Api.GetUserNoteVersionByID(
 		userID,
-		body.NoteVersionID,
+		requestBody.NoteVersionID,
 	)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }

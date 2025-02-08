@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
@@ -92,7 +93,7 @@ func (s *service) GetUserNoteVersionByNoteVersionID(
 	body *GetUserNoteVersionByIDRequest,
 ) (
 	int64,
-	*GetUserNoteVersionByIDResponse,
+	*GetUserNoteVersionByIDResponseBody,
 ) {
 	// Check if the request body is nil
 	if body == nil {
@@ -123,11 +124,14 @@ func (s *service) GetUserNoteVersionByNoteVersionID(
 		}
 		panic(err)
 	}
-	return userID, &GetUserNoteVersionByIDResponse{
-		NoteVersion: &internalpostgresmodel.UserNoteVersion{
-			NoteID:           &userNoteID.Int64,
-			EncryptedContent: userNoteVersionEncryptedContent.String,
-			CreatedAt:        userNoteVersionCreatedAt.Time,
+	return userID, &GetUserNoteVersionByIDResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: GetUserNoteVersionByIDResponseData{
+			NoteVersion: &internalpostgresmodel.UserNoteVersion{
+				NoteID:           &userNoteID.Int64,
+				EncryptedContent: userNoteVersionEncryptedContent.String,
+				CreatedAt:        userNoteVersionCreatedAt.Time,
+			},
 		},
 	}
 }

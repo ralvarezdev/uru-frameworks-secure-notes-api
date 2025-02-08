@@ -515,12 +515,12 @@ BEGIN
 	CALL get_user_totp(in_user_id, out_old_user_totp_id, out_old_user_totp_secret, out_old_user_totp_verified_at);
 
 	-- If the TOTP is not verified, revoke it
-	IF out_old_totp_id IS NOT NULL AND out_old_totp_verified_at IS NULL THEN
+	IF out_old_user_totp_id IS NOT NULL AND out_old_user_totp_verified_at IS NULL THEN
 		CALL revoke_user_totp(in_user_id);
 	END IF;
 
 	-- If the TOTP wasn't active or verified, insert a new TOTP
-	IF out_old_totp_verified_at IS NULL THEN
+	IF out_old_user_totp_verified_at IS NULL THEN
 		-- Insert into user_totps table
 		INSERT INTO user_totps (
 			user_id,
@@ -558,7 +558,7 @@ BEGIN
 	AND
 		user_refresh_tokens.revoked_at IS NULL;
 
-	IF out_expires_at IS NOT NULL THEN
+	IF out_user_refresh_token_expires_at IS NOT NULL THEN
 		out_user_refresh_token_found = TRUE;
 		out_user_refresh_token_is_expired = out_user_refresh_token_expires_at < NOW();
 	END IF;
@@ -589,7 +589,7 @@ BEGIN
 	AND
 		user_access_tokens.revoked_at IS NULL;
 	
-	IF out_expires_at IS NOT NULL THEN
+	IF out_user_refresh_token_expires_at IS NOT NULL THEN
 		out_user_access_token_found = TRUE;
 		out_user_access_token_is_expired = out_user_access_token_expires_at < NOW();
 	END IF;
@@ -876,9 +876,9 @@ BEGIN
 	SELECT
 		users.id,
 		users.first_name,
-		users.last_name,
+		users.last_name
 	INTO
-		out_user_id
+		out_user_id,
 		out_user_first_name,
 		out_user_last_name
 	FROM
@@ -1258,9 +1258,9 @@ BEGIN
 	UPDATE
 		users
 	SET
-		first_name = COALESCE(in_user_first_name, out_first_name),
-		last_name = COALESCE(in_user_last_name, out_last_name),
-		birthdate = COALESCE(in_user_birthdate, out_birthdate),
+		first_name = COALESCE(in_user_first_name, out_user_first_name),
+		last_name = COALESCE(in_user_last_name, out_user_last_name),
+		birthdate = COALESCE(in_user_birthdate, out_user_birthdate),
 		update_at = NOW()
 	WHERE
 		users.id = in_user_id
@@ -1487,7 +1487,7 @@ $$;
 CREATE OR REPLACE PROCEDURE get_user_tag_by_id(
 	IN in_user_id BIGINT,
 	IN in_user_tag_id BIGINT,
-	OUT out_user_tag_name VARCHAR
+	OUT out_user_tag_name VARCHAR,
 	OUT out_user_tag_created_at TIMESTAMP,
 	OUT out_user_tag_updated_at TIMESTAMP
 )
@@ -1531,7 +1531,8 @@ BEGIN
 	SET
 		pinned_at = CASE
 			WHEN in_user_note_pin THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		updated_at = NOW()
 	WHERE
 		user_notes.id = in_user_note_id
@@ -1559,7 +1560,8 @@ BEGIN
 	SET
 		archived_at = CASE
 			WHEN in_user_note_archive THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		updated_at = NOW()
 	WHERE
 		user_notes.id = in_user_note_id
@@ -1587,7 +1589,8 @@ BEGIN
 	SET
 		trashed_at = CASE
 			WHEN in_user_note_trash THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		updated_at = NOW()
 	WHERE
 		user_notes.id = in_user_note_id
@@ -1615,7 +1618,8 @@ BEGIN
 	SET
 		starred_at = CASE
 			WHEN in_user_note_star THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		updated_at = NOW()
 	WHERE
 		user_notes.id = in_user_note_id
@@ -1688,9 +1692,11 @@ BEGIN
 	SET
 		encrypted_content = NULL,
 		deleted_at = NOW()
-	INNER JOIN
-		user_notes ON user_note_versions.note_id = user_notes.id
-	WHERE
+	FROM
+		user_notes 
+	WHERE 
+		user_note_versions.note_id = user_notes.id
+	AND
 		user_note_versions.id = in_user_note_version_id
 	AND
 		user_notes.user_id = in_user_id
@@ -1775,6 +1781,8 @@ CREATE OR REPLACE PROCEDURE add_user_note_tags(
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+	out_valid_user_note_tag_id BIGINT;
 BEGIN
 	-- Check if the user tags ID are valid
 	CALL validate_user_tags_id(in_user_id, in_user_note_tags_id, out_valid_user_note_tags_id);
@@ -1830,16 +1838,20 @@ BEGIN
 		in_user_note_color,
 		CASE
 			WHEN in_user_note_pinned THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		CASE
 			WHEN in_user_note_archived THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		CASE
 			WHEN in_user_note_trashed THEN NOW()
-			ELSE NULL,
+			ELSE NULL
+		END,
 		CASE	
 			WHEN in_user_note_starred THEN NOW()	
 			ELSE NULL
+		END
 	)
 	RETURNING
 		id INTO out_user_note_id;
@@ -1870,6 +1882,8 @@ CREATE OR REPLACE PROCEDURE create_user_totp_recovery_codes(
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+	in_user_totp_recovery_code VARCHAR;
 BEGIN
 	-- Insert into user_totp_recovery_codes table
 	FOREACH in_user_totp_recovery_code IN ARRAY in_user_totp_recovery_codes
@@ -1920,9 +1934,11 @@ BEGIN
 	SET
 		encrypted_content = NULL,
 		deleted_at = NOW()
-	INNER JOIN
-		user_notes ON user_note_versions.note_id = user_notes.id
+	FROM
+		user_notes 
 	WHERE
+		user_note_versions.note_id = user_notes.id
+	AND
 		user_notes.id = in_user_note_id
 	AND
 		user_notes.user_id = in_user_id
@@ -1935,9 +1951,11 @@ BEGIN
 	SET
 		assigned_at = NULL,
 		deleted_at = NOW()
-	INNER JOIN
-		user_notes ON user_note_tags.note_id = user_notes.id
+	FROM
+		user_notes 
 	WHERE
+		user_note_tags.note_id = user_notes.id
+	AND
 		user_notes.id = in_user_note_id
 	AND
 		user_notes.user_id = in_user_id

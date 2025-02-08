@@ -1,0 +1,2181 @@
+basePath: /
+definitions:
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.SyncUserNoteWithID:
+    properties:
+      archived_at:
+        type: string
+      color:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      pinned_at:
+        type: string
+      starred_at:
+        type: string
+      sync_note_tags:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserNoteTag'
+        type: array
+      sync_note_versions:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserNoteVersionWithID'
+        type: array
+      title:
+        type: string
+      trashed_at:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserNoteTag:
+    properties:
+      assigned_at:
+        type: string
+      deleted_at:
+        type: string
+      tag_id:
+        type: integer
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserNoteTagWithID:
+    properties:
+      assigned_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      tag_id:
+        type: integer
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserNoteVersionWithID:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      encrypted_content:
+        type: string
+      id:
+        type: integer
+      note_id:
+        type: integer
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserRefreshToken:
+    properties:
+      expires_at:
+        type: string
+      ip_address:
+        type: string
+      issued_at:
+        type: string
+      revoked_at:
+        type: string
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserRefreshTokenWithID:
+    properties:
+      expires_at:
+        type: string
+      id:
+        type: integer
+      ip_address:
+        type: string
+      issued_at:
+        type: string
+      revoked_at:
+        type: string
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserTag:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserTagWithID:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  internal_router_api_v1.SyncByLastSyncedAtResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1.SyncByLastSyncedAtResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1.SyncByLastSyncedAtResponseData:
+    properties:
+      sync_notes:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.SyncUserNoteWithID'
+        type: array
+      sync_tags:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserTagWithID'
+        type: array
+    type: object
+  internal_router_api_v1_auth.ChangeEmailRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  internal_router_api_v1_auth.ChangePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
+  internal_router_api_v1_auth.ChangePhoneNumberRequest:
+    properties:
+      phone_number:
+        type: string
+    type: object
+  internal_router_api_v1_auth.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  internal_router_api_v1_auth.GenerateTOTPUrlResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_auth.GenerateTOTPUrlResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_auth.GenerateTOTPUrlResponseData:
+    properties:
+      totp_url:
+        type: string
+    type: object
+  internal_router_api_v1_auth.GetRefreshTokenRequest:
+    properties:
+      refresh_token_id:
+        type: integer
+    type: object
+  internal_router_api_v1_auth.GetRefreshTokenResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_auth.GetRefreshTokenResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_auth.GetRefreshTokenResponseData:
+    properties:
+      refresh_token:
+        $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserRefreshToken'
+    type: object
+  internal_router_api_v1_auth.ListRefreshTokensResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_auth.ListRefreshTokensResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_auth.ListRefreshTokensResponseData:
+    properties:
+      refresh_tokens:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserRefreshTokenWithID'
+        type: array
+    type: object
+  internal_router_api_v1_auth.LogInRequest:
+    properties:
+      is_totp_recovery_code:
+        type: boolean
+      password:
+        type: string
+      totp_code:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_router_api_v1_auth.ResetPasswordRequest:
+    properties:
+      password:
+        type: string
+    type: object
+  internal_router_api_v1_auth.RevokeRefreshTokenRequest:
+    properties:
+      refresh_token_id:
+        type: integer
+    type: object
+  internal_router_api_v1_auth.SignUpRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_router_api_v1_auth.VerifyPhoneNumberRequest:
+    properties:
+      token:
+        type: string
+    type: object
+  internal_router_api_v1_auth.VerifyTOTPRequest:
+    properties:
+      totp_code:
+        type: string
+    type: object
+  internal_router_api_v1_auth.VerifyTOTPResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_auth.VerifyTOTPResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_auth.VerifyTOTPResponseData:
+    properties:
+      recovery_codes:
+        items:
+          type: string
+        type: array
+    type: object
+  internal_router_api_v1_note.CreateUserNoteRequest:
+    properties:
+      archived:
+        type: boolean
+      color:
+        type: string
+      encrypted_content:
+        type: string
+      note_tags_id:
+        items:
+          type: string
+        type: array
+      pinned:
+        type: boolean
+      starred:
+        type: boolean
+      title:
+        type: string
+      trashed:
+        type: boolean
+    type: object
+  internal_router_api_v1_note.DeleteUserNoteRequest:
+    properties:
+      note_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note.GetUserNoteByIDRequest:
+    properties:
+      note_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note.UpdateUserNoteArchiveRequest:
+    properties:
+      archive:
+        type: boolean
+      note_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note.UpdateUserNotePinRequest:
+    properties:
+      note_id:
+        type: integer
+      pin:
+        type: boolean
+    type: object
+  internal_router_api_v1_note.UpdateUserNoteRequest:
+    properties:
+      color:
+        type: string
+      note_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  internal_router_api_v1_note.UpdateUserNoteStarRequest:
+    properties:
+      note_id:
+        type: integer
+      star:
+        type: boolean
+    type: object
+  internal_router_api_v1_note.UpdateUserNoteTrashRequest:
+    properties:
+      note_id:
+        type: integer
+      trash:
+        type: boolean
+    type: object
+  internal_router_api_v1_note_tags.AddUserNoteTagsRequest:
+    properties:
+      note_id:
+        type: integer
+      tags_id:
+        type: string
+    type: object
+  internal_router_api_v1_note_tags.ListUserNoteTagsRequest:
+    properties:
+      note_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note_tags.ListUserNoteTagsResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_note_tags.ListUserNoteTagsResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_note_tags.ListUserNoteTagsResponseData:
+    properties:
+      note_tags:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserNoteTagWithID'
+        type: array
+    type: object
+  internal_router_api_v1_note_tags.RemoveUserNoteTagsRequest:
+    properties:
+      note_id:
+        type: integer
+      tags_id:
+        type: string
+    type: object
+  internal_router_api_v1_note_version.CreateUserNoteVersionRequest:
+    properties:
+      encrypted_content:
+        type: string
+      note_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note_version.DeleteUserNoteVersionRequest:
+    properties:
+      note_version_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note_version.GetUserNoteVersionByIDRequest:
+    properties:
+      note_version_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note_versions.ListUserNoteVersionsRequest:
+    properties:
+      note_id:
+        type: integer
+    type: object
+  internal_router_api_v1_note_versions.ListUserNoteVersionsResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_note_versions.ListUserNoteVersionsResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_note_versions.ListUserNoteVersionsResponseData:
+    properties:
+      note_versions_id:
+        items:
+          type: integer
+        type: array
+    type: object
+  internal_router_api_v1_notes.ListUserNotesResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_notes.ListUserNotesResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_notes.ListUserNotesResponseData:
+    properties:
+      notes:
+        items:
+          type: integer
+        type: array
+    type: object
+  internal_router_api_v1_notes.SyncUserNotesByLastSyncedAtResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_notes.SyncUserNotesByLastSyncedAtResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_notes.SyncUserNotesByLastSyncedAtResponseData:
+    properties:
+      sync_notes:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.SyncUserNoteWithID'
+        type: array
+    type: object
+  internal_router_api_v1_tag.CreateUserTagRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  internal_router_api_v1_tag.DeleteUserTagRequest:
+    properties:
+      tag_id:
+        type: integer
+    type: object
+  internal_router_api_v1_tag.GetUserTagByIDRequest:
+    properties:
+      tag_id:
+        type: integer
+    type: object
+  internal_router_api_v1_tag.GetUserTagByIDResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_tag.GetUserTagByIDResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_tag.GetUserTagByIDResponseData:
+    properties:
+      tag:
+        $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserTag'
+    type: object
+  internal_router_api_v1_tag.UpdateUserTagRequest:
+    properties:
+      name:
+        type: string
+      tag_id:
+        type: integer
+    type: object
+  internal_router_api_v1_tags.ListUserTagsResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_tags.ListUserTagsResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_tags.ListUserTagsResponseData:
+    properties:
+      tags:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserTagWithID'
+        type: array
+    type: object
+  internal_router_api_v1_tags.SyncUserTagsByLastSyncedAtResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_tags.SyncUserTagsByLastSyncedAtResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_tags.SyncUserTagsByLastSyncedAtResponseData:
+    properties:
+      sync_tags:
+        items:
+          $ref: '#/definitions/github_com_ralvarezdev_uru-frameworks-secure-notes-api_internal_databases_postgres_model.UserTagWithID'
+        type: array
+    type: object
+  internal_router_api_v1_user.ChangeUsernameRequest:
+    properties:
+      username:
+        type: string
+    type: object
+  internal_router_api_v1_user.DeleteUserRequest:
+    properties:
+      password:
+        type: string
+    type: object
+  internal_router_api_v1_user.GetMyProfileResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_user.GetMyProfileResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_user.GetMyProfileResponseData:
+    properties:
+      birthdate:
+        type: string
+      email:
+        type: string
+      email_is_verified:
+        type: boolean
+      first_name:
+        type: string
+      has_totp_enabled:
+        type: boolean
+      last_name:
+        type: string
+      phone:
+        type: string
+      phone_is_verified:
+        type: boolean
+      username:
+        type: string
+    type: object
+  internal_router_api_v1_user.UpdateProfileRequest:
+    properties:
+      birthdate:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  response.JSendErrorBody:
+    properties:
+      code:
+        type: string
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.JSendFailBody:
+    properties:
+      code:
+        type: string
+      data: {}
+      status:
+        type: string
+    type: object
+  response.JSendSuccessBody:
+    properties:
+      data: {}
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the REST API for the Secure Notes application.
+  license:
+    name: GPL-3.0
+    url: http://www.gnu.org/licenses/gpl-3.0.html
+  title: Secure Notes REST API
+  version: "1.0"
+paths:
+  /api/v1/auth/email:
+    put:
+      consumes:
+      - application/json
+      description: Changes the email of the authenticated user
+      parameters:
+      - description: Change Email Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.ChangeEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Changes the email of the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/email/send-verification:
+    post:
+      consumes:
+      - application/json
+      description: Sends an email verification token to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Sends an email verification token to the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/email/verify/{token}:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the email of the authenticated user
+      parameters:
+      - description: Token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Verifies the email of the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a seed token
+      parameters:
+      - description: Log In Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.LogInRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      summary: Log in a user
+      tags:
+      - api v1 auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Log out a user
+      tags:
+      - api v1 auth
+  /api/v1/auth/password:
+    put:
+      consumes:
+      - application/json
+      description: Changes a user's password
+      parameters:
+      - description: Change Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Change a user's password
+      tags:
+      - api v1 auth
+  /api/v1/auth/password/forgot:
+    post:
+      consumes:
+      - application/json
+      description: Sends a password reset email
+      parameters:
+      - description: Forgot Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Send a password reset email
+      tags:
+      - api v1 auth
+  /api/v1/auth/password/reset/{token}:
+    post:
+      consumes:
+      - application/json
+      description: Resets a user's password
+      parameters:
+      - description: Token
+        in: path
+        name: token
+        required: true
+        type: string
+      - description: Reset Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Reset a user's password
+      tags:
+      - api v1 auth
+  /api/v1/auth/phone-number:
+    put:
+      consumes:
+      - application/json
+      description: Changes the phone number of the authenticated user
+      parameters:
+      - description: Change Phone Number Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.ChangePhoneNumberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Changes the phone number of the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/phone-number/send-verification:
+    post:
+      consumes:
+      - application/json
+      description: Sends a phone number verification code to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Sends a phone number verification code to the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/phone-number/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the phone number of the authenticated user
+      parameters:
+      - description: Verify Phone Number Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.VerifyPhoneNumberRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Verifies the phone number of the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/refresh-token:
+    delete:
+      consumes:
+      - application/json
+      description: Revokes a user's refresh token
+      parameters:
+      - description: Revoke Refresh Token Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.RevokeRefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Revoke a user's refresh token
+      tags:
+      - api v1 auth
+    get:
+      consumes:
+      - application/json
+      description: Gets a user's refresh token
+      parameters:
+      - description: Get Refresh Token Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.GetRefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_auth.GetRefreshTokenResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Get a user's refresh token
+      tags:
+      - api v1 auth
+    post:
+      consumes:
+      - application/json
+      description: Refreshes a user token
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Refresh a user token
+      tags:
+      - api v1 auth
+  /api/v1/auth/refresh-tokens:
+    delete:
+      consumes:
+      - application/json
+      description: Revokes a user's refresh tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Revoke a user's refresh tokens
+      tags:
+      - api v1 auth
+    get:
+      consumes:
+      - application/json
+      description: Gets a user's refresh tokens
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_auth.ListRefreshTokensResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Get a user's refresh tokens
+      tags:
+      - api v1 auth
+  /api/v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account with the provided details
+      parameters:
+      - description: Sign Up Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      summary: Sign up a new user
+      tags:
+      - api v1 auth
+  /api/v1/auth/totp:
+    delete:
+      consumes:
+      - application/json
+      description: Revokes a user's TOTP
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Revoke a user's TOTP
+      tags:
+      - api v1 auth
+  /api/v1/auth/totp/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generates a TOTP URL
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_auth.GenerateTOTPUrlResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Generate a TOTP URL
+      tags:
+      - api v1 auth
+  /api/v1/auth/totp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verifies a TOTP code
+      parameters:
+      - description: Verify TOTP Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.VerifyTOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_auth.VerifyTOTPResponseBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Verify a TOTP code
+      tags:
+      - api v1 auth
+  /api/v1/note:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user note
+      parameters:
+      - description: Delete User Note Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.DeleteUserNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Delete a user note
+      tags:
+      - api v1 note
+    get:
+      consumes:
+      - application/json
+      description: Gets a user note
+      parameters:
+      - description: Get User Note Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.GetUserNoteByIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Get a user note
+      tags:
+      - api v1 note
+    post:
+      consumes:
+      - application/json
+      description: Creates a user note
+      parameters:
+      - description: Create User Note Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.CreateUserNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Create a user note
+      tags:
+      - api v1 note
+    put:
+      consumes:
+      - application/json
+      description: Updates a user note
+      parameters:
+      - description: Update User Note Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.UpdateUserNoteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Update a user note
+      tags:
+      - api v1 note
+  /api/v1/note/archive:
+    put:
+      consumes:
+      - application/json
+      description: Updates a user note as archived or unarchived
+      parameters:
+      - description: Update User Note Archive Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.UpdateUserNoteArchiveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Update a user note as archived or unarchived
+      tags:
+      - api v1 note
+  /api/v1/note/pin:
+    put:
+      consumes:
+      - application/json
+      description: Updates a user note as pinned or unpinned
+      parameters:
+      - description: Update User Note Pin Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.UpdateUserNotePinRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Update a user note as pinned or unpinned
+      tags:
+      - api v1 note
+  /api/v1/note/star:
+    put:
+      consumes:
+      - application/json
+      description: Updates a user note as starred or unstarred
+      parameters:
+      - description: Update User Note Star Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.UpdateUserNoteStarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Update a user note as starred or unstarred
+      tags:
+      - api v1 note
+  /api/v1/note/tags:
+    delete:
+      consumes:
+      - application/json
+      description: Removes user note tags
+      parameters:
+      - description: Remove User UserNote Tags Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_tags.RemoveUserNoteTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Remove user note tags
+      tags:
+      - api v1 note
+    get:
+      consumes:
+      - application/json
+      description: List user note tags
+      parameters:
+      - description: List User UserNote Tags Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_tags.ListUserNoteTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_note_tags.ListUserNoteTagsResponseBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: List user note tags
+      tags:
+      - api v1 note
+    patch:
+      consumes:
+      - application/json
+      description: Adds user note tags
+      parameters:
+      - description: Add User UserNote Tags Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_tags.AddUserNoteTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Add user note tags
+      tags:
+      - api v1 note
+  /api/v1/note/trash:
+    put:
+      consumes:
+      - application/json
+      description: Updates a user note as trashed or untrashed
+      parameters:
+      - description: Update User Note Trash Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note.UpdateUserNoteTrashRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Update a user note as trashed or untrashed
+      tags:
+      - api v1 note
+  /api/v1/note/version:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user note version
+      parameters:
+      - description: Delete User Note Version Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_version.DeleteUserNoteVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Delete a user note version
+      tags:
+      - api v1 note version
+    get:
+      consumes:
+      - application/json
+      description: Gets a user note version by note version ID
+      parameters:
+      - description: Get User Note Version By ID Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_version.GetUserNoteVersionByIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Get a user note version by note version ID
+      tags:
+      - api v1 note version
+    post:
+      consumes:
+      - application/json
+      description: Creates a user note version
+      parameters:
+      - description: Create User Note Version Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_version.CreateUserNoteVersionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Create a user note version
+      tags:
+      - api v1 note version
+  /api/v1/note/versions:
+    get:
+      consumes:
+      - application/json
+      description: List user note versions
+      parameters:
+      - description: List User Note Versions Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_note_versions.ListUserNoteVersionsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_note_versions.ListUserNoteVersionsResponseBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: List user note versions
+      tags:
+      - api v1 note versions
+  /api/v1/notes:
+    get:
+      consumes:
+      - application/json
+      description: List user notes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_notes.ListUserNotesResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: List user notes
+      tags:
+      - api v1 notes
+  /api/v1/notes/sync:
+    post:
+      consumes:
+      - application/json
+      description: Sync user notes by last synced at timestamp
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_notes.SyncUserNotesByLastSyncedAtResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Sync user notes by last synced at timestamp
+      tags:
+      - api v1 notes
+  /api/v1/ping:
+    get:
+      consumes:
+      - application/json
+      description: Returns a pong response to check if the service is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+      summary: Ping the service
+      tags:
+      - api v1
+  /api/v1/sync:
+    post:
+      consumes:
+      - application/json
+      description: Synchronizes user notes and tags by the last synced at timestamp
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1.SyncByLastSyncedAtResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Synchronize user notes and tags by the last synced at timestamp
+      tags:
+      - api v1
+  /api/v1/tag:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user tag
+      parameters:
+      - description: Delete User Tag Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_tag.DeleteUserTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Delete a user tag
+      tags:
+      - api v1 tag
+    get:
+      consumes:
+      - application/json
+      description: Gets a user tag by tag ID
+      parameters:
+      - description: Get User Tag By ID Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_tag.GetUserTagByIDRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_tag.GetUserTagByIDResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Get a user tag by tag ID
+      tags:
+      - api v1 tag
+    post:
+      consumes:
+      - application/json
+      description: Creates a user tag
+      parameters:
+      - description: Create User Tag Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_tag.CreateUserTagRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Create a user tag
+      tags:
+      - api v1 tag
+    put:
+      consumes:
+      - application/json
+      description: Updates a user tag
+      parameters:
+      - description: Update User Tag Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_tag.UpdateUserTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Update a user tag
+      tags:
+      - api v1 tag
+  /api/v1/tags:
+    get:
+      consumes:
+      - application/json
+      description: Lists tags of the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_tags.ListUserTagsResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: List tags of the authenticated user
+      tags:
+      - api v1 tags
+  /api/v1/tags/sync:
+    post:
+      consumes:
+      - application/json
+      description: Synchronizes tags of the authenticated user by last synced at timestamp
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_tags.SyncUserTagsByLastSyncedAtResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Synchronize tags of the authenticated user by last synced at timestamp
+      tags:
+      - api v1 tags
+  /api/v1/user:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the authenticated user
+      parameters:
+      - description: Delete User Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_user.DeleteUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Deletes the authenticated user
+      tags:
+      - api v1 user
+  /api/v1/user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Gets the profile of the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_user.GetMyProfileResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Gets the profile of the authenticated user
+      tags:
+      - api v1 user
+    put:
+      consumes:
+      - application/json
+      description: Updates the profile of the authenticated user
+      parameters:
+      - description: Update Profile Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_user.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Updates the profile of the authenticated user
+      tags:
+      - api v1 user
+  /api/v1/user/username:
+    put:
+      consumes:
+      - application/json
+      description: Changes the username of the authenticated user
+      parameters:
+      - description: Change Username Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_user.ChangeUsernameRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Changes the username of the authenticated user
+      tags:
+      - api v1 user
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: access_token
+    type: apiKey
+swagger: "2.0"

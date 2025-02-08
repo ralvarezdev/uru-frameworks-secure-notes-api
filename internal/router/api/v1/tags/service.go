@@ -1,6 +1,7 @@
 package tags
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
@@ -15,7 +16,10 @@ type (
 )
 
 // ListUserTags lists the tags of the authenticated user
-func (s *service) ListUserTags(r *http.Request) (int64, *ListUserTagsResponse) {
+func (s *service) ListUserTags(r *http.Request) (
+	int64,
+	*ListUserTagsResponseBody,
+) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -47,8 +51,11 @@ func (s *service) ListUserTags(r *http.Request) (int64, *ListUserTagsResponse) {
 		userTags = append(userTags, &tag)
 	}
 
-	return userID, &ListUserTagsResponse{
-		Tags: userTags,
+	return userID, &ListUserTagsResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: ListUserTagsResponseData{
+			Tags: userTags,
+		},
 	}
 }
 
@@ -60,7 +67,7 @@ func (s *service) SyncUserTagsByLastSyncedAt(
 	int64,
 	int64,
 	*time.Time,
-	*SyncUserTagsResponse,
+	*SyncUserTagsByLastSyncedAtResponseBody,
 ) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
@@ -111,7 +118,10 @@ func (s *service) SyncUserTagsByLastSyncedAt(
 	// Set the last sync at cookie
 	internalcookie.SetSyncTagsCookie(w, newLastSyncedAt)
 
-	return userID, userRefreshTokenID, lastSyncedAt, &SyncUserTagsResponse{
-		SyncTags: userTags,
+	return userID, userRefreshTokenID, lastSyncedAt, &SyncUserTagsByLastSyncedAtResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: SyncUserTagsByLastSyncedAtResponseData{
+			SyncTags: userTags,
+		},
 	}
 }

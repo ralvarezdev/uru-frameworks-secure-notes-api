@@ -1,6 +1,7 @@
 package v1
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalrouterapiv1notes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
 	internalrouterapiv1tags "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/tags"
 	"net/http"
@@ -21,7 +22,7 @@ func (s *service) SyncByLastSyncedAt(
 	int64,
 	*time.Time,
 	*time.Time,
-	*SyncResponse,
+	*SyncByLastSyncedAtResponseBody,
 ) {
 	// Synchronize the list of tags by last synced at timestamp
 	userID, userRefreshTokenID, userTagsLastSyncedAt, syncUserTags := internalrouterapiv1tags.Service.SyncUserTagsByLastSyncedAt(
@@ -35,8 +36,11 @@ func (s *service) SyncByLastSyncedAt(
 		r,
 	)
 
-	return userID, userRefreshTokenID, userTagsLastSyncedAt, userNotesLastSyncedAt, &SyncResponse{
-		SyncTags:  syncUserTags.SyncTags,
-		SyncNotes: syncUserNotes.SyncNotes,
+	return userID, userRefreshTokenID, userTagsLastSyncedAt, userNotesLastSyncedAt, &SyncByLastSyncedAtResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: SyncByLastSyncedAtResponseData{
+			SyncTags:  syncUserTags.SyncTags,
+			SyncNotes: syncUserNotes.SyncNotes,
+		},
 	}
 }

@@ -2,6 +2,7 @@ package tags
 
 import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
@@ -17,7 +18,7 @@ type (
 func (s *service) ListUserNoteTags(
 	r *http.Request,
 	body *ListUserNoteTagsRequest,
-) (int64, *ListUserNoteTagsResponse) {
+) (int64, *ListUserNoteTagsResponseBody) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -53,8 +54,11 @@ func (s *service) ListUserNoteTags(
 		panic(ErrListUserNoteTagsNotFound)
 	}
 
-	return userID, &ListUserNoteTagsResponse{
-		NoteTags: userNoteTags,
+	return userID, &ListUserNoteTagsResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: ListUserNoteTagsResponseData{
+			NoteTags: userNoteTags,
+		},
 	}
 }
 

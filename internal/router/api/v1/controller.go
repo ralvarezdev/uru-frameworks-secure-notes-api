@@ -18,12 +18,12 @@ type (
 // @Tags api v1
 // @Accept json
 // @Produce json
-// @Success 200 {object} BasicResponse
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Router /api/v1/ping [get]
 func (c *controller) Ping(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewSuccessResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
 			nil, http.StatusOK,
 		),
 	)
@@ -35,7 +35,8 @@ func (c *controller) Ping(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Success 200 {object} SyncByLastSyncedAtResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/sync [post]
@@ -44,7 +45,7 @@ func (c *controller) SyncByLastSyncedAt(
 	r *http.Request,
 ) {
 	// Synchronize the list of notes and tags by last synced at timestamp
-	userID, userRefreshTokenID, userTagsLastSyncedAt, userNotesLastSyncedAt, data := Service.SyncByLastSyncedAt(
+	userID, userRefreshTokenID, userTagsLastSyncedAt, userNotesLastSyncedAt, responseBody := Service.SyncByLastSyncedAt(
 		w,
 		r,
 	)
@@ -59,6 +60,6 @@ func (c *controller) SyncByLastSyncedAt(
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }

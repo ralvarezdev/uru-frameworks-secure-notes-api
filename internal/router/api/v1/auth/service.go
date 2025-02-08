@@ -13,6 +13,7 @@ import (
 	gocryptorandomutf8 "github.com/ralvarezdev/go-crypto/random/strings/utf8"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -457,7 +458,10 @@ func (s *service) RevokeRefreshTokens(
 }
 
 // GenerateTOTPUrl generates a TOTP URL
-func (s *service) GenerateTOTPUrl(r *http.Request) (int64, *string) {
+func (s *service) GenerateTOTPUrl(r *http.Request) (
+	int64,
+	*GenerateTOTPUrlResponseBody,
+) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -501,14 +505,19 @@ func (s *service) GenerateTOTPUrl(r *http.Request) (int64, *string) {
 	if err != nil {
 		panic(err)
 	}
-	return userID, &totpUrl
+	return userID, &GenerateTOTPUrlResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: &GenerateTOTPUrlResponseData{
+			TOTPUrl: totpUrl,
+		},
+	}
 }
 
 // VerifyTOTP verifies a TOTP secret
 func (s *service) VerifyTOTP(
 	r *http.Request,
 	body *VerifyTOTPRequest,
-) (int64, *[]string) {
+) (int64, *VerifyTOTPResponseBody) {
 	// Check if the request body is nil
 	if body == nil {
 		panic(gonethttp.ErrNilRequestBody)
@@ -579,7 +588,12 @@ func (s *service) VerifyTOTP(
 		panic(err)
 	}
 
-	return userID, userTOTPRecoveryCodes
+	return userID, &VerifyTOTPResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: VerifyTOTPResponseData{
+			RecoveryCodes: *userTOTPRecoveryCodes,
+		},
+	}
 }
 
 // RevokeTOTP revokes a TOTP secret
@@ -604,7 +618,7 @@ func (s *service) RevokeTOTP(r *http.Request) int64 {
 // ListRefreshTokens lists all user refresh tokens
 func (s *service) ListRefreshTokens(r *http.Request) (
 	int64,
-	*ListRefreshTokensResponse,
+	*ListRefreshTokensResponseBody,
 ) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
@@ -637,8 +651,11 @@ func (s *service) ListRefreshTokens(r *http.Request) (
 		userRefreshTokens = append(userRefreshTokens, &userRefreshToken)
 	}
 
-	return userID, &ListRefreshTokensResponse{
-		RefreshTokens: userRefreshTokens,
+	return userID, &ListRefreshTokensResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: ListRefreshTokensResponseData{
+			RefreshTokens: userRefreshTokens,
+		},
 	}
 }
 
@@ -646,7 +663,7 @@ func (s *service) ListRefreshTokens(r *http.Request) (
 func (s *service) GetRefreshToken(
 	r *http.Request,
 	userRefreshTokenID int64,
-) (int64, *GetRefreshTokenResponse) {
+) (int64, *GetRefreshTokenResponseBody) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -670,8 +687,11 @@ func (s *service) GetRefreshToken(
 		panic(err)
 	}
 
-	return userID, &GetRefreshTokenResponse{
-		RefreshToken: &userRefreshToken,
+	return userID, &GetRefreshTokenResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: GetRefreshTokenResponseData{
+			RefreshToken: &userRefreshToken,
+		},
 	}
 }
 

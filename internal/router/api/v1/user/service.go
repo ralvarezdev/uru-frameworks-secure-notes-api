@@ -5,6 +5,7 @@ import (
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwtcache "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/cache"
@@ -126,7 +127,10 @@ func (s *service) UpdateProfile(
 }
 
 // GetMyProfile gets the profile of the authenticated user
-func (s *service) GetMyProfile(r *http.Request) (int64, *GetMyProfileResponse) {
+func (s *service) GetMyProfile(r *http.Request) (
+	int64,
+	*GetMyProfileResponseBody,
+) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -164,15 +168,18 @@ func (s *service) GetMyProfile(r *http.Request) (int64, *GetMyProfileResponse) {
 	}
 
 	// Return the user profile
-	return userID, &GetMyProfileResponse{
-		FirstName:       firstName.String,
-		LastName:        lastName.String,
-		Birthdate:       &birthdate.Time,
-		Username:        username.String,
-		Email:           email.String,
-		EmailIsVerified: emailIsVerified.Bool,
-		Phone:           &phone.String,
-		PhoneIsVerified: &phoneIsVerified.Bool,
-		HasTOTPEnabled:  hasTOTPEnabled.Bool,
+	return userID, &GetMyProfileResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: GetMyProfileResponseData{
+			FirstName:       firstName.String,
+			LastName:        lastName.String,
+			Birthdate:       &birthdate.Time,
+			Username:        username.String,
+			Email:           email.String,
+			EmailIsVerified: emailIsVerified.Bool,
+			Phone:           &phone.String,
+			PhoneIsVerified: &phoneIsVerified.Bool,
+			HasTOTPEnabled:  hasTOTPEnabled.Bool,
+		},
 	}
 }

@@ -251,7 +251,7 @@ func RefreshTokenFn(w http.ResponseWriter, r *http.Request) int64 {
 	if err != nil {
 		panic(err)
 	}
-	oldUserRefreshTokenID, err := internaljwtclaims.GetID(r)
+	oldUserRefreshTokenID, err := internaljwtclaims.GetParentRefreshTokenID(r)
 	if err != nil {
 		panic(err)
 	}

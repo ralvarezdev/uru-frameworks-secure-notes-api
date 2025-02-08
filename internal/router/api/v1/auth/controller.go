@@ -41,10 +41,10 @@ func (c *controller) GetTokenWildcard(
 // @Router /api/v1/auth/signup [post]
 func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*SignUpRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*SignUpRequest)
 
 	// Sign up the user
-	userID := Service.SignUp(body)
+	userID := Service.SignUp(requestBody)
 
 	// Log the user sign up
 	internallogger.Api.SignUp(userID)
@@ -65,16 +65,16 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param request body LogInRequest true "Log In Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
-// @Failure 400 {object} gonethttpresponse.JSendFailResponse
-// @Failure 401 {object} gonethttpresponse.JSendFailResponse
-// @Failure 500 {object} gonethttpresponse.JSendErrorResponse
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/login [post]
 func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID := Service.LogIn(w, r, body)
+	userID := Service.LogIn(w, r, requestBody)
 
 	// Log the successful login
 	internallogger.Api.LogIn(userID)
@@ -94,21 +94,22 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Success 200 {object} ListRefreshTokensResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-tokens [get]
 func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 	// Get the user's refresh tokens
-	userID, data := Service.ListRefreshTokens(r)
+	userID, responseBody := Service.ListRefreshTokens(r)
 
 	// Log the successful fetch of the user's refresh tokens
 	internallogger.Api.ListRefreshTokens(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			data,
+		w, gonethttpresponse.NewResponse(
+			responseBody,
 			http.StatusOK,
 		),
 	)
@@ -120,28 +121,29 @@ func (c *controller) ListRefreshTokens(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body GetRefreshTokenRequest true "Get Refresh Token Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Success 200 {object} GetRefreshTokenResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/refresh-token [get]
 func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*GetRefreshTokenRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*GetRefreshTokenRequest)
 
 	// Get the user's refresh token by ID
-	userID, data := Service.GetRefreshToken(
+	userID, responseBody := Service.GetRefreshToken(
 		r,
-		body.RefreshTokenID,
+		requestBody.RefreshTokenID,
 	)
 
 	// Log the successful fetch of the user's refresh token
-	internallogger.Api.GetRefreshToken(userID, body.RefreshTokenID)
+	internallogger.Api.GetRefreshToken(userID, requestBody.RefreshTokenID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			data,
+		w, gonethttpresponse.NewResponse(
+			responseBody,
 			http.StatusOK,
 		),
 	)
@@ -154,6 +156,7 @@ func (c *controller) GetRefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body RevokeRefreshTokenRequest true "Revoke Refresh Token Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -165,13 +168,13 @@ func (c *controller) RevokeRefreshToken(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*RevokeRefreshTokenRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*RevokeRefreshTokenRequest)
 
 	// Revoke the user's refresh token
-	Service.RevokeRefreshToken(w, r, body.RefreshTokenID)
+	Service.RevokeRefreshToken(w, r, requestBody.RefreshTokenID)
 
 	// Log the successful token revocation
-	internallogger.Api.RevokeRefreshToken(body.RefreshTokenID)
+	internallogger.Api.RevokeRefreshToken(requestBody.RefreshTokenID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -188,6 +191,7 @@ func (c *controller) RevokeRefreshToken(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -214,6 +218,7 @@ func (c *controller) LogOut(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -243,6 +248,7 @@ func (c *controller) RevokeRefreshTokens(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -269,7 +275,8 @@ func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Success 201 {object} GenerateTOTPUrlResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/generate [post]
@@ -278,17 +285,15 @@ func (c *controller) GenerateTOTPUrl(
 	r *http.Request,
 ) {
 	// Generate the TOTP URL
-	userID, totpUrl := Service.GenerateTOTPUrl(r)
+	userID, responseBody := Service.GenerateTOTPUrl(r)
 
 	// Log the successful TOTP URL generation
 	internallogger.Api.GenerateTOTPUrl(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			GenerateTOTPUrlResponse{
-				TOTPUrl: *totpUrl,
-			},
+		w, gonethttpresponse.NewResponse(
+			responseBody,
 			http.StatusCreated,
 		),
 	)
@@ -300,28 +305,27 @@ func (c *controller) GenerateTOTPUrl(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param request body VerifyTOTPRequest
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Param request body VerifyTOTPRequest true "Verify TOTP Request"
+// @Success 200 {object} VerifyTOTPResponseBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/auth/totp/verify [post]
 func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*VerifyTOTPRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*VerifyTOTPRequest)
 
 	// Verify the TOTP code
-	userID, recoveryCodes := Service.VerifyTOTP(r, body)
+	userID, responseBody := Service.VerifyTOTP(r, requestBody)
 
 	// Log the successful TOTP verification
 	internallogger.Api.VerifyTOTP(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			VerifyTOTPResponse{
-				RecoveryCodes: *recoveryCodes,
-			},
+		w, gonethttpresponse.NewResponse(
+			responseBody,
 			http.StatusOK,
 		),
 	)
@@ -333,6 +337,7 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -359,6 +364,7 @@ func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body ChangeEmailRequest true "Change Email Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -370,13 +376,13 @@ func (c *controller) ChangeEmail(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ChangeEmailRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ChangeEmailRequest)
 
 	// Change the email
-	userID := Service.ChangeEmail(r, body)
+	userID := Service.ChangeEmail(r, requestBody)
 
 	// Log the successful email change
-	internallogger.Api.ChangeEmail(userID, body.Email)
+	internallogger.Api.ChangeEmail(userID, requestBody.Email)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -393,6 +399,7 @@ func (c *controller) ChangeEmail(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -423,6 +430,7 @@ func (c *controller) SendEmailVerificationToken(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param token path string true "Token"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -459,7 +467,8 @@ func (c *controller) VerifyEmail(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param request body ChangePasswordRequest
+// @Security CookieAuth
+// @Param request body ChangePasswordRequest true "Change Password Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -467,18 +476,20 @@ func (c *controller) VerifyEmail(
 // @Router /api/v1/auth/password [put]
 func (c *controller) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ChangePasswordRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ChangePasswordRequest)
 
 	// Change the password
-	userID := Service.ChangePassword(r, body)
+	userID := Service.ChangePassword(r, requestBody)
 
 	// Log the successful password change
 	internallogger.Api.ChangePassword(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			nil,
+		w, gonethttpresponse.NewResponse(
+			gonethttpresponse.NewJSendSuccessBody(
+				nil,
+			),
 			http.StatusOK,
 		),
 	)
@@ -490,7 +501,8 @@ func (c *controller) ChangePassword(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
-// @Param request body ForgotPasswordRequest
+// @Security CookieAuth
+// @Param request body ForgotPasswordRequest true "Forgot Password Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -498,10 +510,10 @@ func (c *controller) ChangePassword(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/auth/password/forgot [post]
 func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ForgotPasswordRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ForgotPasswordRequest)
 
 	// Send the reset password email
-	userID := Service.ForgotPassword(body)
+	userID := Service.ForgotPassword(requestBody)
 
 	// Log the successful reset password email request
 	internallogger.Api.ForgotPassword(userID)
@@ -521,6 +533,7 @@ func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param token path string true "Token"
 // @Param request body ResetPasswordRequest true "Reset Password Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
@@ -535,10 +548,10 @@ func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ResetPasswordRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ResetPasswordRequest)
 
 	// Reset the password
-	userID := Service.ResetPassword(token, body)
+	userID := Service.ResetPassword(token, requestBody)
 
 	// Log the successful password reset
 	internallogger.Api.ResetPassword(userID)
@@ -558,6 +571,7 @@ func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body ChangePhoneNumberRequest true "Change Phone Number Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -579,6 +593,7 @@ func (c *controller) ChangePhoneNumber(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -599,6 +614,7 @@ func (c *controller) SendPhoneNumberVerificationCode(
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body VerifyPhoneNumberRequest true "Verify Phone Number Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody

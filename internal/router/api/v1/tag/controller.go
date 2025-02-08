@@ -19,6 +19,7 @@ type (
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body CreateUserTagRequest true "Create User Tag Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -30,10 +31,10 @@ func (c *controller) CreateUserTag(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*CreateUserTagRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*CreateUserTagRequest)
 
 	// Create the user tag
-	userID, data := Service.CreateUserTag(r, body)
+	userID, data := Service.CreateUserTag(r, requestBody)
 
 	// Log the user tag creation
 	internallogger.Api.CreateUserTag(userID, data)
@@ -50,6 +51,7 @@ func (c *controller) CreateUserTag(
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateUserTagRequest true "Update User Tag Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -61,13 +63,13 @@ func (c *controller) UpdateUserTag(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserTagRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserTagRequest)
 
 	// Update the user tag
-	userID := Service.UpdateUserTag(r, body)
+	userID := Service.UpdateUserTag(r, requestBody)
 
 	// Log the user tag update
-	internallogger.Api.UpdateUserTag(userID, body.TagID)
+	internallogger.Api.UpdateUserTag(userID, requestBody.TagID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -81,6 +83,7 @@ func (c *controller) UpdateUserTag(
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body DeleteUserTagRequest true "Delete User Tag Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -92,13 +95,13 @@ func (c *controller) DeleteUserTag(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserTagRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserTagRequest)
 
 	// Delete the user tag
-	userID := Service.DeleteUserTag(r, body)
+	userID := Service.DeleteUserTag(r, requestBody)
 
 	// Log the user tag deletion
-	internallogger.Api.DeleteUserTag(userID, body.TagID)
+	internallogger.Api.DeleteUserTag(userID, requestBody.TagID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -112,8 +115,9 @@ func (c *controller) DeleteUserTag(
 // @Tags api v1 tag
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body GetUserTagByIDRequest true "Get User Tag By ID Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Success 200 {object} GetUserTagByIDResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -123,16 +127,16 @@ func (c *controller) GetUserTagByID(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*GetUserTagByIDRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*GetUserTagByIDRequest)
 
 	// Get the user tag by tag ID
-	userID, data := Service.GetUserTagByID(r, body)
+	userID, responseBody := Service.GetUserTagByID(r, requestBody)
 
 	// Log the user tag retrieval
-	internallogger.Api.GetUserTagByID(userID, body.TagID)
+	internallogger.Api.GetUserTagByID(userID, requestBody.TagID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }

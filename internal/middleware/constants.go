@@ -29,11 +29,8 @@ var (
 	// Limit is the API body limit middleware function
 	Limit func(next http.Handler) http.Handler
 
-	// AuthenticateAccessToken is the API authenticator middleware function
-	AuthenticateAccessToken func(next http.Handler) http.Handler
-
-	// AuthenticateRefreshToken is the API authenticator middleware function
-	AuthenticateRefreshToken func(next http.Handler) http.Handler
+	// Authenticate is the API authenticator middleware function
+	Authenticate func(next http.Handler) http.Handler
 
 	// Validate is the API request validator middleware function
 	Validate func(
@@ -63,18 +60,13 @@ func Load() {
 		internaljwt.Validator,
 		internalhandler.Handler,
 	)
-	AuthenticateAccessToken = authenticator.AuthenticateFromCookie(
+	Authenticate = authenticator.AuthenticateFromCookie(
 		gojwttoken.AccessToken,
 		internalcookie.AccessToken.Name,
 		func(w http.ResponseWriter, r *http.Request) error {
 			_ = internalcookie.RefreshTokenFn(w, r)
 			return nil
 		},
-	)
-	AuthenticateRefreshToken = authenticator.AuthenticateFromCookie(
-		gojwttoken.RefreshToken,
-		internalcookie.RefreshToken.Name,
-		nil,
 	)
 
 	// Create API request validator middleware

@@ -1,6 +1,7 @@
 package tag
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
@@ -26,8 +27,14 @@ type (
 		TagID int64 `json:"tag_id"`
 	}
 
-	// GetUserTagByIDResponse is the response DTO to get a user tag by tag ID
-	GetUserTagByIDResponse struct {
+	// GetUserTagByIDResponseData is the response data DTO to get a user tag by tag ID
+	GetUserTagByIDResponseData struct {
 		Tag internalpostgresmodel.UserTag `json:"tag"`
+	}
+
+	// GetUserTagByIDResponseBody is the response body DTO to get a user tag by tag ID
+	GetUserTagByIDResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data GetUserTagByIDResponseData `json:"data"`
 	}
 )

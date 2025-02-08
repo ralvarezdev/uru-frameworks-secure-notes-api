@@ -18,7 +18,8 @@ type (
 // @Tags api v1 notes
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Success 200 {object} ListUserNotesResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/notes [get]
@@ -27,14 +28,14 @@ func (c *controller) ListUserNotes(
 	r *http.Request,
 ) {
 	// List the user notes
-	userID, data := Service.ListUserNotes(r)
+	userID, responseBody := Service.ListUserNotes(r)
 
 	// Log the user notes list
 	internallogger.Api.ListUserNotes(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }
 
@@ -44,7 +45,8 @@ func (c *controller) ListUserNotes(
 // @Tags api v1 notes
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Success 200 {object} SyncUserNotesByLastSyncedAtResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/notes/sync [post]
@@ -53,7 +55,7 @@ func (c *controller) SyncUserNotesByLastSyncedAt(
 	r *http.Request,
 ) {
 	// Synchronize the list of notes by last synced at timestamp
-	userID, userRefreshTokenID, lastSyncedAt, data := Service.SyncUserNotesByLastSyncedAt(
+	userID, userRefreshTokenID, lastSyncedAt, responseBody := Service.SyncUserNotesByLastSyncedAt(
 		w,
 		r,
 	)
@@ -67,6 +69,6 @@ func (c *controller) SyncUserNotesByLastSyncedAt(
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }

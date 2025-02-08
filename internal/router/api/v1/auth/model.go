@@ -1,6 +1,7 @@
 package auth
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
@@ -22,9 +23,15 @@ type (
 		IsTOTPRecoveryCode *bool   `json:"is_totp_recovery_code,omitempty"`
 	}
 
-	// GenerateTOTPUrlResponse is the response DTO to generate TOTP URL
-	GenerateTOTPUrlResponse struct {
+	// GenerateTOTPUrlResponseData is the response data DTO to generate TOTP URL
+	GenerateTOTPUrlResponseData struct {
 		TOTPUrl string `json:"totp_url"`
+	}
+
+	// GenerateTOTPUrlResponseBody is the response body DTO to generate TOTP URL
+	GenerateTOTPUrlResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data GenerateTOTPUrlResponseData `json:"data"`
 	}
 
 	// VerifyTOTPRequest is the request DTO to verify TOTP
@@ -32,9 +39,15 @@ type (
 		TOTPCode string `json:"totp_code"`
 	}
 
-	// VerifyTOTPResponse is the response DTO to verify TOTP
-	VerifyTOTPResponse struct {
+	// VerifyTOTPResponseData is the response data DTO to verify TOTP
+	VerifyTOTPResponseData struct {
 		RecoveryCodes []string `json:"recovery_codes"`
+	}
+
+	// VerifyTOTPResponseBody is the response body DTO to verify TOTP
+	VerifyTOTPResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data VerifyTOTPResponseData `json:"data"`
 	}
 
 	// RevokeRefreshTokenRequest is the request DTO to revoke a refresh token
@@ -47,14 +60,26 @@ type (
 		RefreshTokenID int64 `json:"refresh_token_id"`
 	}
 
-	// GetRefreshTokenResponse is the response DTO to get a refresh token that has not been revoked or expired
-	GetRefreshTokenResponse struct {
+	// GetRefreshTokenResponseData is the response data DTO to get a refresh token that has not been revoked or expired
+	GetRefreshTokenResponseData struct {
 		RefreshToken *internalpostgresmodel.UserRefreshToken `json:"refresh_token"`
 	}
 
-	// ListRefreshTokensResponse is the response DTO to list refresh tokens that have not been revoked or expired
-	ListRefreshTokensResponse struct {
+	// GetRefreshTokenResponseBody is the response body DTO to get a refresh token that has not been revoked or expired
+	GetRefreshTokenResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data GetRefreshTokenResponseData `json:"data"`
+	}
+
+	// ListRefreshTokensResponseData is the response data DTO to list refresh tokens that have not been revoked or expired
+	ListRefreshTokensResponseData struct {
 		RefreshTokens []*internalpostgresmodel.UserRefreshTokenWithID `json:"refresh_tokens"`
+	}
+
+	// ListRefreshTokensResponseBody is the response body DTO to list refresh tokens that have not been revoked or expired
+	ListRefreshTokensResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data ListRefreshTokensResponseData `json:"data"`
 	}
 
 	// ChangePasswordRequest is the request DTO to change password

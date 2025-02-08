@@ -5,6 +5,7 @@ import (
 	godatabasespgxpool "github.com/ralvarezdev/go-databases/sql/pgxpool"
 	goflagsmode "github.com/ralvarezdev/go-flags/mode"
 	gonethttproute "github.com/ralvarezdev/go-net/http/route"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/docs"
 	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -21,6 +22,7 @@ import (
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalrouter "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
+	swaggohttpswagger "github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
 )
@@ -45,25 +47,24 @@ func init() {
 	internalpostgres.Load(mode)
 	internaljwtcache.Load(mode)
 	internaljwt.Load()
-	internallistener.Load()
+	internallistener.Load(mode)
 	internalvalidator.Load(mode)
 	internalmiddleware.Load()
 	internalmailersend.Load()
 }
 
-// @Title           Secure Notes REST API
-// @Version         1.0
-// @Description     This is the REST API for the Secure Notes application.
+//	@Title			Secure Notes REST API
+//	@Version		1.0
+//	@Description	This is the REST API for the Secure Notes application.
 
-// @License.name  GPL-3.0
-// @License.url   http://www.gnu.org/licenses/gpl-3.0.html
+//	@License.name	GPL-3.0
+//	@License.url	http://www.gnu.org/licenses/gpl-3.0.html
 
-// @BasePath  /
+//	@BasePath	/
 
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @description Type "Bearer" followed by a space and JWT token.
+// @securityDefinitions.apikey	CookieAuth
+// @in							cookie
+// @name						access_token
 func main() {
 	defer func(handler godatabasespgxpool.PoolHandler) {
 		handler.Disconnect()
@@ -78,6 +79,23 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Dynamically set the Swagger host
+	docs.SwaggerInfo.Host = internallistener.Host
+
+	/*
+		r.Get(
+			"/swagger/*", httpSwagger.Handler(
+				httpSwagger.URL("http://localhost:1323/swagger/doc.json"), // The url pointing to API definition
+			),
+		)
+
+		// Serve the Swaggers docs
+		router.RegisterHandler(
+			"/swagger",
+			swaggohttpswagger.
+		)
+	*/
 
 	// Create the main router module
 	if err = internalrouter.Module.Create(router); err != nil {

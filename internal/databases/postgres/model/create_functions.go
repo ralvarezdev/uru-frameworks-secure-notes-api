@@ -372,9 +372,9 @@ BEGIN
 		FROM
 			user_notes
 		WHERE
-			user_notes.user_id = in_user_id;
+			user_notes.user_id = in_user_id
 	) AS user_notes
-	WHERE (
+	WHERE
 		in_last_synced_at IS NULL
 	OR
 		user_notes.out_user_note_has_to_sync_note_tags = TRUE
@@ -383,8 +383,7 @@ BEGIN
 	OR
 		user_notes.out_user_note_created_at > in_last_synced_at
 	OR
-		user_notes.out_user_note_updated_at > in_last_synced_at
-	);
+		user_notes.out_user_note_updated_at > in_last_synced_at;
 END;
 $$ LANGUAGE plpgsql;
 `

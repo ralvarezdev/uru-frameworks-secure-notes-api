@@ -42,17 +42,17 @@ var (
 			m.RegisterExactRoute(
 				"POST /refresh-token",
 				Controller.RefreshToken,
-				internalmiddleware.AuthenticateRefreshToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"POST /logout",
 				Controller.LogOut,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"GET /refresh-token",
 				Controller.GetRefreshToken,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(
 					&GetRefreshTokenRequest{},
 				),
@@ -60,12 +60,12 @@ var (
 			m.RegisterExactRoute(
 				"GET /refresh-tokens",
 				Controller.ListRefreshTokens,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"DELETE /refresh-token",
 				Controller.RevokeRefreshToken,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(
 					&RevokeRefreshTokenRequest{},
 				),
@@ -73,17 +73,17 @@ var (
 			m.RegisterExactRoute(
 				"DELETE /refresh-tokens",
 				Controller.RevokeRefreshTokens,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"POST /totp/generate",
 				Controller.GenerateTOTPUrl,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"POST /totp/verify",
 				Controller.VerifyTOTP,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(
 					&VerifyTOTPRequest{},
 				),
@@ -91,12 +91,12 @@ var (
 			m.RegisterExactRoute(
 				"DELETE /totp",
 				Controller.RevokeTOTP,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"PUT /password",
 				Controller.ChangePassword,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(
 					&ChangePasswordRequest{},
 				),
@@ -118,13 +118,13 @@ var (
 			m.RegisterExactRoute(
 				"PUT /email",
 				Controller.ChangeEmail,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(&ChangeEmailRequest{}),
 			)
 			m.RegisterExactRoute(
 				"POST /email/send-verification",
 				Controller.SendEmailVerificationToken,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"POST /email/verify/{token}",
@@ -133,18 +133,18 @@ var (
 			m.RegisterExactRoute(
 				"PUT /phone-number",
 				Controller.ChangePhoneNumber,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(&ChangePhoneNumberRequest{}),
 			)
 			m.RegisterExactRoute(
 				"POST /phone-number/send-verification",
 				Controller.SendPhoneNumberVerificationCode,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			)
 			m.RegisterExactRoute(
 				"POST /phone-number/verify",
 				Controller.VerifyPhoneNumber,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(&VerifyPhoneNumberRequest{}),
 			)
 		},

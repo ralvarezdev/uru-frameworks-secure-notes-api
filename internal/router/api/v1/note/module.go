@@ -18,7 +18,7 @@ var (
 		Controller: Controller,
 		BeforeLoadFn: func(m *gonethttp.Module) {
 			m.Middlewares = &[]func(http.Handler) http.Handler{
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Authenticate,
 			}
 		},
 		Submodules: gonethttp.NewSubmodules(

@@ -2,6 +2,7 @@ package notes
 
 import (
 	"database/sql"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
@@ -18,7 +19,7 @@ type (
 // ListUserNotes returns the notes of the user
 func (s *service) ListUserNotes(r *http.Request) (
 	int64,
-	*ListUserNotesResponse,
+	*ListUserNotesResponseBody,
 ) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
@@ -44,7 +45,12 @@ func (s *service) ListUserNotes(r *http.Request) (
 		}
 	}
 
-	return userID, &ListUserNotesResponse{NotesID: parsedUserNotesID}
+	return userID, &ListUserNotesResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: ListUserNotesResponseData{
+			NotesID: parsedUserNotesID,
+		},
+	}
 }
 
 // SyncUserNoteVersionsByLastSyncedAt returns the note versions of the user by the last synced at timestamp
@@ -126,7 +132,7 @@ func (s *service) SyncUserNotesByLastSyncedAt(
 	int64,
 	int64,
 	*time.Time,
-	*SyncUserNotesResponse,
+	*SyncUserNotesByLastSyncedAtResponseBody,
 ) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
@@ -201,5 +207,10 @@ func (s *service) SyncUserNotesByLastSyncedAt(
 	// Set the last sync at cookie
 	internalcookie.SetSyncNotesCookie(w, newLastSyncedAt)
 
-	return userID, userRefreshTokenID, lastSyncedAt, &SyncUserNotesResponse{SyncNotes: syncUserNotes}
+	return userID, userRefreshTokenID, lastSyncedAt, &SyncUserNotesByLastSyncedAtResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: SyncUserNotesByLastSyncedAtResponseData{
+			SyncNotes: syncUserNotes,
+		},
+	}
 }

@@ -19,6 +19,7 @@ type (
 // @Tags api v1 user
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateProfileRequest true "Update Profile Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -30,10 +31,10 @@ func (c *controller) UpdateProfile(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateProfileRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateProfileRequest)
 
 	// Update the profile
-	userID := Service.UpdateProfile(r, body)
+	userID := Service.UpdateProfile(r, requestBody)
 
 	// Log the profile update
 	internallogger.Api.UpdateProfile(userID)
@@ -50,7 +51,8 @@ func (c *controller) UpdateProfile(
 // @Tags api v1 user
 // @Accept json
 // @Produce json
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Security CookieAuth
+// @Success 200 {object} GetMyProfileResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
 // @Router /api/v1/user/profile [get]
@@ -59,14 +61,14 @@ func (c *controller) GetMyProfile(
 	r *http.Request,
 ) {
 	// Get the user profile
-	userID, data := Service.GetMyProfile(r)
+	userID, responseBody := Service.GetMyProfile(r)
 
 	// Log the profile retrieval
 	internallogger.Api.GetMyProfile(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }
 
@@ -76,6 +78,7 @@ func (c *controller) GetMyProfile(
 // @Tags api v1 user
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body ChangeUsernameRequest true "Change Username Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -87,13 +90,13 @@ func (c *controller) ChangeUsername(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ChangeUsernameRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ChangeUsernameRequest)
 
 	// Change the username
-	userID := Service.ChangeUsername(r, body)
+	userID := Service.ChangeUsername(r, requestBody)
 
 	// Log the username change
-	internallogger.Api.ChangeUsername(userID, body.Username)
+	internallogger.Api.ChangeUsername(userID, requestBody.Username)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -107,6 +110,7 @@ func (c *controller) ChangeUsername(
 // @Tags api v1 user
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body DeleteUserRequest true "Delete User Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -118,10 +122,10 @@ func (c *controller) DeleteUser(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserRequest)
 
 	// Delete the user
-	userID := Service.DeleteUser(r, body)
+	userID := Service.DeleteUser(r, requestBody)
 
 	// Log the user deletion
 	internallogger.Api.DeleteUser(userID)

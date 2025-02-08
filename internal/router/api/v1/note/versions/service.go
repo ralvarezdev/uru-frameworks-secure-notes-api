@@ -1,6 +1,7 @@
 package versions
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
@@ -16,7 +17,7 @@ type (
 func (s *service) ListUserNoteVersions(
 	r *http.Request,
 	body *ListUserNoteVersionsRequest,
-) (int64, *ListUserNoteVersionsResponse) {
+) (int64, *ListUserNoteVersionsResponseBody) {
 	// Get the user ID from the request
 	userID, err := internaljwtclaims.GetSubject(r)
 	if err != nil {
@@ -51,7 +52,10 @@ func (s *service) ListUserNoteVersions(
 		panic(ErrListUserNoteVersionsNotFound)
 	}
 
-	return userID, &ListUserNoteVersionsResponse{
-		NoteVersionsID: userNoteVersionsID,
+	return userID, &ListUserNoteVersionsResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: ListUserNoteVersionsResponseData{
+			NoteVersionsID: userNoteVersionsID,
+		},
 	}
 }

@@ -19,8 +19,9 @@ type (
 // @Tags api v1 note versions
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body ListUserNoteVersionsRequest true "List User Note Versions Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Success 200 {object} ListUserNoteVersionsResponseBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -30,16 +31,16 @@ func (c *controller) ListUserNoteVersions(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ListUserNoteVersionsRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ListUserNoteVersionsRequest)
 
 	// List the user note versions
-	userID, data := Service.ListUserNoteVersions(r, body)
+	userID, responseBody := Service.ListUserNoteVersions(r, requestBody)
 
 	// Log the user note versions listing
-	internallogger.Api.ListUserNoteVersions(userID, body.NoteID)
+	internallogger.Api.ListUserNoteVersions(userID, requestBody.NoteID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w, gonethttpresponse.NewResponse(responseBody, http.StatusOK),
 	)
 }

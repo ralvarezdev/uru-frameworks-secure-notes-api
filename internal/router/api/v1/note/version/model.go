@@ -1,6 +1,7 @@
 package version
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 )
 
@@ -21,8 +22,14 @@ type (
 		NoteVersionID int64 `json:"note_version_id"`
 	}
 
-	// GetUserNoteVersionByIDResponse is the response DTO to get a user note version by note version ID
-	GetUserNoteVersionByIDResponse struct {
+	// GetUserNoteVersionByIDResponseData is the response data DTO to get a user note version by note version ID
+	GetUserNoteVersionByIDResponseData struct {
 		NoteVersion *internalpostgresmodel.UserNoteVersion `json:"note_version"`
+	}
+
+	// GetUserNoteVersionByIDResponseBody is the response body DTO to get a user note version by note version ID
+	GetUserNoteVersionByIDResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data GetUserNoteVersionByIDResponseData `json:"data"`
 	}
 )

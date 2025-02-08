@@ -19,6 +19,7 @@ type (
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body CreateUserNoteRequest true "Create User Note Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -30,10 +31,10 @@ func (c *controller) CreateUserNote(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*CreateUserNoteRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*CreateUserNoteRequest)
 
 	// Create the user note
-	userID, userNoteID := Service.CreateUserNote(r, body)
+	userID, userNoteID := Service.CreateUserNote(r, requestBody)
 
 	// Log the user note creation
 	internallogger.Api.CreateUserNote(
@@ -52,6 +53,7 @@ func (c *controller) CreateUserNote(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateUserNoteRequest true "Update User Note Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -64,14 +66,14 @@ func (c *controller) UpdateUserNote(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteRequest)
 
 	// Update the user note
-	userID := Service.UpdateUserNote(r, body)
+	userID := Service.UpdateUserNote(r, requestBody)
 
 	// Log the user note update
 	internallogger.Api.UpdateUserNote(
-		userID, body.NoteID,
+		userID, requestBody.NoteID,
 	)
 
 	// Handle the response
@@ -86,6 +88,7 @@ func (c *controller) UpdateUserNote(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body DeleteUserNoteRequest true "Delete User Note Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -98,14 +101,14 @@ func (c *controller) DeleteUserNote(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserNoteRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*DeleteUserNoteRequest)
 
 	// Delete the user note
-	userID := Service.DeleteUserNote(r, body)
+	userID := Service.DeleteUserNote(r, requestBody)
 
 	// Log the user note deletion
 	internallogger.Api.DeleteUserNote(
-		userID, body.NoteID,
+		userID, requestBody.NoteID,
 	)
 
 	// Handle the response
@@ -120,6 +123,7 @@ func (c *controller) DeleteUserNote(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body GetUserNoteByIDRequest true "Get User Note Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -132,14 +136,14 @@ func (c *controller) GetUserNoteByID(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*GetUserNoteByIDRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*GetUserNoteByIDRequest)
 
 	// Get the user note by ID
-	userID, data := Service.GetUserNoteByID(r, body)
+	userID, data := Service.GetUserNoteByID(r, requestBody)
 
 	// Log the user note retrieval
 	internallogger.Api.GetUserNoteByID(
-		userID, body.NoteID,
+		userID, requestBody.NoteID,
 	)
 
 	// Handle the response
@@ -154,6 +158,7 @@ func (c *controller) GetUserNoteByID(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateUserNotePinRequest true "Update User Note Pin Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -166,13 +171,17 @@ func (c *controller) UpdateUserNotePin(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNotePinRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNotePinRequest)
 
 	// Update the user note pin
-	userID := Service.UpdateUserNotePin(r, body)
+	userID := Service.UpdateUserNotePin(r, requestBody)
 
 	// Log the user note pin update
-	internallogger.Api.UpdateUserNotePin(userID, body.NoteID, body.Pin)
+	internallogger.Api.UpdateUserNotePin(
+		userID,
+		requestBody.NoteID,
+		requestBody.Pin,
+	)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -186,6 +195,7 @@ func (c *controller) UpdateUserNotePin(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateUserNoteArchiveRequest true "Update User Note Archive Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -198,13 +208,17 @@ func (c *controller) UpdateUserNoteArchive(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteArchiveRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteArchiveRequest)
 
 	// Update the user note archive
-	userID := Service.UpdateUserNoteArchive(r, body)
+	userID := Service.UpdateUserNoteArchive(r, requestBody)
 
 	// Log the user note archive update
-	internallogger.Api.UpdateUserNotePin(userID, body.NoteID, body.Archive)
+	internallogger.Api.UpdateUserNotePin(
+		userID,
+		requestBody.NoteID,
+		requestBody.Archive,
+	)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -218,6 +232,7 @@ func (c *controller) UpdateUserNoteArchive(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateUserNoteTrashRequest true "Update User Note Trash Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -230,13 +245,17 @@ func (c *controller) UpdateUserNoteTrash(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteTrashRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteTrashRequest)
 
 	// Update the user note trash
-	userID := Service.UpdateUserNoteTrash(r, body)
+	userID := Service.UpdateUserNoteTrash(r, requestBody)
 
 	// Log the user note trash update
-	internallogger.Api.UpdateUserNoteTrash(userID, body.NoteID, body.Trash)
+	internallogger.Api.UpdateUserNoteTrash(
+		userID,
+		requestBody.NoteID,
+		requestBody.Trash,
+	)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -250,6 +269,7 @@ func (c *controller) UpdateUserNoteTrash(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body UpdateUserNoteStarRequest true "Update User Note Star Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -262,13 +282,17 @@ func (c *controller) UpdateUserNoteStar(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteStarRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*UpdateUserNoteStarRequest)
 
 	// Update the user note star
-	userID := Service.UpdateUserNoteStar(r, body)
+	userID := Service.UpdateUserNoteStar(r, requestBody)
 
 	// Log the user note star update
-	internallogger.Api.UpdateUserNoteStar(userID, body.NoteID, body.Star)
+	internallogger.Api.UpdateUserNoteStar(
+		userID,
+		requestBody.NoteID,
+		requestBody.Star,
+	)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(

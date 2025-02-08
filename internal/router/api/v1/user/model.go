@@ -1,6 +1,7 @@
 package user
 
 import (
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	"time"
 )
 
@@ -12,8 +13,8 @@ type (
 		Birthdate *time.Time `json:"birthdate,omitempty"`
 	}
 
-	// GetMyProfileResponse is the response DTO to get my profile
-	GetMyProfileResponse struct {
+	// GetMyProfileResponseData is the response data DTO to get my profile
+	GetMyProfileResponseData struct {
 		FirstName       string     `json:"first_name"`
 		LastName        string     `json:"last_name"`
 		Birthdate       *time.Time `json:"birthdate,omitempty"`
@@ -23,6 +24,12 @@ type (
 		Phone           *string    `json:"phone,omitempty"`
 		PhoneIsVerified *bool      `json:"phone_is_verified,omitempty"`
 		HasTOTPEnabled  bool       `json:"has_totp_enabled"`
+	}
+
+	// GetMyProfileResponseBody is the response body DTO to get my profile
+	GetMyProfileResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data GetMyProfileResponseData `json:"data"`
 	}
 
 	// ChangeUsernameRequest is the request DTO to change username

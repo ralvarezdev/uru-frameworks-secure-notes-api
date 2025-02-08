@@ -19,8 +19,9 @@ type (
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body ListUserNoteTagsRequest true "List User UserNote Tags Request"
-// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Success 200 {object} ListUserNoteTagsResponseBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 404 {object} gonethttpresponse.JSendFailBody
@@ -31,20 +32,21 @@ func (c *controller) ListUserNoteTags(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*ListUserNoteTagsRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ListUserNoteTagsRequest)
 
 	// List the user note tags
-	userID, data := Service.ListUserNoteTags(r, body)
+	userID, responseBody := Service.ListUserNoteTags(r, requestBody)
 
 	// Log the user note tags listing
 	internallogger.Api.ListUserNoteTags(
 		userID,
-		body.NoteID,
+		requestBody.NoteID,
 	)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(data, http.StatusOK),
+		w,
+		gonethttpresponse.NewJSendSuccessResponse(responseBody, http.StatusOK),
 	)
 }
 
@@ -54,6 +56,7 @@ func (c *controller) ListUserNoteTags(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body AddUserNoteTagsRequest true "Add User UserNote Tags Request"
 // @Success 201 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -66,15 +69,15 @@ func (c *controller) AddUserNoteTags(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*AddUserNoteTagsRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*AddUserNoteTagsRequest)
 
 	// Add the user note tags
-	userID := Service.AddUserNoteTags(r, body)
+	userID := Service.AddUserNoteTags(r, requestBody)
 
 	// Log the user note tags addition
 	internallogger.Api.AddUserNoteTags(
 		userID,
-		body.NoteID,
+		requestBody.NoteID,
 	)
 
 	// Handle the response
@@ -89,6 +92,7 @@ func (c *controller) AddUserNoteTags(
 // @Tags api v1 note
 // @Accept json
 // @Produce json
+// @Security CookieAuth
 // @Param request body RemoveUserNoteTagsRequest true "Remove User UserNote Tags Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
@@ -101,15 +105,15 @@ func (c *controller) RemoveUserNoteTags(
 	r *http.Request,
 ) {
 	// Get the body from the context
-	body, _ := gonethttpctx.GetCtxBody(r).(*RemoveUserNoteTagsRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*RemoveUserNoteTagsRequest)
 
 	// Remove the user note tags
-	userID := Service.RemoveUserNoteTags(r, body)
+	userID := Service.RemoveUserNoteTags(r, requestBody)
 
 	// Log the user note tags removal
 	internallogger.Api.RemoveUserNoteTags(
 		userID,
-		body.NoteID,
+		requestBody.NoteID,
 	)
 
 	// Handle the response

@@ -5,6 +5,7 @@ import (
 	"errors"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwtclaims "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/claims"
@@ -125,7 +126,7 @@ func (s *service) GetUserTagByID(
 	body *GetUserTagByIDRequest,
 ) (
 	int64,
-	*GetUserTagByIDResponse,
+	*GetUserTagByIDResponseBody,
 ) {
 	// Check if the request body is nil
 	if body == nil {
@@ -155,11 +156,14 @@ func (s *service) GetUserTagByID(
 		}
 		panic(err)
 	}
-	return userID, &GetUserTagByIDResponse{
-		Tag: internalpostgresmodel.UserTag{
-			Name:      userTagName.String,
-			CreatedAt: userTagCreatedAt.Time,
-			UpdatedAt: userTagUpdatedAt.Time,
+	return userID, &GetUserTagByIDResponseBody{
+		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+		Data: GetUserTagByIDResponseData{
+			Tag: internalpostgresmodel.UserTag{
+				Name:      userTagName.String,
+				CreatedAt: userTagCreatedAt.Time,
+				UpdatedAt: userTagUpdatedAt.Time,
+			},
 		},
 	}
 }
