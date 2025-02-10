@@ -9,3 +9,7 @@ DROP FUNCTION IF EXISTS sync_user_note_versions_by_last_synced_at;
 DROP FUNCTION IF EXISTS sync_user_notes_by_last_synced_at;
 DROP FUNCTION IF EXISTS sync_user_note_tags_by_last_synced_at;
 DROP FUNCTION IF EXISTS sync_user_tags_by_last_synced_at;
+DROP FUNCTION IF EXISTS get_user_tag_by_id;
+DROP FUNCTION IF EXISTS get_user_note_version_by_id;
+DROP FUNCTION IF EXISTS get_user_note_by_id;
+DROP FUNCTION IF EXISTS get_log_in_information;

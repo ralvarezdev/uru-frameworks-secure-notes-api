@@ -259,25 +259,17 @@ func (s *service) LogIn(
 	// Get the client IP
 	clientIP := gonethttp.GetClientIP(r)
 
-	// Get the user ID and password hash by the username, and the user TOTP ID and secret if it is active
-	var userID, userTOTPID sql.NullInt64
-	var userPasswordHash, userSalt, userEncryptedKey, userTOTPSecret sql.NullString
-	totpIsActive := true
+	// Get the user ID and password hash by the username
+	var userID sql.NullInt64
+	var userPasswordHash, userSalt, userEncryptedKey sql.NullString
 	if err := internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.PreLogInProc,
+		&internalpostgresmodel.GetLogInInformationFn,
 		body.Username,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil, nil,
 	).Scan(
 		&userID,
 		&userPasswordHash,
 		&userSalt,
 		&userEncryptedKey,
-		&userTOTPID,
-		&userTOTPSecret,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			panic(ErrLogInInvalidUsername)
@@ -295,13 +287,24 @@ func (s *service) LogIn(
 		panic(ErrLogInInvalidPassword)
 	}
 
-	// Check if the user TOTP ID is nil
-	if userTOTPID.Int64 == 0 {
-		totpIsActive = false
+	// Get the user TOTP ID and secret by the user ID if it is active
+	var userTOTPID sql.NullInt64
+	var userTOTPSecret sql.NullString
+	var userTOTPVerifiedAt sql.NullTime
+	if err := internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.GetUserTOTPProc,
+		userID,
+		nil, nil, nil,
+	).Scan(
+		&userTOTPID,
+		&userTOTPSecret,
+		&userTOTPVerifiedAt,
+	); err != nil {
+		panic(err)
 	}
 
-	// Validate the TOTP code, if it is active
-	if totpIsActive {
+	// Check if the user TOTP ID is not nil and the TOTP is verified
+	if userTOTPID.Int64 != 0 && userTOTPVerifiedAt.Valid {
 		// Check if the TOTP code-related fields are nil
 		if body.TOTPCode == nil {
 			panic(ErrLogInRequiredTOTPCode)
@@ -711,14 +714,11 @@ func (s *service) VerifyEmail(
 		&userID,
 		&userInvalidToken,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrVerifyEmailTokenNotFound)
-		}
 		panic(err)
 	}
 
 	// Check if the email verification token is invalid
-	if userInvalidToken.Bool {
+	if !userInvalidToken.Valid || userInvalidToken.Bool {
 		panic(ErrVerifyEmailInvalidToken)
 	}
 	return userID.Int64

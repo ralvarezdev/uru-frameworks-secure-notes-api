@@ -175,10 +175,9 @@ func (s *service) GetUserNoteByID(
 	var userNoteTitle, userNoteColor sql.NullString
 	var userNoteCreatedAt, userNoteUpdatedAt, userNotePinnedAt, userNoteArchivedAt, userNoteTrashedAt, userNoteStarredAt sql.NullTime
 	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.GetUserNoteByIDProc,
+		&internalpostgresmodel.GetUserNoteByIDFn,
 		userID,
 		body.NoteID,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil,
 	).Scan(
 		&userNoteTitle,
 		&userNoteColor,

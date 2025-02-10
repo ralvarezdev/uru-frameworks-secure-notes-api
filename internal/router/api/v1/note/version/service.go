@@ -111,7 +111,7 @@ func (s *service) GetUserNoteVersionByNoteVersionID(
 	var userNoteVersionEncryptedContent sql.NullString
 	var userNoteVersionCreatedAt sql.NullTime
 	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.GetUserNoteVersionByIDProc,
+		&internalpostgresmodel.GetUserNoteVersionByIDFn,
 		userID,
 		body.NoteVersionID,
 	).Scan(

@@ -143,7 +143,7 @@ func (s *service) GetUserTagByID(
 	var userTagName sql.NullString
 	var userTagCreatedAt, userTagUpdatedAt sql.NullTime
 	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.GetUserTagByIDProc,
+		&internalpostgresmodel.GetUserTagByIDFn,
 		userID,
 		body.TagID,
 	).Scan(

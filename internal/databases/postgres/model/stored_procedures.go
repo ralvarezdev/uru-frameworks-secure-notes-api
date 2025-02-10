@@ -22,9 +22,6 @@ var (
 	// GetUserAccessTokenByUserRefreshTokenIDProc is the query to call the stored procedure to get user access token by user refresh token ID
 	GetUserAccessTokenByUserRefreshTokenIDProc = "CALL get_user_access_token_by_user_refresh_token_id($1, $2)"
 
-	// PreLogInProc is the query to call the stored procedure to pre-login
-	PreLogInProc = "CALL pre_log_in($1, $2, $3, $4, $5, $6, $7);"
-
 	// RegisterFailedLogInAttemptProc is the query to call the stored procedure to register failed login attempt
 	RegisterFailedLogInAttemptProc = "CALL register_failed_log_in_attempt($1, $2, $3, $4)"
 
@@ -133,9 +130,6 @@ var (
 	// UpdateUserTagProc is the query to call the stored procedure to update user tag
 	UpdateUserTagProc = "CALL update_user_tag($1, $2, $3)"
 
-	// GetUserTagByIDProc is the query to call the stored procedure to get user tag by tag ID
-	GetUserTagByIDProc = "CALL get_user_tag_by_id($1, $2, $3, $4, $5)"
-
 	// UpdateUserNoteTrashProc is the query to call the stored procedure to update user note trash
 	UpdateUserNoteTrashProc = "CALL update_user_note_trash($1, $2, $3)"
 
@@ -153,9 +147,6 @@ var (
 
 	// DeleteUserNoteVersionProc is the query to call the stored procedure to delete user note version
 	DeleteUserNoteVersionProc = "CALL delete_user_note_version($1, $2)"
-
-	// GetUserNoteVersionByIDProc is the query to call the stored procedure to get user note version by note version ID
-	GetUserNoteVersionByIDProc = "CALL get_user_note_version_by_id($1, $2, $3, $4)"
 
 	// CreateUserNoteProc is the query to call the stored procedure to create user note
 	CreateUserNoteProc = "CALL create_user_note($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
@@ -177,9 +168,6 @@ var (
 
 	// UpdateUserNoteProc is the query to call the stored procedure to update user note
 	UpdateUserNoteProc = "CALL update_user_note($1, $2, $3, $4)"
-
-	// GetUserNoteByIDProc is the query to call the stored procedure to get user note by note ID
-	GetUserNoteByIDProc = "CALL get_user_note_by_id($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)"
 
 	// ListUserNotesProc is the query to call the stored procedure to list user notes
 	ListUserNotesProc = "CALL list_user_notes($1, $2)"

@@ -387,4 +387,158 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 `
+
+	// CreateGetUserTagByIDFn is the query to create the function to get user tag by tag ID
+	CreateGetUserTagByIDFn = `
+CREATE OR REPLACE FUNCTION get_user_tag_by_id(
+	IN in_user_id BIGINT,
+	IN in_user_tag_id BIGINT
+) RETURNS
+TABLE(
+	out_user_tag_name VARCHAR,
+	out_user_tag_created_at TIMESTAMP,
+	out_user_tag_updated_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user tag name, created at, and updated at by user ID and tag ID
+	RETURN QUERY
+	SELECT
+		user_tags.name AS out_user_tag_name,
+		user_tags.created_at AS out_user_tag_created_at,
+		user_tags.updated_at AS out_user_tag_updated_at
+	FROM
+		user_tags
+	WHERE
+		user_tags.id = in_user_tag_id
+	AND
+		user_tags.user_id = in_user_id
+	AND
+		user_tags.deleted_at IS NULL;
+END;
+$$;
+`
+
+	// CreateGetUserNoteVersionByIDFn is the query to create the function to get user note version by note version ID
+	CreateGetUserNoteVersionByIDFn = `
+CREATE OR REPLACE FUNCTION get_user_note_version_by_id(
+	IN in_user_id BIGINT,
+	IN in_user_note_version_id BIGINT
+) RETURNS
+TABLE(
+	out_user_note_version_encrypted_content TEXT,
+	out_user_note_version_created_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user note version encrypted content and created at by user ID and user note version ID
+	RETURN QUERY
+	SELECT
+		user_note_versions.encrypted_content AS out_user_note_version_encrypted_content,
+		user_note_versions.created_at AS out_user_note_version_created_at
+	FROM
+		user_note_versions
+	INNER JOIN
+		user_notes ON user_note_versions.note_id = user_notes.id
+	WHERE
+		user_note_versions.id = in_user_note_version_id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL
+	AND
+		user_note_versions.deleted_at IS NULL;
+END;
+$$;
+`
+
+	// CreateGetUserNoteByIDFn is the query to create the function to get user note by note ID
+	CreateGetUserNoteByIDFn = `
+CREATE OR REPLACE FUNCTION get_user_note_by_id(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT
+) RETURNS
+TABLE(
+	out_user_note_title VARCHAR,
+	out_user_note_color VARCHAR,
+	out_user_note_created_at TIMESTAMP,
+	out_user_note_updated_at TIMESTAMP,
+	out_user_note_pinned_at TIMESTAMP,
+	out_user_note_archived_at TIMESTAMP,
+	out_user_note_trashed_at TIMESTAMP,
+	out_user_note_starred_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user note title, color, created at, updated at, pinned at, archived at, trashed at, and starred at by user ID and user note ID
+	RETURN QUERY
+	SELECT
+		user_notes.title AS out_user_note_title,
+		user_notes.color AS out_user_note_color,
+		user_notes.created_at AS out_user_note_created_at,
+		user_notes.updated_at AS out_user_note_updated_at,
+		user_notes.pinned_at AS out_user_note_pinned_at,
+		user_notes.archived_at AS out_user_note_archived_at,
+		user_notes.trashed_at AS out_user_note_trashed_at,
+		user_notes.starred_at AS out_user_note_starred_at
+	FROM
+		user_notes
+	INNER JOIN
+		user_note_versions ON user_notes.id = user_note_versions.note_id
+	WHERE
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.deleted_at IS NULL
+	AND
+		user_note_versions.deleted_at IS NULL
+	ORDER BY
+		user_note_versions.created_at DESC
+	LIMIT 1;
+END;
+$$;
+`
+
+	// CreateGetLogInInformationFn is the query to create the function to get the login information
+	CreateGetLogInInformationFn = `
+CREATE OR REPLACE FUNCTION get_log_in_information(
+	IN in_user_username VARCHAR
+) RETURNS
+TABLE(
+	out_user_id BIGINT,
+	out_user_salt VARCHAR,
+	out_user_encrypted_key VARCHAR,
+	out_user_password_hash VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Select the user ID and password hash by username
+	RETURN QUERY
+	SELECT
+		users.id AS out_user_id,
+		users.salt AS out_user_salt,
+		users.encrypted_key AS out_user_encrypted_key,
+		user_password_hashes.password_hash AS out_user_password_hash
+	FROM
+		users
+	INNER JOIN
+		user_usernames ON users.id = user_usernames.user_id
+	INNER JOIN
+		user_password_hashes ON users.id = user_password_hashes.user_id
+	WHERE
+		user_usernames.username = in_user_username
+	AND
+		user_usernames.revoked_at IS NULL
+	AND
+		users.deleted_at IS NULL
+	AND
+		user_password_hashes.revoked_at IS NULL;
+END;
+$$;
+`
 )

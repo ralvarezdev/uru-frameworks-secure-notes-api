@@ -348,71 +348,6 @@ END;
 $$;
 `
 
-	// CreatePreLogInProc is the query to create the stored procedure to pre-log in
-	CreatePreLogInProc = `
-CREATE OR REPLACE PROCEDURE pre_log_in(
-	IN in_user_username VARCHAR,
-	OUT out_user_id BIGINT,
-	OUT out_user_password_hash VARCHAR,
-	OUT out_user_salt VARCHAR,
-	OUT out_user_encrypted_key TEXT,
-	OUT out_user_totp_id BIGINT,
-	OUT out_user_totp_secret VARCHAR
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-	-- Select the user ID and password hash by username
-	SELECT
-		users.id,
-		users.salt,
-		users.encrypted_key,
-		user_password_hashes.password_hash
-	INTO
-		out_user_id,
-		out_user_salt,	
-		out_user_encrypted_key,	
-		out_user_password_hash
-	FROM
-		users
-	INNER JOIN
-		user_usernames ON users.id = user_usernames.user_id
-	INNER JOIN
-		user_password_hashes ON users.id = user_password_hashes.user_id
-	WHERE
-		user_usernames.username = in_user_username
-	AND
-		user_usernames.revoked_at IS NULL
-	AND
-		users.deleted_at IS NULL
-	AND
-		user_password_hashes.revoked_at IS NULL;
-
-	-- Select the TOTP ID and secret by user ID
-	SELECT
-		user_totps.id,
-		user_totps.secret
-	INTO
-		out_user_totp_id,
-		out_user_totp_secret
-	FROM
-		user_totps
-	WHERE
-		user_totps.user_id = out_user_id
-	AND
-		user_totps.revoked_at IS NULL
-	AND
-		user_totps.verified_at IS NOT NULL;
-
-	-- If the user doesn't have a TOTP, set the TOTP ID and secret to NULL
-	IF NOT FOUND THEN
-		out_user_totp_id = NULL;
-		out_user_totp_secret = NULL;
-	END IF;
-END;
-$$;
-`
-
 	// CreateRegisterFailedLogInAttemptProc is the query to create the stored procedure to register failed log in attempt
 	CreateRegisterFailedLogInAttemptProc = `
 CREATE OR REPLACE PROCEDURE register_failed_log_in_attempt(
@@ -1482,39 +1417,6 @@ END;
 $$;
 `
 
-	// CreateGetUserTagByIDProc is the query to create the stored procedure to get user tag by tag ID
-	CreateGetUserTagByIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_tag_by_id(
-	IN in_user_id BIGINT,
-	IN in_user_tag_id BIGINT,
-	OUT out_user_tag_name VARCHAR,
-	OUT out_user_tag_created_at TIMESTAMP,
-	OUT out_user_tag_updated_at TIMESTAMP
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-	-- Select the user tag name, created at, and updated at by user ID and tag ID
-	SELECT
-		user_tags.name,
-		user_tags.created_at,
-		user_tags.updated_at
-	INTO
-		out_user_tag_name,
-		out_user_tag_created_at,
-		out_user_tag_updated_at
-	FROM
-		user_tags
-	WHERE
-		user_tags.id = in_user_tag_id
-	AND
-		user_tags.user_id = in_user_id
-	AND
-		user_tags.deleted_at IS NULL;
-END;
-$$;
-`
-
 	// CreateUpdateUserNotePinProc is the query to create the stored procedure to update user note pin
 	CreateUpdateUserNotePinProc = `
 CREATE OR REPLACE PROCEDURE update_user_note_pin(
@@ -1704,40 +1606,6 @@ BEGIN
 		user_notes.deleted_at IS NULL
 	AND
 		user_note_versions.deleted_at IS NULL;		
-END;
-$$;
-`
-
-	// CreateGetUserNoteVersionByIDProc is the query to create the stored procedure to get user note version by note version ID
-	CreateGetUserNoteVersionByIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_note_version_by_id(
-	IN in_user_id BIGINT,
-	IN in_user_note_version_id BIGINT,	
-	OUT out_user_note_version_encrypted_content TEXT,
-	OUT out_user_note_version_created_at TIMESTAMP
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-	-- Select the user note version encrypted content and created at by user ID and user note version ID
-	SELECT
-		user_note_versions.encrypted_content,
-		user_note_versions.created_at
-	INTO
-		out_user_note_version_encrypted_content,
-		out_user_note_version_created_at
-	FROM
-		user_note_versions
-	INNER JOIN
-		user_notes ON user_note_versions.note_id = user_notes.id
-	WHERE
-		user_note_versions.id = in_user_note_version_id
-	AND
-		user_notes.user_id = in_user_id
-	AND
-		user_notes.deleted_at IS NULL
-	AND
-		user_note_versions.deleted_at IS NULL;
 END;
 $$;
 `
@@ -2034,72 +1902,6 @@ BEGIN
 		user_notes.id = in_user_note_id
 	AND
 		user_notes.user_id = in_user_id;
-END;
-$$;
-`
-
-	// CreateGetUserNoteByIDProc is the query to create the stored procedure to get user note by note ID
-	CreateGetUserNoteByIDProc = `
-CREATE OR REPLACE PROCEDURE get_user_note_by_id(
-	IN in_user_id BIGINT,
-	IN in_user_note_id BIGINT,
-	OUT out_user_note_title VARCHAR,
-	OUT out_user_note_color VARCHAR,
-	OUT out_user_note_created_at TIMESTAMP,
-	OUT out_user_note_updated_at TIMESTAMP,
-	OUT out_user_note_pinned_at TIMESTAMP,
-	OUT out_user_note_archived_at TIMESTAMP,
-	OUT out_user_note_trashed_at TIMESTAMP,
-	OUT out_user_note_starred_at TIMESTAMP,
-	OUT out_user_note_latest_note_version_id BIGINT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-	-- Select the user note title, color, created at, updated at, pinned at, archived at, trashed at, and starred at by user ID and user note ID
-	SELECT
-		user_notes.title,
-		user_notes.color,
-		user_notes.created_at,
-		user_notes.updated_at,
-		user_notes.pinned_at,
-		user_notes.archived_at,
-		user_notes.trashed_at,
-		user_notes.starred_at
-	INTO
-		out_user_note_title,
-		out_user_note_color,
-		out_user_note_created_at,
-		out_user_note_updated_at,
-		out_user_note_pinned_at,
-		out_user_note_archived_at,
-		out_user_note_trashed_at,
-		out_user_note_starred_at
-	FROM
-		user_notes
-	WHERE
-		user_notes.id = in_user_note_id
-	AND
-		user_notes.user_id = in_user_id
-	AND
-		user_notes.deleted_at IS NULL;
-
-	-- Select the user note latest user note version ID by user ID and user note ID
-	SELECT
-		user_note_versions.id
-	INTO
-		out_user_note_latest_note_version_id
-	FROM
-		user_note_versions
-	WHERE
-		user_note_versions.note_id = in_user_note_id
-	AND
-		user_note_versions.user_id = in_user_id
-	AND
-		user_note_versions.deleted_at IS NULL
-	ORDER BY
-		user_note_versions.created_at DESC
-	LIMIT 1;
 END;
 $$;
 `
