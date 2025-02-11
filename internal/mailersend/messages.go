@@ -115,8 +115,18 @@ func SendWelcomeEmail(
 	// Create a new mail message
 	mail := NewSingleRecipientMessage(fullName, email)
 	mail.SetSubject(WelcomeEmailSubject)
-	mail.SetHTML(WelcomeEmailHTML)
-	mail.SetText(WelcomeEmailText)
+	mail.SetHTML(
+		fmt.Sprintf(
+			WelcomeEmailHTML,
+			FooterHTML,
+		),
+	)
+	mail.SetText(
+		fmt.Sprintf(
+			WelcomeEmailText,
+			FooterText,
+		),
+	)
 
 	// Send the email
 	_, err := Client.Email.Send(context.Background(), mail)
