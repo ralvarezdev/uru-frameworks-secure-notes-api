@@ -53,8 +53,8 @@ func (s *service) RegisterFailedLoginAttempt(
 	}
 }
 
-// ValidatePassword validates a password
-func (s *service) ValidatePassword(
+// ComparePassword compares a password with its hash
+func (s *service) ComparePassword(
 	userID int64,
 	hash, password, ipAddress string,
 ) bool {
@@ -285,8 +285,8 @@ func (s *service) LogIn(
 		panic(err)
 	}
 
-	// Validate the password
-	if !s.ValidatePassword(
+	// Compare the password with its hash
+	if !s.ComparePassword(
 		userID.Int64,
 		userPasswordHash.String,
 		body.Password,
@@ -901,7 +901,7 @@ func (s *service) ResetPassword(
 
 	// Hash the password
 	passwordHash, err := gocryptobcrypt.HashPassword(
-		body.Password,
+		body.NewPassword,
 		internalbcrypt.Cost,
 	)
 	if err != nil {

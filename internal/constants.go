@@ -2,7 +2,9 @@ package internal
 
 import (
 	"errors"
+	govalidatormappervalidations "github.com/ralvarezdev/go-validator/struct/mapper/validator"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
+	"time"
 )
 
 const (
@@ -11,6 +13,33 @@ const (
 
 	// EnvResetPasswordURL is the environment variable for the reset password URL
 	EnvResetPasswordURL = "URU_FRAMEWORKS_SECURE_NOTES_RESET_PASSWORD_URL"
+
+	// EnvMinimumPasswordLength is the environment for the minimum password length
+	EnvMinimumPasswordLength = "URU_FRAMEWORKS_SECURE_NOTES_MINIMUM_PASSWORD_LENGTH"
+
+	// EnvMinimumPasswordSpecialCount is the environment for the minimum password special characters count
+	EnvMinimumPasswordSpecialCount = "URU_FRAMEWORKS_SECURE_NOTES_MINIMUM_PASSWORD_SPECIAL_COUNT"
+
+	// EnvMinimumPasswordNumbersCount is the environment for the minimum password numbers characters count
+	EnvMinimumPasswordNumbersCount = "URU_FRAMEWORKS_SECURE_NOTES_MINIMUM_PASSWORD_NUMBERS_COUNT"
+
+	// EnvMinimumPasswordCapsCount is the environment for the minimum password caps characters count
+	EnvMinimumPasswordCapsCount = "URU_FRAMEWORKS_SECURE_NOTES_MINIMUM_PASSWORD_CAPS_COUNT"
+
+	// EnvMaximumFailedAttemptsCount is the environment for the maximum failed attempts count
+	EnvMaximumFailedAttemptsCount = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_FAILED_ATTEMPTS_COUNT"
+
+	// EnvMaximumFailedAttemptsPeriod is the environment for the maximum failed attempts period
+	EnvMaximumFailedAttemptsPeriod = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_FAILED_ATTEMPTS_PERIOD"
+
+	// EnvMaximumFailedAttemptsSuspension is the environment for the maximum failed attempts suspension
+	EnvMaximumFailedAttemptsSuspension = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_FAILED_ATTEMPTS_SUSPENSION"
+
+	// EnvMinimumAge is the environment for the minimum age
+	EnvMinimumAge = "URU_FRAMEWORKS_SECURE_NOTES_MINIMUM_AGE"
+
+	// EnvMaximumAge is the environment for the maximum age
+	EnvMaximumAge = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_AGE"
 )
 
 var (
@@ -19,6 +48,39 @@ var (
 
 	// ResetPasswordURL is the reset password URL
 	ResetPasswordURL string
+
+	// MinimumPasswordLength is the minimum password length
+	MinimumPasswordLength int
+
+	// MinimumPasswordSpecialCount is the minimum password special characters count
+	MinimumPasswordSpecialCount int
+
+	// MinimumPasswordNumbersCount is the minimum password numbers characters count
+	MinimumPasswordNumbersCount int
+
+	// MinimumPasswordCapsCount is the minimum password caps characters count
+	MinimumPasswordCapsCount int
+
+	// PasswordOptions is the password options
+	PasswordOptions *govalidatormappervalidations.PasswordOptions
+
+	// MaximumFailedAttemptsCount is the maximum failed attempts count
+	MaximumFailedAttemptsCount int
+
+	// MaximumFailedAttemptsPeriod is the maximum failed attempts period
+	MaximumFailedAttemptsPeriod time.Duration
+
+	// MaximumFailedAttemptsSuspension is the maximum failed attempts suspension
+	MaximumFailedAttemptsSuspension time.Duration
+
+	// MinimumAge is the minimum age
+	MinimumAge int
+
+	// MaximumAge is the maximum age
+	MaximumAge int
+
+	// BirthdateOptions is the birthdate options
+	BirthdateOptions *govalidatormappervalidations.BirthdateOptions
 )
 
 var (
@@ -28,7 +90,7 @@ var (
 
 // Load loads the URL constants
 func Load() {
-	// Load the environment variables
+	// Get the verify email and reset password URL
 	for env, dest := range map[string]*string{
 		EnvVerifyEmailURL:   &VerifyEmailURL,
 		EnvResetPasswordURL: &ResetPasswordURL,
@@ -39,5 +101,50 @@ func Load() {
 		); err != nil {
 			panic(err)
 		}
+	}
+
+	// Get the password-related counts and length, and age-related counts
+	for env, dest := range map[string]*int{
+		EnvMinimumPasswordLength:       &MinimumPasswordLength,
+		EnvMinimumPasswordSpecialCount: &MinimumPasswordSpecialCount,
+		EnvMinimumPasswordNumbersCount: &MinimumPasswordNumbersCount,
+		EnvMinimumPasswordCapsCount:    &MinimumPasswordCapsCount,
+		EnvMaximumFailedAttemptsCount:  &MaximumFailedAttemptsCount,
+		EnvMinimumAge:                  &MinimumAge,
+		EnvMaximumAge:                  &MaximumAge,
+	} {
+		if err := internalloader.Loader.LoadIntVariable(
+			env,
+			dest,
+		); err != nil {
+			panic(err)
+		}
+	}
+
+	// Get the maximum failed attempts-related durations
+	for env, dest := range map[string]*time.Duration{
+		EnvMaximumFailedAttemptsPeriod:     &MaximumFailedAttemptsPeriod,
+		EnvMaximumFailedAttemptsSuspension: &MaximumFailedAttemptsSuspension,
+	} {
+		if err := internalloader.Loader.LoadDurationVariable(
+			env,
+			dest,
+		); err != nil {
+			panic(err)
+		}
+	}
+
+	// Create the password options
+	PasswordOptions = &govalidatormappervalidations.PasswordOptions{
+		MinimumLength:       MinimumPasswordLength,
+		MinimumSpecialCount: MinimumPasswordSpecialCount,
+		MinimumNumbersCount: MinimumPasswordNumbersCount,
+		MinimumCapsCount:    MinimumPasswordCapsCount,
+	}
+
+	// Create the birthdate options
+	BirthdateOptions = &govalidatormappervalidations.BirthdateOptions{
+		MinimumAge: MinimumAge,
+		MaximumAge: MaximumAge,
 	}
 }

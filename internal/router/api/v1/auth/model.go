@@ -95,7 +95,7 @@ type (
 
 	// ResetPasswordRequest is the request DTO to reset password
 	ResetPasswordRequest struct {
-		Password string `json:"password"`
+		NewPassword string `json:"new_password"`
 	}
 
 	// ChangeEmailRequest is the request DTO to change email

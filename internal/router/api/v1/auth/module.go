@@ -3,6 +3,7 @@ package auth
 import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	govalidatormappervalidation "github.com/ralvarezdev/go-validator/struct/mapper/validation"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
@@ -27,6 +28,12 @@ var (
 						internalvalidator.Service.Email(
 							"email",
 							body.Email,
+							validations,
+						)
+						internalvalidator.Service.Password(
+							"password",
+							body.Password,
+							internal.PasswordOptions,
 							validations,
 						)
 					},
@@ -99,6 +106,17 @@ var (
 				internalmiddleware.Authenticate,
 				internalmiddleware.Validate(
 					&ChangePasswordRequest{},
+					func(
+						body *ChangePasswordRequest,
+						validations *govalidatormappervalidation.StructValidations,
+					) {
+						internalvalidator.Service.Password(
+							"new_password",
+							body.NewPassword,
+							internal.PasswordOptions,
+							validations,
+						)
+					},
 				),
 			)
 			m.RegisterExactRoute(
@@ -113,6 +131,17 @@ var (
 				Controller.ResetPassword,
 				internalmiddleware.Validate(
 					&ResetPasswordRequest{},
+					func(
+						body *ResetPasswordRequest,
+						validations *govalidatormappervalidation.StructValidations,
+					) {
+						internalvalidator.Service.Password(
+							"password",
+							body.Password,
+							internal.PasswordOptions,
+							validations,
+						)
+					},
 				),
 			)
 			m.RegisterExactRoute(

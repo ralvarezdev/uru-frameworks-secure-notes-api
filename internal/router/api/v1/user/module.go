@@ -2,7 +2,10 @@ package user
 
 import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	govalidatormappervalidation "github.com/ralvarezdev/go-validator/struct/mapper/validation"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
+	internalvalidator "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/validator"
 )
 
 var (
@@ -21,7 +24,22 @@ var (
 			m.RegisterExactRoute(
 				"PUT /profile",
 				Controller.UpdateProfile,
-				internalmiddleware.Validate(&UpdateProfileRequest{}),
+				internalmiddleware.Validate(
+					&UpdateProfileRequest{},
+					func(
+						body *UpdateProfileRequest,
+						validations *govalidatormappervalidation.StructValidations,
+					) {
+						if body.Birthdate != nil {
+							internalvalidator.Service.Birthdate(
+								"birthdate",
+								*body.Birthdate,
+								internal.BirthdateOptions,
+								validations,
+							)
+						}
+					},
+				),
 			)
 			m.RegisterExactRoute(
 				"GET /profile",

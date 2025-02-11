@@ -71,10 +71,10 @@ github.com/ralvarezdev/go-reflect v0.2.4 h1:PLyzbrdNvUiRzpxSHuI9b7hJEhFes22gjNLZ
 github.com/ralvarezdev/go-reflect v0.2.4/go.mod h1:jv3EqQfUixWtNeJd/Rnzf0IDcYZ1z3GApRdAGQHdHZQ=
 github.com/ralvarezdev/go-security-headers v0.1.1 h1:tuZ66YhmOb4JJluhJCwo63i4fvZfmm4mfPUcya9tT/c=
 github.com/ralvarezdev/go-security-headers v0.1.1/go.mod h1:DXhZZGyaIAL2Z3WtRr+wQU7wtp2FR1MukoNpdNwfdU0=
-github.com/ralvarezdev/go-strings v0.1.8 h1:QuFg0teQxASu0jMaeh8sX2Q6Tc6qjKTPx7FEXf8nxV4=
-github.com/ralvarezdev/go-strings v0.1.8/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
-github.com/ralvarezdev/go-validator v0.5.29 h1:aYDIf4wHsCZg8cCXvObMvlDlP47vD9cf1fA8ib6Fxyg=
-github.com/ralvarezdev/go-validator v0.5.29/go.mod h1:DqePOybfNHgcT6Pm315BQRAsms2hBLAGJfQgBlyhDv8=
+github.com/ralvarezdev/go-strings v0.1.9 h1:FyYTJW+EnkWFp5C9GsK6wTt3rXIwPt3mUbsTAFUuAT8=
+github.com/ralvarezdev/go-strings v0.1.9/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
+github.com/ralvarezdev/go-validator v0.5.30 h1:FwH6magdK3yauYkD0Gkslwh8EM0frAW0npR8xxfLW+A=
+github.com/ralvarezdev/go-validator v0.5.30/go.mod h1:pXRv4WtUXuVmtZvzqGNLBTRYV0x6T8RPsyJ1XeOflto=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
 github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
