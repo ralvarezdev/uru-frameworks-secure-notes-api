@@ -2,7 +2,6 @@ package note
 
 import (
 	"database/sql"
-	"errors"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
@@ -174,11 +173,23 @@ func (s *service) GetUserNoteByID(
 	var userNoteLatestNoteVersionID sql.NullInt64
 	var userNoteTitle, userNoteColor sql.NullString
 	var userNoteCreatedAt, userNoteUpdatedAt, userNotePinnedAt, userNoteArchivedAt, userNoteTrashedAt, userNoteStarredAt sql.NullTime
-	if err = internalpostgres.PoolService.QueryRow(
+	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetUserNoteByIDFn,
 		userID,
 		body.NoteID,
-	).Scan(
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	// Check if the note ID exists
+	if !rows.Next() {
+		panic(ErrGetUserNoteByIDNotFound)
+	}
+
+	// Scan the row
+	if err = rows.Scan(
 		&userNoteTitle,
 		&userNoteColor,
 		&userNoteCreatedAt,
@@ -189,9 +200,6 @@ func (s *service) GetUserNoteByID(
 		&userNoteStarredAt,
 		&userNoteLatestNoteVersionID,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrGetUserNoteNotFound)
-		}
 		panic(err)
 	}
 

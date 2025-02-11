@@ -24,7 +24,7 @@ var (
 		nil,
 		http.StatusNotFound,
 	)
-	ErrGetUserTagByTagIDNotFound = gonethttpresponse.NewFailResponseError(
+	ErrGetUserTagByIDNotFound = gonethttpresponse.NewFailResponseError(
 		"tag_id",
 		"tag not found",
 		nil,

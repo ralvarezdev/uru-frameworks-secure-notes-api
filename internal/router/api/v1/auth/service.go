@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
-	"errors"
 	"github.com/google/uuid"
 	gocryptoaes "github.com/ralvarezdev/go-crypto/aes"
 	gocryptobcrypt "github.com/ralvarezdev/go-crypto/bcrypt"
@@ -262,18 +261,27 @@ func (s *service) LogIn(
 	// Get the user ID and password hash by the username
 	var userID sql.NullInt64
 	var userPasswordHash, userSalt, userEncryptedKey sql.NullString
-	if err := internalpostgres.PoolService.QueryRow(
+	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetLogInInformationFn,
 		body.Username,
-	).Scan(
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	// Check if the user exists
+	if !rows.Next() {
+		panic(ErrLogInInvalidUsername)
+	}
+
+	// Scan the row
+	if err = rows.Scan(
 		&userID,
 		&userPasswordHash,
 		&userSalt,
 		&userEncryptedKey,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrLogInInvalidUsername)
-		}
 		panic(err)
 	}
 
@@ -675,18 +683,27 @@ func (s *service) GetRefreshToken(
 
 	// Run the SQL function to get the user refresh token by the ID and user ID
 	var userRefreshToken internalpostgresmodel.UserRefreshToken
-	if err = internalpostgres.PoolService.QueryRow(
+	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetUserRefreshTokenByIDFn,
 		userRefreshTokenID,
 		userID,
-	).Scan(
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	// Check if the user refresh token exists
+	if !rows.Next() {
+		panic(ErrGetRefreshTokenNotFound)
+	}
+
+	// Scan the row
+	if err = rows.Scan(
 		&userRefreshToken.IssuedAt,
 		&userRefreshToken.ExpiresAt,
 		&userRefreshToken.IPAddress,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrGetRefreshTokenNotFound)
-		}
 		panic(err)
 	}
 

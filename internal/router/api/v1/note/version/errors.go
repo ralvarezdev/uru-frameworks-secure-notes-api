@@ -18,7 +18,7 @@ var (
 		nil,
 		http.StatusNotFound,
 	)
-	ErrGetUserNoteVersionByNoteVersionIDNotFound = gonethttpresponse.NewFailResponseError(
+	ErrGetUserNoteVersionByIDNotFound = gonethttpresponse.NewFailResponseError(
 		"note_version_id",
 		"note version not found",
 		nil,

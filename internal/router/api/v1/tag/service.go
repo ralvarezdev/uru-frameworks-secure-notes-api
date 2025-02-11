@@ -2,7 +2,6 @@ package tag
 
 import (
 	"database/sql"
-	"errors"
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
@@ -142,20 +141,30 @@ func (s *service) GetUserTagByID(
 	// Get the tag
 	var userTagName sql.NullString
 	var userTagCreatedAt, userTagUpdatedAt sql.NullTime
-	if err = internalpostgres.PoolService.QueryRow(
+	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetUserTagByIDFn,
 		userID,
 		body.TagID,
-	).Scan(
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	// Check if the tag ID exists
+	if !rows.Next() {
+		panic(ErrGetUserTagByIDNotFound)
+	}
+
+	// Scan the row
+	if err = rows.Scan(
 		&userTagName,
 		&userTagCreatedAt,
 		&userTagUpdatedAt,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrGetUserTagByTagIDNotFound)
-		}
 		panic(err)
 	}
+
 	return userID, &GetUserTagByIDResponseBody{
 		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
 		Data: GetUserTagByIDResponseData{

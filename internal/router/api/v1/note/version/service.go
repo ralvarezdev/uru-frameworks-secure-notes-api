@@ -2,7 +2,6 @@ package version
 
 import (
 	"database/sql"
-	"errors"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
@@ -110,20 +109,30 @@ func (s *service) GetUserNoteVersionByNoteVersionID(
 	var userNoteID sql.NullInt64
 	var userNoteVersionEncryptedContent sql.NullString
 	var userNoteVersionCreatedAt sql.NullTime
-	if err = internalpostgres.PoolService.QueryRow(
+	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetUserNoteVersionByIDFn,
 		userID,
 		body.NoteVersionID,
-	).Scan(
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	// Check if the note version exists
+	if !rows.Next() {
+		panic(ErrGetUserNoteVersionByIDNotFound)
+	}
+
+	// Scan the row
+	if err = rows.Scan(
 		&userNoteID,
 		&userNoteVersionEncryptedContent,
 		&userNoteVersionCreatedAt,
 	); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			panic(ErrGetUserNoteVersionByNoteVersionIDNotFound)
-		}
 		panic(err)
 	}
+
 	return userID, &GetUserNoteVersionByIDResponseBody{
 		BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
 		Data: GetUserNoteVersionByIDResponseData{

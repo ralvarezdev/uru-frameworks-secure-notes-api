@@ -6,7 +6,6 @@ import (
 	internalrouterapiv1notetags "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/tags"
 	internalrouterapiv1noteversion "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/version"
 	internalrouterapiv1noteversions "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note/versions"
-	"net/http"
 )
 
 var (
@@ -17,9 +16,9 @@ var (
 		Service:    Service,
 		Controller: Controller,
 		BeforeLoadFn: func(m *gonethttp.Module) {
-			m.Middlewares = &[]func(http.Handler) http.Handler{
+			m.Middlewares = gonethttp.NewMiddlewares(
 				internalmiddleware.Authenticate,
-			}
+			)
 		},
 		Submodules: gonethttp.NewSubmodules(
 			internalrouterapiv1noteversion.Module,

@@ -30,7 +30,7 @@ var (
 		nil,
 		http.StatusNotFound,
 	)
-	ErrGetUserNoteNotFound = gonethttpresponse.NewFailResponseError(
+	ErrGetUserNoteByIDNotFound = gonethttpresponse.NewFailResponseError(
 		"note_id",
 		"note not found",
 		nil,
