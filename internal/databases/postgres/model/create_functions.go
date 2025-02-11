@@ -391,8 +391,8 @@ $$ LANGUAGE plpgsql;
 	// CreateGetUserTagByIDFn is the query to create the function to get user tag by tag ID
 	CreateGetUserTagByIDFn = `
 CREATE OR REPLACE FUNCTION get_user_tag_by_id(
-	IN in_user_id BIGINT,
-	IN in_user_tag_id BIGINT
+	in_user_id BIGINT,
+	in_user_tag_id BIGINT
 ) RETURNS
 TABLE(
 	out_user_tag_name VARCHAR,
@@ -423,8 +423,8 @@ $$;
 	// CreateGetUserNoteVersionByIDFn is the query to create the function to get user note version by note version ID
 	CreateGetUserNoteVersionByIDFn = `
 CREATE OR REPLACE FUNCTION get_user_note_version_by_id(
-	IN in_user_id BIGINT,
-	IN in_user_note_version_id BIGINT
+	in_user_id BIGINT,
+	in_user_note_version_id BIGINT
 ) RETURNS
 TABLE(
 	out_user_note_version_encrypted_content TEXT,
@@ -457,8 +457,8 @@ $$;
 	// CreateGetUserNoteByIDFn is the query to create the function to get user note by note ID
 	CreateGetUserNoteByIDFn = `
 CREATE OR REPLACE FUNCTION get_user_note_by_id(
-	IN in_user_id BIGINT,
-	IN in_user_note_id BIGINT
+	in_user_id BIGINT,
+	in_user_note_id BIGINT
 ) RETURNS
 TABLE(
 	out_user_note_title VARCHAR,
@@ -503,15 +503,14 @@ END;
 $$;
 `
 
-	// CreateGetLogInInformationFn is the query to create the function to get the login information
 	CreateGetLogInInformationFn = `
 CREATE OR REPLACE FUNCTION get_log_in_information(
-	IN in_user_username VARCHAR
+	in_user_username VARCHAR
 ) RETURNS
 TABLE(
 	out_user_id BIGINT,
 	out_user_salt VARCHAR,
-	out_user_encrypted_key VARCHAR,
+	out_user_encrypted_key TEXT,
 	out_user_password_hash VARCHAR
 )
 LANGUAGE plpgsql

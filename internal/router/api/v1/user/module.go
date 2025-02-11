@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 )
@@ -17,10 +16,6 @@ var (
 			m.Middlewares = gonethttp.NewMiddlewares(
 				internalmiddleware.Authenticate,
 			)
-			fmt.Println("3b", m.Middlewares)
-		},
-		AfterLoadFn: func(m *gonethttp.Module) {
-			fmt.Println("3b", m.GetRouter().GetMiddlewares())
 		},
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(
