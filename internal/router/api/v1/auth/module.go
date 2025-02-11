@@ -136,8 +136,8 @@ var (
 						validations *govalidatormappervalidation.StructValidations,
 					) {
 						internalvalidator.Service.Password(
-							"password",
-							body.Password,
+							"new_password",
+							body.NewPassword,
 							internal.PasswordOptions,
 							validations,
 						)

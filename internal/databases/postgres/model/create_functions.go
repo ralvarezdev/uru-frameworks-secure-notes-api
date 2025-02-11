@@ -508,7 +508,7 @@ CREATE OR REPLACE FUNCTION get_log_in_information(
 	in_user_username VARCHAR,
 	in_ip_address VARCHAR,
 	in_maximum_failed_attempts_count INT,
-	in_maximum_failed_attempts_period_seconds INTERVAL
+	in_maximum_failed_attempts_period_seconds INT
 ) RETURNS
 TABLE(
 	out_user_id BIGINT,
@@ -533,13 +533,13 @@ BEGIN
 					SELECT
 						COUNT(*)
 					FROM
-						user_failed_attempts
+						user_failed_log_in_attempts
 					WHERE	
-						user_failed_attempts.user_id = users.id	
+						user_failed_log_in_attempts.user_id = users.id	
 					AND
-						user_failed_attempts.attempted_at >= NOW() - INTERVAL '1 second' * in_maximum_failed_attempts_period_seconds
+						user_failed_log_in_attempts.attempted_at >= NOW() - INTERVAL '1 second' * in_maximum_failed_attempts_period_seconds
 					AND
-						user_failed_attempts.ip_address = in_ip_address
+						user_failed_log_in_attempts.ip_address = in_ip_address
 				) >= in_maximum_failed_attempts_count THEN TRUE
 			ELSE FALSE
 		END AS out_too_many_failed_attempts

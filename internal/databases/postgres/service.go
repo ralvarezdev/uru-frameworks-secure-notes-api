@@ -29,14 +29,6 @@ func NewService(pool *pgxpool.Pool) (
 		Service: service,
 	}
 
-	// Migrate the database
-	/**/
-	err = instance.Migrate()
-	if err != nil {
-		return nil, err
-	}
-	/**/
-
 	return instance, nil
 }
 

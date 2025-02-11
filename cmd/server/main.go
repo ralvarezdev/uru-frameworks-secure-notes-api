@@ -70,6 +70,16 @@ func main() {
 		internallogger.Postgres.DisconnectedFromDatabase()
 	}(internalpostgres.PoolHandler)
 
+	// Check if the mode is migrate
+	if goflagsmode.ModeFlag.IsMigrate() {
+		// Migrate the database
+		err := internalpostgres.PoolService.Migrate()
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
 	// Create the main router
 	router, err := gonethttproute.NewBaseRouter(
 		goflagsmode.ModeFlag,

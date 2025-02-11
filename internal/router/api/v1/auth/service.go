@@ -266,6 +266,7 @@ func (s *service) LogIn(
 	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetLogInInformationFn,
 		body.Username,
+		clientIP,
 		internal.MaximumFailedAttemptsCount,
 		internal.MaximumFailedAttemptsPeriodSeconds,
 	)

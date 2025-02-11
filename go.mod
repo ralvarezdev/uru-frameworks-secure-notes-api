@@ -10,7 +10,7 @@ require (
 	github.com/mailersend/mailersend-go v1.5.1
 	github.com/ralvarezdev/go-crypto v0.6.0
 	github.com/ralvarezdev/go-databases v0.5.6
-	github.com/ralvarezdev/go-flags v0.3.2
+	github.com/ralvarezdev/go-flags v0.3.3
 	github.com/ralvarezdev/go-jwt v0.4.10
 	github.com/ralvarezdev/go-loader v0.2.14
 	github.com/ralvarezdev/go-logger v0.4.6
