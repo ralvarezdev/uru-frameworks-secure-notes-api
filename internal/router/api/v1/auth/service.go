@@ -13,6 +13,7 @@ import (
 	godatabasespgx "github.com/ralvarezdev/go-databases/sql/pgx"
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
+	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalaes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/aes"
 	internalbcrypt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/crypto/bcrypt"
@@ -261,9 +262,12 @@ func (s *service) LogIn(
 	// Get the user ID and password hash by the username
 	var userID sql.NullInt64
 	var userPasswordHash, userSalt, userEncryptedKey sql.NullString
+	var tooManyFailedAttempts sql.NullBool
 	rows, err := internalpostgres.PoolService.Query(
 		&internalpostgresmodel.GetLogInInformationFn,
 		body.Username,
+		internal.MaximumFailedAttemptsCount,
+		internal.MaximumFailedAttemptsPeriodSeconds,
 	)
 	if err != nil {
 		panic(err)
@@ -281,8 +285,14 @@ func (s *service) LogIn(
 		&userPasswordHash,
 		&userSalt,
 		&userEncryptedKey,
+		&tooManyFailedAttempts,
 	); err != nil {
 		panic(err)
+	}
+
+	// Check if there are too many failed attempts
+	if tooManyFailedAttempts.Valid && tooManyFailedAttempts.Bool {
+		panic(ErrLogInTooManyFailedAttempts)
 	}
 
 	// Compare the password with its hash

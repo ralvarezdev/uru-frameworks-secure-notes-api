@@ -26,6 +26,12 @@ var (
 		nil,
 		http.StatusUnauthorized,
 	)
+	ErrLogInTooManyFailedAttempts = gonethttpresponse.NewFailResponseError(
+		"password",
+		"too many failed login attempts, try again later",
+		nil,
+		http.StatusUnauthorized,
+	)
 	ErrLogInInvalidPassword = gonethttpresponse.NewFailResponseError(
 		"password",
 		"invalid password",

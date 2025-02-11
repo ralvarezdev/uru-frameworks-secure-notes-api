@@ -505,13 +505,17 @@ $$;
 
 	CreateGetLogInInformationFn = `
 CREATE OR REPLACE FUNCTION get_log_in_information(
-	in_user_username VARCHAR
+	in_user_username VARCHAR,
+	in_ip_address VARCHAR,
+	in_maximum_failed_attempts_count INT,
+	in_maximum_failed_attempts_period_seconds INTERVAL
 ) RETURNS
 TABLE(
 	out_user_id BIGINT,
 	out_user_salt VARCHAR,
 	out_user_encrypted_key TEXT,
-	out_user_password_hash VARCHAR
+	out_user_password_hash VARCHAR,
+	out_too_many_failed_attempts BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -522,7 +526,23 @@ BEGIN
 		users.id AS out_user_id,
 		users.salt AS out_user_salt,
 		users.encrypted_key AS out_user_encrypted_key,
-		user_password_hashes.password_hash AS out_user_password_hash
+		user_password_hashes.password_hash AS out_user_password_hash,
+		CASE
+			WHEN
+				(	
+					SELECT
+						COUNT(*)
+					FROM
+						user_failed_attempts
+					WHERE	
+						user_failed_attempts.user_id = users.id	
+					AND
+						user_failed_attempts.attempted_at >= NOW() - INTERVAL '1 second' * in_maximum_failed_attempts_period_seconds
+					AND
+						user_failed_attempts.ip_address = in_ip_address
+				) >= in_maximum_failed_attempts_count THEN TRUE
+			ELSE FALSE
+		END AS out_too_many_failed_attempts
 	FROM
 		users
 	INNER JOIN

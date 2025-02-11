@@ -41,5 +41,5 @@ var (
 	GetUserNoteByIDFn = "SELECT * FROM get_user_note_by_id($1, $2)"
 
 	// GetLogInInformationFn is the query to get the login information
-	GetLogInInformationFn = "SELECT * FROM get_log_in_information($1);"
+	GetLogInInformationFn = "SELECT * FROM get_log_in_information($1, $2, $3);"
 )

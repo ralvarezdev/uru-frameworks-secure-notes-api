@@ -32,9 +32,6 @@ const (
 	// EnvMaximumFailedAttemptsPeriod is the environment for the maximum failed attempts period
 	EnvMaximumFailedAttemptsPeriod = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_FAILED_ATTEMPTS_PERIOD"
 
-	// EnvMaximumFailedAttemptsSuspension is the environment for the maximum failed attempts suspension
-	EnvMaximumFailedAttemptsSuspension = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_FAILED_ATTEMPTS_SUSPENSION"
-
 	// EnvMinimumAge is the environment for the minimum age
 	EnvMinimumAge = "URU_FRAMEWORKS_SECURE_NOTES_MINIMUM_AGE"
 
@@ -64,15 +61,6 @@ var (
 	// PasswordOptions is the password options
 	PasswordOptions *govalidatormappervalidations.PasswordOptions
 
-	// MaximumFailedAttemptsCount is the maximum failed attempts count
-	MaximumFailedAttemptsCount int
-
-	// MaximumFailedAttemptsPeriod is the maximum failed attempts period
-	MaximumFailedAttemptsPeriod time.Duration
-
-	// MaximumFailedAttemptsSuspension is the maximum failed attempts suspension
-	MaximumFailedAttemptsSuspension time.Duration
-
 	// MinimumAge is the minimum age
 	MinimumAge int
 
@@ -81,6 +69,15 @@ var (
 
 	// BirthdateOptions is the birthdate options
 	BirthdateOptions *govalidatormappervalidations.BirthdateOptions
+
+	// MaximumFailedAttemptsCount is the maximum failed attempts count
+	MaximumFailedAttemptsCount int
+
+	// MaximumFailedAttemptsPeriod is the maximum failed attempts period
+	MaximumFailedAttemptsPeriod time.Duration
+
+	// MaximumFailedAttemptsPeriodSeconds is the maximum failed attempts period in seconds
+	MaximumFailedAttemptsPeriodSeconds int64
 )
 
 var (
@@ -121,18 +118,16 @@ func Load() {
 		}
 	}
 
-	// Get the maximum failed attempts-related durations
-	for env, dest := range map[string]*time.Duration{
-		EnvMaximumFailedAttemptsPeriod:     &MaximumFailedAttemptsPeriod,
-		EnvMaximumFailedAttemptsSuspension: &MaximumFailedAttemptsSuspension,
-	} {
-		if err := internalloader.Loader.LoadDurationVariable(
-			env,
-			dest,
-		); err != nil {
-			panic(err)
-		}
+	// Get the maximum failed attempts period duration
+	if err := internalloader.Loader.LoadDurationVariable(
+		EnvMaximumFailedAttemptsPeriod,
+		&MaximumFailedAttemptsPeriod,
+	); err != nil {
+		panic(err)
 	}
+
+	// Get the maximum failed attempts period in seconds
+	MaximumFailedAttemptsPeriodSeconds = int64(MaximumFailedAttemptsPeriod.Seconds())
 
 	// Create the password options
 	PasswordOptions = &govalidatormappervalidations.PasswordOptions{
