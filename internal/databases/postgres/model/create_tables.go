@@ -20,59 +20,6 @@ CREATE TABLE IF NOT EXISTS users (
 );
 `
 
-	// CreateUserPasswordHashes is the SQL query to create the user_password_hashes table
-	CreateUserPasswordHashes = `
-CREATE TABLE IF NOT EXISTS user_password_hashes (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-`
-
-	// CreateUserResetPasswords is the SQL query to create the user_reset_passwords table
-	CreateUserResetPasswords = `
-CREATE TABLE IF NOT EXISTS user_reset_passwords (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    reset_token VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-`
-
-	// CreateUserEmailVerifications is the SQL query to create the user_email_verifications table
-	CreateUserEmailVerifications = `
-CREATE TABLE IF NOT EXISTS user_email_verifications (
-    id BIGSERIAL PRIMARY KEY,
-    user_email_id BIGINT NOT NULL,
-    verification_token VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMP NOT NULL,
-    verified_at TIMESTAMP,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_email_id) REFERENCES user_emails(id) ON DELETE CASCADE
-);
-`
-
-	// CreateUserPhoneNumberVerifications is the SQL query to create the user_phone_number_verifications table
-	CreateUserPhoneNumberVerifications = `
-CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
-    id BIGSERIAL PRIMARY KEY,
-    user_phone_number_id BIGINT NOT NULL,
-    verification_code VARCHAR(10) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMP NOT NULL,
-    verified_at TIMESTAMP,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_phone_number_id) REFERENCES user_phone_numbers(id) ON DELETE CASCADE
-);
-`
-
 	// CreateUserFailedLogInAttempts is the SQL query to create the user_failed_log_in_attempts table
 	CreateUserFailedLogInAttempts = `
 CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
@@ -82,48 +29,6 @@ CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
     bad_password BOOLEAN,
     bad_2fa_code BOOLEAN,
     attempted_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-`
-
-	// CreateUserRefreshTokens is the SQL query to create the user_refresh_tokens table
-	CreateUserRefreshTokens = `
-CREATE TABLE IF NOT EXISTS user_refresh_tokens (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    parent_user_refresh_token_id BIGINT,
-    ip_address VARCHAR(15) NOT NULL,
-    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_user_refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE CASCADE
-);
-`
-
-	// CreateUserAccessTokens is the SQL query to create the user_access_tokens table
-	CreateUserAccessTokens = `
-CREATE TABLE IF NOT EXISTS user_access_tokens (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    user_refresh_token_id BIGINT NOT NULL,
-    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE CASCADE
-);
-`
-
-	// CreateUserTOTPs is the SQL query to create the user_totps table
-	CreateUserTOTPs = `
-CREATE TABLE IF NOT EXISTS user_totps (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    secret VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    verified_at TIMESTAMP,
-    revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
@@ -158,19 +63,6 @@ CREATE TABLE IF NOT EXISTS user_notes (
 );
 `
 
-	// CreateUserNoteTags is the SQL query to create the user_note_tags table
-	CreateUserNoteTags = `
-CREATE TABLE IF NOT EXISTS user_note_tags (
-    id BIGSERIAL PRIMARY KEY,
-    user_note_id BIGINT NOT NULL,
-    user_tag_id BIGINT NOT NULL,
-    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
-	deleted_at TIMESTAMP,
-    FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_tag_id) REFERENCES user_tags(id) ON DELETE CASCADE
-);
-`
-
 	// CreateUserNoteVersions is the SQL query to create the user_note_versions table
 	CreateUserNoteVersions = `
 CREATE TABLE IF NOT EXISTS user_note_versions (
@@ -197,7 +89,8 @@ CREATE TABLE IF NOT EXISTS user_usernames (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_usernames (username) WHERE revoked_at IS NULL;
-`, UserUsernamesUniqueUsername,
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_usernames (user_id) WHERE revoked_at IS NULL;
+`, UserUsernamesUniqueUsername, UserUsernamesUniqueUserID,
 	)
 
 	// CreateUserEmails is the SQL query to create the user_emails table
@@ -212,7 +105,23 @@ CREATE TABLE IF NOT EXISTS user_emails (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (email) WHERE revoked_at IS NULL;
-`, UserEmailsUniqueEmail,
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_emails (user_id) WHERE revoked_at IS NULL;
+`, UserEmailsUniqueEmail, UserEmailsUniqueUserID,
+	)
+
+	// CreateUserPasswordHashes is the SQL query to create the user_password_hashes table
+	CreateUserPasswordHashes = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_password_hashes (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_password_hashes (user_id) WHERE revoked_at IS NULL;
+`, UserPasswordHashesUniqueUserID,
 	)
 
 	// CreateUserPhoneNumbers is the SQL query to create the user_phone_numbers table
@@ -227,7 +136,8 @@ CREATE TABLE IF NOT EXISTS user_phone_numbers (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_phone_numbers (phone_number) WHERE revoked_at IS NULL;
-`, UserPhoneNumbersUniquePhoneNumber,
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_phone_numbers (user_id) WHERE revoked_at IS NULL;
+`, UserPhoneNumbersUniquePhoneNumber, UserPhoneNumbersUniqueUserID,
 	)
 
 	// CreateUserTags is the SQL query to create the user_tags table
@@ -236,13 +146,130 @@ CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_phone_numbers (phone_number) WHERE 
 CREATE TABLE IF NOT EXISTS user_tags (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    name VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(50) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	deleted_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_tags (user_id, name);
-`, UserTagsUniqueName,
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_tags (user_id, name) WHERE deleted_at IS NULL;
+`, UserTagsUniqueUserIDName,
+	)
+
+	// CreateUserResetPasswords is the SQL query to create the user_reset_passwords table
+	CreateUserResetPasswords = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_reset_passwords (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    reset_token VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_reset_passwords (user_id) WHERE revoked_at IS NULL;
+`, UserResetPasswordsUniqueUserID,
+	)
+
+	// CreateUserEmailVerifications is the SQL query to create the user_email_verifications table
+	CreateUserEmailVerifications = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_email_verifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_email_id BIGINT NOT NULL,
+    verification_token VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMP NOT NULL,
+    verified_at TIMESTAMP,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_email_id) REFERENCES user_emails(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_email_verifications (user_email_id) WHERE revoked_at IS NULL;
+`, UserEmailVerificationsUniqueUserEmailID,
+	)
+
+	// CreateUserPhoneNumberVerifications is the SQL query to create the user_phone_number_verifications table
+	CreateUserPhoneNumberVerifications = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_phone_number_verifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_phone_number_id BIGINT NOT NULL,
+    verification_code VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMP NOT NULL,
+    verified_at TIMESTAMP,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_phone_number_id) REFERENCES user_phone_numbers(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_phone_number_verifications (user_phone_number_id) WHERE revoked_at IS NULL;
+`, UserPhoneNumberVerificationsUniqueUserPhoneNumberID,
+	)
+
+	// CreateUserRefreshTokens is the SQL query to create the user_refresh_tokens table
+	CreateUserRefreshTokens = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_refresh_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    parent_user_refresh_token_id BIGINT,
+    ip_address VARCHAR(15) NOT NULL,
+    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_user_refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_refresh_tokens (parent_user_refresh_token_id) WHERE parent_user_refresh_token_id IS NOT NULL;
+`, UserRefreshTokensUniqueParentUserRefreshTokenID,
+	)
+
+	// CreateUserAccessTokens is the SQL query to create the user_access_tokens table
+	CreateUserAccessTokens = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_access_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    user_refresh_token_id BIGINT NOT NULL,
+    issued_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_refresh_token_id) REFERENCES user_refresh_tokens(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_access_tokens (user_refresh_token_id);
+`, UserAccessTokensUniqueUserRefreshTokenID,
+	)
+
+	// CreateUserTOTPs is the SQL query to create the user_totps table
+	CreateUserTOTPs = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_totps (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    secret VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    verified_at TIMESTAMP,
+    revoked_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_totps (user_id) WHERE revoked_at IS NULL;
+`, UserTOTPsUniqueUserID,
+	)
+
+	// CreateUserNoteTags is the SQL query to create the user_note_tags table
+	CreateUserNoteTags = fmt.Sprintf(
+		`
+CREATE TABLE IF NOT EXISTS user_note_tags (
+    id BIGSERIAL PRIMARY KEY,
+    user_note_id BIGINT NOT NULL,
+    user_tag_id BIGINT NOT NULL,
+    assigned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	deleted_at TIMESTAMP,
+    FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_tag_id) REFERENCES user_tags(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_note_tags (user_note_id, user_tag_id) WHERE deleted_at IS NULL;
+`, UserNoteTagsUniqueUserNoteIDUserTagID,
 	)
 )

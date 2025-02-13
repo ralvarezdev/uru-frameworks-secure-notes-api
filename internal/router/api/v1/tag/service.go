@@ -45,7 +45,7 @@ func (s *service) CreateUserTag(
 		if !isUniqueViolation {
 			panic(err)
 		}
-		if constraintName == internalpostgresmodel.UserTagsUniqueName {
+		if constraintName == internalpostgresmodel.UserTagsUniqueUserIDName {
 			panic(ErrCreateUserTagAlreadyExists)
 		}
 	}
