@@ -408,11 +408,6 @@ func (s *service) RevokeRefreshToken(
 	if err != nil {
 		panic(err)
 	}
-	// Get the parent refresh token ID from the request
-	parentRefreshTokenID, err := internaljwtclaims.GetParentRefreshTokenID(r)
-	if err != nil {
-		panic(err)
-	}
 
 	// Set the tokens in the cache as invalid
 	go internaljwtcache.RevokeRefreshTokenFromCache(userRefreshTokenID)
@@ -428,7 +423,8 @@ func (s *service) RevokeRefreshToken(
 	}
 
 	// Clear cookies if the parent refresh token ID is the same as the user refresh token ID
-	if parentRefreshTokenID == userRefreshTokenID {
+	parentRefreshTokenID, err := internaljwtclaims.GetParentRefreshTokenID(r)
+	if err == nil && parentRefreshTokenID == userRefreshTokenID {
 		internalcookie.ClearCookies(w)
 	}
 }
@@ -447,6 +443,9 @@ func (s *service) LogOut(w http.ResponseWriter, r *http.Request) int64 {
 		r,
 		userRefreshTokenID,
 	)
+
+	// Clear cookies
+	internalcookie.ClearCookies(w)
 
 	return userRefreshTokenID
 }

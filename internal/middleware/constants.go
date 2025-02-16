@@ -75,7 +75,7 @@ func Load() {
 				w http.ResponseWriter,
 				r *http.Request,
 			) (*map[gojwttoken.Token]string, error) {
-				_, rawTokens := internalcookie.RefreshTokenFn(gojwttoken.AccessToken)(
+				_, rawTokens := internalcookie.RefreshTokenFn(token)(
 					w,
 					r,
 				)

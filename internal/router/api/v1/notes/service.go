@@ -147,7 +147,7 @@ func (s *service) SyncUserNotesByLastSyncedAt(
 	}
 
 	// Get the last synced at from the cookies
-	lastSyncedAt, err := internalcookie.GetSyncTagsCookie(r)
+	lastSyncedAt, err := internalcookie.GetSyncNotesCookie(r)
 	if err != nil {
 		panic(err)
 	}
