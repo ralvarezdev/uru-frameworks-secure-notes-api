@@ -283,9 +283,9 @@ func (s *service) LogIn(
 	// Scan the row
 	if err = rows.Scan(
 		&userID,
-		&userPasswordHash,
 		&userSalt,
 		&userEncryptedKey,
+		&userPasswordHash,
 		&tooManyFailedAttempts,
 	); err != nil {
 		panic(err)
@@ -361,7 +361,7 @@ func (s *service) LogIn(
 
 	// Call the refresh token stored procedure
 	var userAccessTokenID, userRefreshTokenID sql.NullInt64
-	if err := internalpostgres.PoolService.QueryRow(
+	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.GenerateUserTokensProc,
 		userID,
 		nil,
@@ -381,7 +381,7 @@ func (s *service) LogIn(
 	userAccessTokenInfo.ID = userAccessTokenID.Int64
 
 	// Set the user tokens cookies
-	if err := internalcookie.SetTokensCookies(
+	if _, err = internalcookie.SetTokensCookies(
 		w,
 		userID.Int64,
 		userRefreshTokenInfo,
@@ -390,9 +390,10 @@ func (s *service) LogIn(
 		panic(err)
 	}
 
-	// Set the user salt and encrypted key cookies
+	// Set the user salt, encrypted key and user ID cookies
 	internalcookie.SetSaltCookie(w, userSalt.String)
 	internalcookie.SetEncryptedKeyCookie(w, userEncryptedKey.String)
+	internalcookie.SetUserIDCookie(w, userID.Int64)
 	return userID.Int64
 }
 

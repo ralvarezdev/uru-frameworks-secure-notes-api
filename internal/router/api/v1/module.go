@@ -2,6 +2,7 @@ package v1
 
 import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
+	internalmiddleware "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/middleware"
 	internalrouterapiv1auth "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/auth"
 	internalrouterapiv1note "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/note"
 	internalrouterapiv1notes "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/router/api/v1/notes"
@@ -33,6 +34,7 @@ var (
 			m.RegisterExactRoute(
 				"POST /sync",
 				Controller.SyncByLastSyncedAt,
+				internalmiddleware.AuthenticateAccessToken,
 			)
 		},
 	}

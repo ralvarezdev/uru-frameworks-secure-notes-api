@@ -524,7 +524,7 @@ BEGIN
 	AND
 		user_access_tokens.revoked_at IS NULL;
 	
-	IF out_user_refresh_token_expires_at IS NOT NULL THEN
+	IF out_user_access_token_expires_at IS NOT NULL THEN
 		out_user_access_token_found = TRUE;
 		out_user_access_token_is_expired = out_user_access_token_expires_at < NOW();
 	END IF;

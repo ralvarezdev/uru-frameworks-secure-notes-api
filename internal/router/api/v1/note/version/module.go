@@ -13,7 +13,7 @@ var (
 		Service:    Service,
 		Controller: Controller,
 		BeforeLoadFn: func(m *gonethttp.Module) {
-			m.Middlewares = gonethttp.NewMiddlewares(internalmiddleware.Authenticate)
+			m.Middlewares = gonethttp.NewMiddlewares(internalmiddleware.AuthenticateAccessToken)
 		},
 		RegisterRoutesFn: func(m *gonethttp.Module) {
 			m.RegisterExactRoute(

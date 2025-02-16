@@ -17,7 +17,7 @@ var (
 		Controller: Controller,
 		BeforeLoadFn: func(m *gonethttp.Module) {
 			m.Middlewares = gonethttp.NewMiddlewares(
-				internalmiddleware.Authenticate,
+				internalmiddleware.AuthenticateAccessToken,
 			)
 		},
 		RegisterRoutesFn: func(m *gonethttp.Module) {

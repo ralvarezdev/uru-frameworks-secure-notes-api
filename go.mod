@@ -14,7 +14,7 @@ require (
 	github.com/ralvarezdev/go-jwt v0.4.10
 	github.com/ralvarezdev/go-loader v0.2.14
 	github.com/ralvarezdev/go-logger v0.4.6
-	github.com/ralvarezdev/go-net v0.9.17
+	github.com/ralvarezdev/go-net v0.9.20
 	github.com/ralvarezdev/go-security-headers v0.1.1
 	github.com/ralvarezdev/go-strings v0.1.9
 	github.com/ralvarezdev/go-validator v0.5.30

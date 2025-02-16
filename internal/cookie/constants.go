@@ -54,6 +54,14 @@ var (
 		Path:     "/",
 	}
 
+	// UserID is the cookies attributes for the user ID cookie
+	UserID = &gonethttpcookie.Attributes{
+		Name:     "user_id",
+		HTTPOnly: false,
+		Secure:   Secure,
+		Path:     "/",
+	}
+
 	// SyncNotes is the cookies attributes for the sync notes cookie
 	SyncNotes = &gonethttpcookie.Attributes{
 		Name:     "sync_notes",
@@ -101,7 +109,7 @@ func SetTokensCookies(
 	userID int64,
 	userRefreshToken,
 	userAccessToken *internaljwtinfo.TokenInfo,
-) error {
+) (*map[gojwttoken.Token]string, error) {
 	// Set the tokens in the cache as valid
 	go func() {
 		for _, token := range []*internaljwtinfo.TokenInfo{
@@ -132,7 +140,8 @@ func SetTokensCookies(
 		userRefreshToken.ID,
 	)
 
-	// Create the user token claims and set the cookies
+	// Issue the user tokens
+	var rawTokens = make(map[gojwttoken.Token]string)
 	for _, userToken := range []*internaljwtinfo.TokenInfo{
 		userRefreshToken,
 		userAccessToken,
@@ -140,18 +149,27 @@ func SetTokensCookies(
 		// Issue the user tokens
 		rawToken, err := internaljwt.Issuer.IssueToken(userToken.Claims)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
+		// Set the raw token
+		rawTokens[userToken.Type] = rawToken
+	}
+
+	// Set the user tokens cookies
+	for _, userToken := range []*internaljwtinfo.TokenInfo{
+		userRefreshToken,
+		userAccessToken,
+	} {
 		// Set the cookies
 		gonethttpcookie.SetCookie(
 			w,
 			userToken.CookieAttributes,
-			rawToken,
+			rawTokens[userToken.Type],
 			userToken.ExpiresAt,
 		)
 	}
-	return nil
+	return &rawTokens, nil
 }
 
 // SetSaltCookie sets the salt cookie
@@ -204,6 +222,16 @@ func GetSyncTagsCookie(r *http.Request) (*time.Time, error) {
 	return gonethttpcookie.GetTimestampCookie(r, SyncTags)
 }
 
+// SetUserIDCookie sets the user ID cookie
+func SetUserIDCookie(w http.ResponseWriter, userID int64) {
+	gonethttpcookie.SetCookie(
+		w,
+		UserID,
+		strconv.FormatInt(userID, 10),
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
 // ClearCookies clears the user cookies
 func ClearCookies(w http.ResponseWriter) {
 	gonethttpcookie.DeleteCookies(
@@ -211,6 +239,7 @@ func ClearCookies(w http.ResponseWriter) {
 		AccessToken,
 		Salt,
 		EncryptedKey,
+		UserID,
 		SyncTags,
 		SyncNotes,
 	)
@@ -245,69 +274,91 @@ func RenovateCookie(
 }
 
 // RefreshTokenFn function to refresh the user tokens
-func RefreshTokenFn(w http.ResponseWriter, r *http.Request) int64 {
-	// Get the user ID and the user refresh token ID from the request
-	userID, err := internaljwtclaims.GetSubject(r)
-	if err != nil {
-		panic(err)
-	}
-	oldUserRefreshTokenID, err := internaljwtclaims.GetParentRefreshTokenID(r)
-	if err != nil {
-		panic(err)
-	}
+func RefreshTokenFn(token gojwttoken.Token) func(
+	w http.ResponseWriter,
+	r *http.Request,
+) (
+	int64,
+	*map[gojwttoken.Token]string,
+) {
+	return func(w http.ResponseWriter, r *http.Request) (
+		int64,
+		*map[gojwttoken.Token]string,
+	) {
 
-	// Get the client IP
-	clientIP := gonethttp.GetClientIP(r)
+		// Get the user ID and the user refresh token ID from the request
+		userID, err := internaljwtclaims.GetSubject(r)
+		if err != nil {
+			panic(err)
+		}
 
-	// Create the user tokens info
-	userRefreshTokenInfo, userAccessTokenInfo := GenerateTokensInfo()
+		// Check if the token is the access token
+		var oldUserRefreshTokenID int64
+		if token == gojwttoken.AccessToken {
+			// Get the parent refresh token ID from the access token
+			oldUserRefreshTokenID, err = internaljwtclaims.GetParentRefreshTokenID(r)
+		} else if token == gojwttoken.RefreshToken {
+			// Get the user refresh token ID from the request
+			oldUserRefreshTokenID, err = internaljwtclaims.GetID(r)
+		}
+		if err != nil {
+			panic(err)
+		}
 
-	// Call the refresh token stored procedure
-	var userRefreshTokenID, userAccessTokenID sql.NullInt64
-	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.RefreshTokenProc,
-		userID,
-		oldUserRefreshTokenID,
-		clientIP,
-		userRefreshTokenInfo.ExpiresAt,
-		userAccessTokenInfo.ExpiresAt,
-		nil, nil,
-	).Scan(
-		&userRefreshTokenID,
-		&userAccessTokenID,
-	); err != nil {
-		panic(err)
-	}
+		// Get the client IP
+		clientIP := gonethttp.GetClientIP(r)
 
-	// Set the token ID to its respective token info
-	userRefreshTokenInfo.ID = userRefreshTokenID.Int64
-	userAccessTokenInfo.ID = userAccessTokenID.Int64
+		// Create the user tokens info
+		userRefreshTokenInfo, userAccessTokenInfo := GenerateTokensInfo()
 
-	// Set the user tokens cookies
-	if err = SetTokensCookies(
-		w,
-		userID,
-		userRefreshTokenInfo,
-		userAccessTokenInfo,
-	); err != nil {
-		panic(err)
-	}
-
-	// Renovate the user salt and encrypted key cookies
-	for _, cookie := range []*gonethttpcookie.Attributes{
-		Salt,
-		EncryptedKey,
-		SyncTags,
-		SyncNotes,
-	} {
-		if err = RenovateCookie(
-			w,
-			r,
-			cookie,
+		// Call the refresh token stored procedure
+		var userRefreshTokenID, userAccessTokenID sql.NullInt64
+		if err = internalpostgres.PoolService.QueryRow(
+			&internalpostgresmodel.RefreshTokenProc,
+			userID,
+			oldUserRefreshTokenID,
+			clientIP,
+			userRefreshTokenInfo.ExpiresAt,
 			userAccessTokenInfo.ExpiresAt,
+			nil, nil,
+		).Scan(
+			&userRefreshTokenID,
+			&userAccessTokenID,
 		); err != nil {
 			panic(err)
 		}
+
+		// Set the token ID to its respective token info
+		userRefreshTokenInfo.ID = userRefreshTokenID.Int64
+		userAccessTokenInfo.ID = userAccessTokenID.Int64
+
+		// Set the user tokens cookies
+		rawTokens, err := SetTokensCookies(
+			w,
+			userID,
+			userRefreshTokenInfo,
+			userAccessTokenInfo,
+		)
+		if err != nil {
+			panic(err)
+		}
+
+		// Renovate the user salt and encrypted key cookies
+		for _, cookie := range []*gonethttpcookie.Attributes{
+			Salt,
+			EncryptedKey,
+			SyncTags,
+			SyncNotes,
+		} {
+			if err = RenovateCookie(
+				w,
+				r,
+				cookie,
+				userAccessTokenInfo.ExpiresAt,
+			); err != nil {
+				panic(err)
+			}
+		}
+		return userID, rawTokens
 	}
-	return userID
 }

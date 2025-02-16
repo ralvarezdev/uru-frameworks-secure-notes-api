@@ -30,7 +30,13 @@ var (
 	Limit func(next http.Handler) http.Handler
 
 	// Authenticate is the API authenticator middleware function
-	Authenticate func(next http.Handler) http.Handler
+	Authenticate func(token gojwttoken.Token) func(next http.Handler) http.Handler
+
+	// AuthenticateAccessToken is the API authenticator middleware function for access tokens
+	AuthenticateAccessToken func(next http.Handler) http.Handler
+
+	// AuthenticateRefreshToken is the API authenticator middleware function for refresh tokens
+	AuthenticateRefreshToken func(next http.Handler) http.Handler
 
 	// Validate is the API request validator middleware function
 	Validate func(
@@ -60,14 +66,25 @@ func Load() {
 		internaljwt.Validator,
 		internalhandler.Handler,
 	)
-	Authenticate = authenticator.AuthenticateFromCookie(
-		gojwttoken.AccessToken,
-		internalcookie.AccessToken.Name,
-		func(w http.ResponseWriter, r *http.Request) error {
-			_ = internalcookie.RefreshTokenFn(w, r)
-			return nil
-		},
-	)
+	Authenticate = func(token gojwttoken.Token) func(next http.Handler) http.Handler {
+		return authenticator.AuthenticateFromCookie(
+			token,
+			internalcookie.RefreshToken.Name,
+			internalcookie.AccessToken.Name,
+			func(
+				w http.ResponseWriter,
+				r *http.Request,
+			) (*map[gojwttoken.Token]string, error) {
+				_, rawTokens := internalcookie.RefreshTokenFn(gojwttoken.AccessToken)(
+					w,
+					r,
+				)
+				return rawTokens, nil
+			},
+		)
+	}
+	AuthenticateAccessToken = Authenticate(gojwttoken.AccessToken)
+	AuthenticateRefreshToken = Authenticate(gojwttoken.RefreshToken)
 
 	// Create API request validator middleware
 	validator, _ := gonethttpmiddlewarevalidator.NewMiddleware(

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	gojwttoken "github.com/ralvarezdev/go-jwt/token"
 	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
@@ -255,7 +256,7 @@ func (c *controller) RevokeRefreshTokens(
 // @Router /api/v1/auth/refresh-token [post]
 func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// Refresh the token
-	userID := internalcookie.RefreshTokenFn(w, r)
+	userID, _ := internalcookie.RefreshTokenFn(gojwttoken.RefreshToken)(w, r)
 
 	// Log the successful token refresh
 	internallogger.Api.RefreshToken(userID)
