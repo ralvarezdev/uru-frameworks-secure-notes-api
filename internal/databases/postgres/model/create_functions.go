@@ -318,6 +318,7 @@ TABLE(
 	out_user_note_starred_at TIMESTAMP,
 	out_user_note_archived_at TIMESTAMP,
 	out_user_note_trashed_at TIMESTAMP,
+	out_user_note_deleted_at TIMESTAMP,
 	out_user_note_has_to_sync_note_tags BOOLEAN,
 	out_user_note_has_to_sync_note_versions BOOLEAN
 )
@@ -337,6 +338,7 @@ BEGIN
 			user_notes.starred_at AS out_user_note_starred_at,
 			user_notes.archived_at AS out_user_note_archived_at,
 			user_notes.trashed_at AS out_user_note_trashed_at,
+			user_notes.deleted_at AS out_user_note_deleted_at,
 			CASE
 				WHEN EXISTS (
 					SELECT
@@ -383,7 +385,9 @@ BEGIN
 	OR
 		user_notes.out_user_note_created_at > in_last_synced_at
 	OR
-		user_notes.out_user_note_updated_at > in_last_synced_at;
+		user_notes.out_user_note_updated_at > in_last_synced_at
+	OR
+		user_notes.out_user_note_deleted_at > in_last_synced_at;
 END;
 $$ LANGUAGE plpgsql;
 `

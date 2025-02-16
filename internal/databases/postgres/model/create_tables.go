@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS user_note_versions (
     user_note_id BIGINT NOT NULL,
     encrypted_content TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-	delete_at TIMESTAMP,
+	deleted_at TIMESTAMP,
     FOREIGN KEY (user_note_id) REFERENCES user_notes(id) ON DELETE CASCADE
 );
 `

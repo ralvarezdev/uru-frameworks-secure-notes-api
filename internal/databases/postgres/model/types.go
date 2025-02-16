@@ -44,6 +44,7 @@ type (
 		StarredAt           *time.Time `json:"starred_at,omitempty"`
 		ArchivedAt          *time.Time `json:"archived_at,omitempty"`
 		TrashedAt           *time.Time `json:"trashed_at,omitempty"`
+		DeletedAt           *time.Time `json:"deleted_at,omitempty"`
 		LatestNoteVersionID *int64     `json:"latest_note_version_id,omitempty"`
 	}
 
@@ -90,6 +91,7 @@ type (
 		StarredAt        *time.Time               `json:"starred_at,omitempty"`
 		ArchivedAt       *time.Time               `json:"archived_at,omitempty"`
 		TrashedAt        *time.Time               `json:"trashed_at,omitempty"`
+		DeletedAt        *time.Time               `json:"deleted_at,omitempty"`
 		SyncNoteVersions []*UserNoteVersionWithID `json:"sync_note_versions"`
 		SyncNoteTags     []*UserNoteTag           `json:"sync_note_tags"`
 	}

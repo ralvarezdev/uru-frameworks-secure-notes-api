@@ -178,6 +178,7 @@ func (s *service) SyncUserNotesByLastSyncedAt(
 			&syncUserNote.StarredAt,
 			&syncUserNote.ArchivedAt,
 			&syncUserNote.TrashedAt,
+			&syncUserNote.DeletedAt,
 			&hasToSyncNoteTags,
 			&hasToSyncNoteVersions,
 		); err != nil {
