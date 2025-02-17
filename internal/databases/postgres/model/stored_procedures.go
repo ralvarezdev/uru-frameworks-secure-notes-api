@@ -32,7 +32,7 @@ var (
 	GetUserEmailProc = "CALL get_user_email($1, $2)"
 
 	// GenerateTOTPUrlProc is the query to call the stored procedure to generate TOTP URL
-	GenerateTOTPUrlProc = "CALL generate_totp_url($1, $2, $3, $4, $5, $6)"
+	GenerateTOTPUrlProc = "CALL generate_totp_url($1, $2, $3, $4, $5, $6, $7)"
 
 	// IsRefreshTokenValidProc is the query to call the stored procedure to check if the refresh token is valid
 	IsRefreshTokenValidProc = "CALL is_refresh_token_valid($1, $2, $3, $4)"
@@ -171,4 +171,19 @@ var (
 
 	// ListUserNotesProc is the query to call the stored procedure to list user notes
 	ListUserNotesProc = "CALL list_user_notes($1, $2)"
+
+	// RevokeUser2FAEmailCodeProc is the query to call the stored procedure to revoke user 2FA email code
+	RevokeUser2FAEmailCodeProc = "CALL revoke_user_2fa_email_code($1)"
+
+	// CreateUser2FAEmailCodeProc is the query to call the stored procedure to create user 2FA email code
+	CreateUser2FAEmailCodeProc = "CALL create_user_2fa_email_code($1, $2)"
+
+	// UseUser2FAEmailCodeProc is the query to call the stored procedure to use user 2FA email code
+	UseUser2FAEmailCodeProc = "CALL use_user_2fa_email_code($1, $2)"
+
+	// EnableUser2FAProc is the query to call the stored procedure to enable user 2FA
+	EnableUser2FAProc = "CALL enable_user_2fa($1, $2, $3)"
+
+	// DisableUser2FAProc is the query to call the stored procedure to disable user 2FA
+	DisableUser2FAProc = "CALL disable_user_2fa($1)"
 )

@@ -152,37 +152,23 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTOTPProc is the query to create the stored procedure to revoke user TOTP
-	CreateRevokeUserTOTPProc = `
-CREATE OR REPLACE PROCEDURE revoke_user_totp(
+	// CreateRevokeUser2FATOTPProc is the query to create the stored procedure to revoke user 2FA TOTP
+	CreateRevokeUser2FATOTPProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_2fa_totp(
 	IN in_user_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the user_totp_recovery_codes table
-	UPDATE
-		user_totp_recovery_codes
-	SET
-		revoked_at = NOW()
-	FROM
-		user_totps 
-	WHERE
-		user_totps.id = user_totp_recovery_codes.user_totp_id
-	AND	
-		user_totps.user_id = in_user_id
-	AND	
-		user_totp_recovery_codes.revoked_at IS NULL;
-
-	-- Update the user_totps table
+	-- Update the user_2fa_totp table
 	UPDATE	
-		user_totps
+		user_2fa_totp
 	SET	
 		revoked_at = NOW()
 	WHERE
-		user_totps.user_id = in_user_id 
+		user_2fa_totp.user_id = in_user_id 
 	AND	
-		user_totps.revoked_at IS NULL;
+		user_2fa_totp.revoked_at IS NULL;
 END;
 $$;
 `
@@ -376,32 +362,32 @@ END;
 $$;
 `
 
-	// CreateGetUserTOTPProc is the query to create the stored procedure to get user TOTP by user ID
-	CreateGetUserTOTPProc = `
-CREATE OR REPLACE PROCEDURE get_user_totp(
+	// CreateGetUser2FATOTPProc is the query to create the stored procedure to get user 2FA TOTP by user ID
+	CreateGetUser2FATOTPProc = `
+CREATE OR REPLACE PROCEDURE get_user_2fa_totp(
 	IN in_user_id BIGINT,
-	OUT out_user_totp_id BIGINT,
-	OUT out_user_totp_secret VARCHAR,
-	OUT out_user_totp_verified_at TIMESTAMP
+	OUT out_user_2fa_totp_id BIGINT,
+	OUT out_user_2fa_totp_secret VARCHAR,
+	OUT out_user_2fa_totp_verified_at TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
 	-- Select the TOTP ID, secret, and verified at by user ID
 	SELECT
-		user_totps.id,
-		user_totps.secret,
-		user_totps.verified_at
+		user_2fa_totp.id,
+		user_2fa_totp.secret,
+		user_2fa_totp.verified_at
 	INTO
-		out_user_totp_id,
-		out_user_totp_secret,
-		out_user_totp_verified_at
+		out_user_2fa_totp_id,
+		out_user_2fa_totp_secret,
+		out_user_2fa_totp_verified_at
 	FROM
-		user_totps
+		user_2fa_totp
 	WHERE
-		user_totps.user_id = in_user_id
+		user_2fa_totp.user_id = in_user_id
 	AND
-		user_totps.revoked_at IS NULL;
+		user_2fa_totp.revoked_at IS NULL;
 END;
 $$;
 `
@@ -430,41 +416,47 @@ END;
 $$;
 `
 
-	// CreateGenerateTOTPUrlProc is the query to create the stored procedure to generate TOTP URL
-	CreateGenerateTOTPUrlProc = `
-CREATE OR REPLACE PROCEDURE generate_totp_url(
+	// CreateGenerate2FATOTPUrlProc is the query to create the stored procedure to generate 2FA TOTP URL
+	CreateGenerate2FATOTPUrlProc = `
+CREATE OR REPLACE PROCEDURE generate_2fa_totp_url(
 	IN in_user_id BIGINT,
-	IN in_new_user_totp_secret VARCHAR,
+	IN in_new_user_2fa_totp_secret VARCHAR,
+	OUT out_has_user_2fa_enabled BOOLEAN,
 	OUT out_user_email VARCHAR,
-	OUT out_old_user_totp_id BIGINT,
-	OUT out_old_user_totp_secret VARCHAR,
-	OUT out_old_user_totp_verified_at TIMESTAMP
+	OUT out_old_user_2fa_totp_id BIGINT,
+	OUT out_old_user_2fa_totp_secret VARCHAR,
+	OUT out_old_user_2fa_totp_verified_at TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Select the user email by user ID
-	CALL get_user_email(in_user_id, out_user_email);
+	-- Check if the user has 2FA enabled
+	call has_user_2fa_enabled(in_user_id, out_has_user_2fa_enabled);
 
-	-- Select the TOTP ID, secret, and verified at by user ID
-	CALL get_user_totp(in_user_id, out_old_user_totp_id, out_old_user_totp_secret, out_old_user_totp_verified_at);
-
-	-- If the TOTP is not verified, revoke it
-	IF out_old_user_totp_id IS NOT NULL AND out_old_user_totp_verified_at IS NULL THEN
-		CALL revoke_user_totp(in_user_id);
-	END IF;
-
-	-- If the TOTP wasn't active or verified, insert a new TOTP
-	IF out_old_user_totp_verified_at IS NULL THEN
-		-- Insert into user_totps table
-		INSERT INTO user_totps (
-			user_id,
-			secret
-		)
-		VALUES (
-			in_user_id,
-			in_new_user_totp_secret
-		);
+	IF out_has_user_2fa_enabled THEN
+		-- Select the user email by user ID
+		CALL get_user_email(in_user_id, out_user_email);
+	
+		-- Select the TOTP ID, secret, and verified at by user ID
+		CALL get_user_2fa_totp(in_user_id, out_old_user_2fa_totp_id, out_old_user_2fa_totp_secret, out_old_user_2fa_totp_verified_at);
+	
+		-- If the TOTP is not verified, revoke it
+		IF out_old_user_2fa_totp_id IS NOT NULL AND out_old_user_2fa_totp_verified_at IS NULL THEN
+			CALL revoke_user_2fa_totp(in_user_id);
+		END IF;
+	
+		-- If the TOTP wasn't active or verified, insert a new TOTP
+		IF out_old_user_2fa_totp_verified_at IS NULL THEN
+			-- Insert into user_2fa_totp table
+			INSERT INTO user_2fa_totp (
+				user_id,
+				secret
+			)
+			VALUES (
+				in_user_id,
+				in_new_user_2fa_totp_secret
+			);
+		END IF;
 	END IF;
 END;
 $$;
@@ -532,26 +524,51 @@ END;
 $$;
 `
 
-	// CreateRevokeUserTOTPRecoveryCodeProc is the query to create the stored procedure to revoke user TOTP recovery code
-	CreateRevokeUserTOTPRecoveryCodeProc = `
-CREATE OR REPLACE PROCEDURE revoke_user_totp_recovery_code(
-	IN in_user_totp_id BIGINT,
-	IN in_user_totp_recovery_code VARCHAR
+	// CreateUseUser2FARecoveryCodeProc is the query to create the stored procedure to use user 2FA TOTP recovery code
+	CreateUseUser2FARecoveryCodeProc = `
+CREATE OR REPLACE PROCEDURE use_user_2fa_recovery_code(
+	IN in_user_id BIGINT,
+	IN in_user_2fa_recovery_code VARCHAR
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the user_totp_recovery_codes table
+	-- Update the user_2fa_recovery_codes table
 	UPDATE
-		user_totp_recovery_codes
+		user_2fa_recovery_codes
+	SET
+		used_at = NOW()
+	WHERE
+		user_2fa_recovery_codes.user_id = in_user_id
+	AND
+		user_2fa_recovery_codes.recovery_code = in_user_2fa_recovery_code
+	AND
+		user_2fa_recovery_codes.revoked_at IS NULL
+	AND
+		user_2fa_recovery_codes.used_at IS NULL;
+END;
+$$;
+`
+
+	// CreateRevokeUser2FARecoveryCodesProc is the query to create the stored procedure to revoke user 2FA recovery codes
+	CreateRevokeUser2FARecoveryCodesProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_2fa_recovery_codes(
+	IN in_user_id BIGINT
+)	
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_2fa_recovery_codes table
+	UPDATE
+		user_2fa_recovery_codes
 	SET
 		revoked_at = NOW()
-	WHERE
-		user_totp_recovery_codes.user_totp_id = in_user_totp_id
+	WHERE	
+		user_2fa_recovery_codes.user_id = in_user_id
+	AND	
+		user_2fa_recovery_codes.revoked_at IS NULL
 	AND
-		user_totp_recovery_codes.recovery_code = in_user_totp_recovery_code
-	AND
-		user_totp_recovery_codes.revoked_at IS NULL;
+		user_2fa_recovery_codes.used_at IS NULL;
 END;
 $$;
 `
@@ -559,26 +576,22 @@ $$;
 	// CreateVerifyTOTPProc is the query to create verify TOTP
 	CreateVerifyTOTPProc = `
 CREATE OR REPLACE PROCEDURE verify_totp(
-	IN in_user_totp_id BIGINT,
-	IN in_user_totp_recovery_codes VARCHAR[]
+	IN in_user_2fa_totp_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Update the user_totps table
+	-- Update the user_2fa_totp table
 	UPDATE
-		user_totps
+		user_2fa_totp
 	SET
 		verified_at = NOW()
 	WHERE
-		user_totps.id = in_user_totp_id
+		user_2fa_totp.id = in_user_2fa_totp_id
 	AND 
-		user_totps.verified_at IS NULL
+		user_2fa_totp.verified_at IS NULL
 	AND
-		user_totps.revoked_at IS NULL;
-
-	-- Create the TOTP recovery codes
-	call create_user_totp_recovery_codes(in_user_totp_id, in_user_totp_recovery_codes);
+		user_2fa_totp.revoked_at IS NULL;
 END;
 $$;
 `
@@ -869,7 +882,7 @@ $$;
 	// CreateResetPasswordProc is the query to create the stored procedure to reset password
 	CreateResetPasswordProc = `
 CREATE OR REPLACE PROCEDURE reset_password(
-	IN in_user_reset_password_token BIGINT,
+	IN in_user_reset_password_token VARCHAR,
 	IN in_new_user_password_hash VARCHAR,
 	OUT out_user_id BIGINT,
 	OUT out_invalid_token BOOLEAN
@@ -1049,11 +1062,11 @@ BEGIN
 	-- Revoke the user tokens
 	CALL revoke_user_tokens(in_user_id);
 
-	-- Revoke the user TOTP
-	CALL revoke_user_totp(in_user_id);
-
 	-- Revoke the user reset password token
 	CALL revoke_user_reset_password_token(in_user_id);
+
+	-- Disable the user 2FA 
+	CALL disable_user_2fa(in_user_id);
 
 	-- Update the users table
 	UPDATE
@@ -1253,26 +1266,26 @@ END;
 $$;
 `
 
-	// CreateHasUserTOTPEnabledProc is the query to create the stored procedure to check if the user has TOTP enabled
-	CreateHasUserTOTPEnabledProc = `
-CREATE OR REPLACE PROCEDURE has_user_totp_enabled(
+	// CreateHasUser2FAEnabledProc is the query to create the stored procedure to check if the user has 2FA enabled
+	CreateHasUser2FAEnabledProc = `
+CREATE OR REPLACE PROCEDURE has_user_2fa_enabled(
 	IN in_user_id BIGINT,
-	OUT out_user_has_totp_enabled BOOLEAN
+	OUT out_has_user_2fa_enabled BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	-- Select the user TOTP ID by user ID
+	-- Check if the user is on the user_2fa table
 	SELECT
-		user_totps.verified_at IS NOT NULL
+		user_2fa.id IS NOT NULL
 	INTO
-		out_user_has_totp_enabled
+		out_has_user_2fa_enabled
 	FROM
-		user_totps
+		user_2fa
 	WHERE
-		user_totps.user_id = in_user_id
+		user_2fa.user_id = in_user_id
 	AND
-		user_totps.revoked_at IS NULL;
+		user_2fa.revoked_at IS NULL;
 END;
 $$;
 `
@@ -1313,7 +1326,7 @@ CREATE OR REPLACE PROCEDURE get_my_profile(
 	OUT out_user_email_is_verified BOOLEAN,
 	OUT out_user_phone_number VARCHAR,
 	OUT out_user_phone_number_is_verified BOOLEAN,
-	OUT out_user_has_totp_enabled BOOLEAN
+	OUT out_user_has_2fa_enabled BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -1337,7 +1350,7 @@ BEGIN
 	CALL is_user_phone_number_verified(in_user_id, out_user_phone_number_is_verified);
 
 	-- Check if the user has TOTP enabled
-	CALL has_user_totp_enabled(in_user_id, out_user_has_totp_enabled);
+	CALL has_user_2fa_enabled(in_user_id, out_user_has_2fa_enabled);
 END;
 $$;
 `
@@ -1742,27 +1755,27 @@ END;
 $$;
 `
 
-	// CreateCreateUserTOTPRecoveryCodesProc is the query to create the stored procedure to create user TOTP recovery codes
-	CreateCreateUserTOTPRecoveryCodesProc = `
-CREATE OR REPLACE PROCEDURE create_user_totp_recovery_codes(
-	IN in_user_totp_id BIGINT,
-	IN in_user_totp_recovery_codes VARCHAR[]
+	// CreateCreateUser2FARecoveryCodesProc is the query to create the stored procedure to create user TOTP recovery codes
+	CreateCreateUser2FARecoveryCodesProc = `
+CREATE OR REPLACE PROCEDURE create_user_2fa_recovery_codes(
+	IN in_user_id BIGINT,
+	IN in_user_2fa_recovery_codes VARCHAR[]
 )
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	in_user_totp_recovery_code VARCHAR;
+	in_user_2fa_recovery_code VARCHAR;
 BEGIN
-	-- Insert into user_totp_recovery_codes table
-	FOREACH in_user_totp_recovery_code IN ARRAY in_user_totp_recovery_codes
+	-- Insert into user_2fa_recovery_codes table
+	FOREACH in_user_2fa_recovery_code IN ARRAY in_user_2fa_recovery_codes
 	LOOP
-		INSERT INTO user_totp_recovery_codes (
-			user_totp_id,
+		INSERT INTO user_2fa_recovery_codes (
+			user_id,
 			recovery_code
 		)
 		VALUES (
-			in_user_totp_id,
-			in_user_totp_recovery_code
+			in_user_id,
+			in_user_2fa_recovery_code
 		);
 	END LOOP;
 END;
@@ -1929,6 +1942,144 @@ BEGIN
 		)
 	INTO
 		out_user_notes_id;
+END;
+$$;
+`
+
+	// CreateRevokeUser2FAEmailCodeProc is the query to create the stored procedure to revoke user 2FA email code
+	CreateRevokeUser2FAEmailCodeProc = `
+CREATE OR REPLACE PROCEDURE revoke_user_2fa_email_code(
+	IN in_user_id BIGINT
+)	
+LANGUAGE plpgsql	
+AS $$
+BEGIN
+	-- Update the user_2fa_email_codes table
+	UPDATE
+		user_2fa_email_codes
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_2fa_email_codes.user_id = in_user_id
+	AND
+		user_2fa_email_codes.revoked_at IS NULL
+	AND
+		user_2fa_email_codes.used_at IS NULL;
+END;	
+$$;
+`
+
+	// CreateCreateUser2FAEmailCodeProc is the query to create the stored procedure to create user 2FA email code
+	CreateCreateUser2FAEmailCodeProc = `
+CREATE OR REPLACE PROCEDURE create_user_2fa_email_code(	
+	IN in_user_id BIGINT,
+	IN in_user_2fa_email_code VARCHAR,
+	IN in_user_2fa_email_code_expires_at TIMESTAMP
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN	
+	-- Revoke the user 2FA email code
+	CALL revoke_user_2fa_email_code(in_user_id);
+	
+	-- Insert into user_2fa_email_codes table
+	INSERT INTO user_2fa_email_codes (
+		user_id,
+		code,
+		expires_at
+	)
+	VALUES (
+		in_user_id,
+		in_user_2fa_email_code,
+		in_user_2fa_email_code_expires_at
+	);
+END;
+$$;
+`
+
+	// CreateUseUser2FAEmailCodeProc is the query to create the stored procedure to use user 2FA email code
+	CreateUseUser2FAEmailCodeProc = `
+CREATE OR REPLACE PROCEDURE use_user_2fa_email_code(
+	IN in_user_id BIGINT,
+	IN in_user_2fa_email_code VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_2fa_email_codes table
+	UPDATE
+		user_2fa_email_codes
+	SET
+		used_at = NOW()
+	WHERE
+		user_2fa_email_codes.user_id = in_user_id
+	AND
+		user_2fa_email_codes.code = in_user_2fa_email_code
+	AND
+		user_2fa_email_codes.expires_at > NOW()
+	AND
+		user_2fa_email_codes.revoked_at IS NULL
+	AND
+		user_2fa_email_codes.used_at IS NULL;
+END;
+$$;
+`
+
+	// CreateEnableUser2FAProc is the query to create the stored procedure to enable user 2FA
+	CreateEnableUser2FAProc = `
+CREATE OR REPLACE PROCEDURE enable_2fa(
+	IN in_user_id BIGINT,
+	IN in_user_2fa_recovery_codes VARCHAR[],
+	OUT out_is_user_email_verified BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user email is verified
+	CALL is_user_email_verified(in_user_id, out_is_user_email_verified);
+
+	IF out_is_user_email_verified IS TRUE THEN
+		-- Create the user 2FA recovery codes
+		CALL create_user_2fa_recovery_codes(in_user_id, in_user_2fa_recovery_codes);
+	
+		-- Insert into user_2fa table
+		INSERT INTO user_2fa (
+			user_id
+		)
+		VALUES (
+			in_user_id
+		);
+	END IF;
+END;	
+$$;
+`
+
+	// CreateDisableUser2FAProc is the query to create the stored procedure to disable user 2FA
+	CreateDisableUser2FAProc = `
+CREATE OR REPLACE PROCEDURE disable_2fa(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_2fa table
+	UPDATE
+		user_2fa
+	SET
+		revoked_at = NOW()
+	WHERE
+		user_2fa.user_id = in_user_id
+	AND
+		user_2fa.revoked_at IS NULL;
+
+	-- Revoke the user 2FA recovery codes
+	CALL revoke_user_2fa_recovery_codes(in_user_id);
+
+	-- Revoke the user 2FA email code
+	CALL revoke_user_2fa_email_code(in_user_id);
+
+	-- Revoke the user 2FA TOTP
+	CALL revoke_user_2fa_totp(in_user_id);
 END;
 $$;
 `

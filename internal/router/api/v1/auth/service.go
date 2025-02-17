@@ -324,35 +324,37 @@ func (s *service) LogIn(
 
 	// Check if the user TOTP ID is not nil and the TOTP is verified
 	if userTOTPID.Int64 != 0 && userTOTPVerifiedAt.Valid {
-		// Check if the TOTP code-related fields are nil
-		if body.TOTPCode == nil {
-			panic(ErrLogInRequiredTOTPCode)
+		// Check if the 2FA code-related fields are nil
+		if body.TwoFactorAuthenticationCode == nil {
+			panic(ErrLogInRequired2FACode)
 		}
-		if body.IsTOTPRecoveryCode == nil {
-			panic(ErrLogInRequiredIsTOTPRecoveryCode)
+		if body.TwoFactorAuthenticationCodeType == nil {
+			panic(ErrLogInRequired2FACodeType)
 		}
 
 		// Validate the TOTP code
-		if !(*body.IsTOTPRecoveryCode) {
+		if *body.TwoFactorAuthenticationCodeType == TOTPCodeType {
 			if !s.ValidateTOTPCode(
 				userID.Int64,
 				userTOTPSecret.String,
-				*body.TOTPCode,
+				*body.TwoFactorAuthenticationCode,
 				clientIP,
 				currentTime,
 			) {
 				panic(ErrLogInInvalidTOTPCode)
 			}
-		} else {
+		} else if *body.TwoFactorAuthenticationCodeType == TOTPRecoveryCodeType {
 			// Validate the TOTP recovery code
 			if !s.ValidateTOTPRecoveryCode(
 				userID.Int64,
 				userTOTPID.Int64,
-				*body.TOTPCode,
+				*body.TwoFactorAuthenticationCode,
 				clientIP,
 			) {
 				panic(ErrLogInInvalidTOTPRecoveryCode)
 			}
+		} else {
+			panic(ErrLogInInvalid2FACodeType)
 		}
 	}
 

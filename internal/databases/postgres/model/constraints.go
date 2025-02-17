@@ -40,8 +40,8 @@ const (
 	// UserAccessTokensUniqueUserRefreshTokenID is the constraint name for the unique user refresh token ID constraint on the user_access_tokens table
 	UserAccessTokensUniqueUserRefreshTokenID = "user_access_tokens_unique_user_refresh_token_id"
 
-	// UserTOTPsUniqueUserID is the constraint name for the unique user ID constraint on the user_totps table
-	UserTOTPsUniqueUserID = "user_totps_unique_user_id"
+	// User2FATOTPUniqueUserID is the constraint name for the unique user ID constraint on the user_2fa_totp table
+	User2FATOTPUniqueUserID = "user_2fa_totp_unique_user_id"
 
 	// UserNoteTagsUniqueUserNoteIDUserTagID is the constraint name for the unique user note ID and user tag ID constraint on the user_note_tags table
 	UserNoteTagsUniqueUserNoteIDUserTagID = "user_note_tags_unique_user_note_id_user_tag_id"

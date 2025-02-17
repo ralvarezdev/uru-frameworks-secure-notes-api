@@ -2870,13 +2870,13 @@ const docTemplate = `{
         "internal_router_api_v1_auth.LogInRequest": {
             "type": "object",
             "properties": {
-                "is_totp_recovery_code": {
-                    "type": "boolean"
-                },
-                "password": {
+                "2fa_code": {
                     "type": "string"
                 },
-                "totp_code": {
+                "2fa_code_type": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 },
                 "username": {

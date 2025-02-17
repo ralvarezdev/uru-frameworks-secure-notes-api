@@ -17,10 +17,15 @@ type (
 
 	// LogInRequest is the request DTO to log in
 	LogInRequest struct {
-		Username           string  `json:"username"`
-		Password           string  `json:"password"`
-		TOTPCode           *string `json:"totp_code,omitempty"`
-		IsTOTPRecoveryCode *bool   `json:"is_totp_recovery_code,omitempty"`
+		Username                        string  `json:"username"`
+		Password                        string  `json:"password"`
+		TwoFactorAuthenticationCode     *string `json:"2fa_code,omitempty"`
+		TwoFactorAuthenticationCodeType *string `json:"2fa_code_type,omitempty"`
+	}
+
+	// SendTOTPEmailRequest is the request DTO to send TOTP email
+	SendTOTPEmailRequest struct {
+		Username string `json:"username"`
 	}
 
 	// GenerateTOTPUrlResponseData is the response data DTO to generate TOTP URL

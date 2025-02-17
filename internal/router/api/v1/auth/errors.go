@@ -39,29 +39,35 @@ var (
 		http.StatusUnauthorized,
 	)
 	ErrLogInInvalidTOTPCode = gonethttpresponse.NewFailResponseError(
-		"totp_code",
+		"2fa_code",
 		"invalid TOTP code",
 		nil,
 		http.StatusUnauthorized,
 	)
 	ErrLogInInvalidTOTPRecoveryCode = gonethttpresponse.NewFailResponseError(
-		"totp_code",
+		"2fa_code",
 		"invalid TOTP recovery code",
 		nil,
 		http.StatusUnauthorized,
 	)
-	ErrLogInRequiredTOTPCode = gonethttpresponse.NewFailResponseError(
-		"totp_code",
-		fmt.Sprintf(govalidatormappervalidations.ErrRequiredField, "totp_code"),
+	ErrLogInRequired2FACode = gonethttpresponse.NewFailResponseError(
+		"2fa_code",
+		fmt.Sprintf(govalidatormappervalidations.ErrRequiredField, "2fa_code"),
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrLogInRequiredIsTOTPRecoveryCode = gonethttpresponse.NewFailResponseError(
-		"is_totp_recovery_code",
+	ErrLogInRequired2FACodeType = gonethttpresponse.NewFailResponseError(
+		"2fa_code_type",
 		fmt.Sprintf(
 			govalidatormappervalidations.ErrRequiredField,
-			"is_totp_recovery_code",
+			"2fa_code_type",
 		),
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrLogInInvalid2FACodeType = gonethttpresponse.NewFailResponseError(
+		"2fa_code_type",
+		"invalid 2FA code type",
 		nil,
 		http.StatusBadRequest,
 	)

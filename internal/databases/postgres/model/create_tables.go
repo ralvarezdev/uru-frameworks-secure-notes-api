@@ -33,15 +33,41 @@ CREATE TABLE IF NOT EXISTS user_failed_log_in_attempts (
 );
 `
 
-	// CreateUserTOTPRecoveryCodes is the SQL query to create the user_totp_recovery_codes table
-	CreateUserTOTPRecoveryCodes = `
-CREATE TABLE IF NOT EXISTS user_totp_recovery_codes (
+	// CreateUser2FA is the SQL query to create the user_2fa table
+	CreateUser2FA = `
+CREATE TABLE IF NOT EXISTS user_2fa (
+	id BIGSERIAL PRIMARY KEY,
+	user_id BIGINT NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	revoked_at TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`
+
+	// CreateUser2FARecoveryCodes is the SQL query to create the user_2fa_recovery_codes table
+	CreateUser2FARecoveryCodes = `
+CREATE TABLE IF NOT EXISTS user_2fa_recovery_codes (
     id BIGSERIAL PRIMARY KEY,
-    user_totp_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
     code VARCHAR(255) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	used_at TIMESTAMP,
     revoked_at TIMESTAMP,
-    FOREIGN KEY (user_totp_id) REFERENCES user_totps(id) ON DELETE CASCADE
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`
+
+	// CreateUser2FAEmailCodes is the SQL query to create the user_2fa_email_codes table
+	CreateUser2FAEmailCodes = `
+CREATE TABLE IF NOT EXISTS user_2fa_email_codes (
+	id BIGSERIAL PRIMARY KEY,
+	user_id BIGINT NOT NULL,
+	code VARCHAR(255) NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+	expires_at TIMESTAMP NOT NULL,
+	used_at TIMESTAMP,
+	revoked_at TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 `
 
@@ -241,10 +267,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_access_tokens (user_refresh_token_i
 `, UserAccessTokensUniqueUserRefreshTokenID,
 	)
 
-	// CreateUserTOTPs is the SQL query to create the user_totps table
-	CreateUserTOTPs = fmt.Sprintf(
+	// CreateUser2FATOTP is the SQL query to create the user_2fa_totp table
+	CreateUser2FATOTP = fmt.Sprintf(
 		`
-CREATE TABLE IF NOT EXISTS user_totps (
+CREATE TABLE IF NOT EXISTS user_2fa_totp (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     secret VARCHAR(255) NOT NULL,
@@ -253,8 +279,8 @@ CREATE TABLE IF NOT EXISTS user_totps (
     revoked_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_totps (user_id) WHERE revoked_at IS NULL;
-`, UserTOTPsUniqueUserID,
+CREATE UNIQUE INDEX IF NOT EXISTS %s ON user_2fa_totp (user_id) WHERE revoked_at IS NULL;
+`, User2FATOTPUniqueUserID,
 	)
 
 	// CreateUserNoteTags is the SQL query to create the user_note_tags table
