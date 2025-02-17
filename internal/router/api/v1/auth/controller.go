@@ -5,7 +5,6 @@ import (
 	gonethttpctx "github.com/ralvarezdev/go-net/http/context"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
 	gonethttpstatusresponse "github.com/ralvarezdev/go-net/http/status/response"
-	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	internalcookie "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/cookie"
 	internalhandler "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/handler"
 	internallogger "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/logger"
@@ -16,18 +15,6 @@ type (
 	// controller is the structure for the API V1 auth controller
 	controller struct{}
 )
-
-// GetTokenWildcard gets the token wildcard
-func (c *controller) GetTokenWildcard(
-	w http.ResponseWriter,
-	r *http.Request,
-	dest *string,
-) bool {
-	return internalhandler.Handler.ParseWildcard(
-		w, r, "token", dest,
-		gostringsconvert.ToString,
-	)
-}
 
 // SignUp signs up a new user
 // @Summary Sign up a new user
@@ -432,23 +419,20 @@ func (c *controller) SendEmailVerificationToken(
 // @Accept json
 // @Produce json
 // @Security CookieAuth
-// @Param token path string true "Token"
+// @Param request body VerifyEmailRequest true "Verify Email Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/email/verify/{token} [post]
+// @Router /api/v1/auth/email/verify [post]
 func (c *controller) VerifyEmail(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// Get the token from the URL
-	var token string
-	if !c.GetTokenWildcard(w, r, &token) {
-		return
-	}
+	// Get the body from the context
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*VerifyEmailRequest)
 
 	// Verify the email
-	userID := Service.VerifyEmail(token)
+	userID := Service.VerifyEmail(requestBody)
 
 	// Log the successful email verification
 	internallogger.Api.VerifyEmail(userID)
@@ -535,24 +519,17 @@ func (c *controller) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security CookieAuth
-// @Param token path string true "Token"
 // @Param request body ResetPasswordRequest true "Reset Password Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/password/reset/{token} [post]
+// @Router /api/v1/auth/password/reset [post]
 func (c *controller) ResetPassword(w http.ResponseWriter, r *http.Request) {
-	// Get the token from the URL
-	var token string
-	if !c.GetTokenWildcard(w, r, &token) {
-		return
-	}
-
 	// Get the body from the context
 	requestBody, _ := gonethttpctx.GetCtxBody(r).(*ResetPasswordRequest)
 
 	// Reset the password
-	userID := Service.ResetPassword(token, requestBody)
+	userID := Service.ResetPassword(requestBody)
 
 	// Log the successful password reset
 	internallogger.Api.ResetPassword(userID)

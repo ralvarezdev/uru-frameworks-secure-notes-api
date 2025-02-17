@@ -127,7 +127,7 @@ var (
 				),
 			)
 			m.RegisterExactRoute(
-				"POST /password/reset/{token}",
+				"POST /password/reset",
 				Controller.ResetPassword,
 				internalmiddleware.Validate(
 					&ResetPasswordRequest{},
@@ -156,8 +156,9 @@ var (
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
-				"POST /email/verify/{token}",
+				"POST /email/verify",
 				Controller.VerifyEmail,
+				internalmiddleware.Validate(&VerifyEmailRequest{}),
 			)
 			m.RegisterExactRoute(
 				"PUT /phone-number",

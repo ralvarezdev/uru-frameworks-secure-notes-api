@@ -1,6 +1,7 @@
 package token
 
 import (
+	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	internalloader "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/loader"
 	"time"
 )
@@ -19,6 +20,12 @@ var (
 
 	// ResetPasswordTokenDuration is the reset password token duration
 	ResetPasswordTokenDuration time.Duration
+
+	// PrettyEmailVerificationTokenDuration is the pretty email verification token duration
+	PrettyEmailVerificationTokenDuration string
+
+	// PrettyResetPasswordTokenDuration is the pretty reset password token duration
+	PrettyResetPasswordTokenDuration string
 )
 
 // Load loads the token constants
@@ -35,4 +42,16 @@ func Load() {
 			panic(err)
 		}
 	}
+
+	// Set the pretty email verification token duration
+	PrettyEmailVerificationTokenDuration, _ = gostringsconvert.PrettyDuration(
+		EmailVerificationTokenDuration,
+		"s",
+	)
+
+	// Set the pretty reset password token duration
+	PrettyResetPasswordTokenDuration, _ = gostringsconvert.PrettyDuration(
+		ResetPasswordTokenDuration,
+		"s",
+	)
 }

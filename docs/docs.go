@@ -122,7 +122,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/email/verify/{token}": {
+        "/api/v1/auth/email/verify": {
             "post": {
                 "security": [
                     {
@@ -142,11 +142,13 @@ const docTemplate = `{
                 "summary": "Verifies the email of the authenticated user",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "path",
-                        "required": true
+                        "description": "Verify Email Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.VerifyEmailRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -377,7 +379,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/password/reset/{token}": {
+        "/api/v1/auth/password/reset": {
             "post": {
                 "security": [
                     {
@@ -396,13 +398,6 @@ const docTemplate = `{
                 ],
                 "summary": "Reset a user's password",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Token",
-                        "name": "token",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "Reset Password Request",
                         "name": "request",
@@ -2581,6 +2576,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "deleted_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2889,7 +2887,10 @@ const docTemplate = `{
         "internal_router_api_v1_auth.ResetPasswordRequest": {
             "type": "object",
             "properties": {
-                "password": {
+                "new_password": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -2918,6 +2919,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.VerifyEmailRequest": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }

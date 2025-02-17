@@ -16,7 +16,7 @@ require (
 	github.com/ralvarezdev/go-logger v0.4.6
 	github.com/ralvarezdev/go-net v0.9.21
 	github.com/ralvarezdev/go-security-headers v0.1.1
-	github.com/ralvarezdev/go-strings v0.1.9
+	github.com/ralvarezdev/go-strings v0.1.10
 	github.com/ralvarezdev/go-validator v0.5.30
 	github.com/swaggo/swag v1.16.4
 )

@@ -8,6 +8,8 @@ definitions:
         type: string
       created_at:
         type: string
+      deleted_at:
+        type: string
       id:
         type: integer
       pinned_at:
@@ -206,7 +208,9 @@ definitions:
     type: object
   internal_router_api_v1_auth.ResetPasswordRequest:
     properties:
-      password:
+      new_password:
+        type: string
+      token:
         type: string
     type: object
   internal_router_api_v1_auth.RevokeRefreshTokenRequest:
@@ -225,6 +229,11 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  internal_router_api_v1_auth.VerifyEmailRequest:
+    properties:
+      token:
         type: string
     type: object
   internal_router_api_v1_auth.VerifyPhoneNumberRequest:
@@ -623,17 +632,18 @@ paths:
       summary: Sends an email verification token to the authenticated user
       tags:
       - api v1 auth
-  /api/v1/auth/email/verify/{token}:
+  /api/v1/auth/email/verify:
     post:
       consumes:
       - application/json
       description: Verifies the email of the authenticated user
       parameters:
-      - description: Token
-        in: path
-        name: token
+      - description: Verify Email Request
+        in: body
+        name: request
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.VerifyEmailRequest'
       produces:
       - application/json
       responses:
@@ -785,17 +795,12 @@ paths:
       summary: Send a password reset email
       tags:
       - api v1 auth
-  /api/v1/auth/password/reset/{token}:
+  /api/v1/auth/password/reset:
     post:
       consumes:
       - application/json
       description: Resets a user's password
       parameters:
-      - description: Token
-        in: path
-        name: token
-        required: true
-        type: string
       - description: Reset Password Request
         in: body
         name: request

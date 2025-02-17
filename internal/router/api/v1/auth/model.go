@@ -96,6 +96,7 @@ type (
 	// ResetPasswordRequest is the request DTO to reset password
 	ResetPasswordRequest struct {
 		NewPassword string `json:"new_password"`
+		Token       string `json:"token"`
 	}
 
 	// ChangeEmailRequest is the request DTO to change email
@@ -110,6 +111,11 @@ type (
 
 	// VerifyPhoneNumberRequest is the request DTO to verify phone number
 	VerifyPhoneNumberRequest struct {
+		Token string `json:"token"`
+	}
+
+	// VerifyEmailRequest is the request DTO to verify email
+	VerifyEmailRequest struct {
 		Token string `json:"token"`
 	}
 )

@@ -158,14 +158,14 @@ func SendVerificationEmail(
 			VerificationEmailHTML,
 			verificationURL,
 			verificationURL,
-			internaltoken.EmailVerificationTokenDuration,
+			internaltoken.PrettyEmailVerificationTokenDuration,
 			FooterHTML,
 		),
 	)
 	mail.SetText(
 		fmt.Sprintf(
 			VerificationEmailText, verificationURL,
-			internaltoken.EmailVerificationTokenDuration,
+			internaltoken.PrettyEmailVerificationTokenDuration,
 			FooterText,
 		),
 	)
@@ -198,14 +198,14 @@ func SendResetPasswordEmail(
 	mail.SetHTML(
 		fmt.Sprintf(
 			ResetPasswordEmailHTML, resetPasswordURL, resetPasswordURL,
-			internaltoken.ResetPasswordTokenDuration,
+			internaltoken.PrettyResetPasswordTokenDuration,
 			FooterHTML,
 		),
 	)
 	mail.SetText(
 		fmt.Sprintf(
 			ResetPasswordEmailText, resetPasswordURL,
-			internaltoken.ResetPasswordTokenDuration,
+			internaltoken.PrettyResetPasswordTokenDuration,
 			FooterText,
 		),
 	)

@@ -600,7 +600,7 @@ BEGIN
 		user_email_verifications.id,
 		user_emails.user_id
 	INTO
-		out_user_email_verification_id
+		out_user_email_verification_id,
 		out_user_id
 	FROM
 		user_email_verifications

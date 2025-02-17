@@ -728,14 +728,19 @@ func (s *service) GetRefreshToken(
 
 // VerifyEmail verifies a user email
 func (s *service) VerifyEmail(
-	emailVerificationToken string,
+	body *VerifyEmailRequest,
 ) int64 {
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
+	}
+
 	// Run the SQL stored procedure to verify the user email by the email verification token
 	var userID sql.NullInt64
 	var userInvalidToken sql.NullBool
 	if err := internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.VerifyEmailProc,
-		emailVerificationToken,
+		body.Token,
 		nil,
 		nil,
 	).Scan(
@@ -746,7 +751,7 @@ func (s *service) VerifyEmail(
 	}
 
 	// Check if the email verification token is invalid
-	if !userInvalidToken.Valid || userInvalidToken.Bool {
+	if userInvalidToken.Bool {
 		panic(ErrVerifyEmailInvalidToken)
 	}
 	return userID.Int64
@@ -902,7 +907,6 @@ func (s *service) ForgotPassword(
 
 // ResetPassword resets a user password
 func (s *service) ResetPassword(
-	resetPasswordToken string,
 	body *ResetPasswordRequest,
 ) int64 {
 	// Check if the request body is nil
@@ -924,7 +928,7 @@ func (s *service) ResetPassword(
 	var userInvalidToken sql.NullBool
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.ResetPasswordProc,
-		resetPasswordToken,
+		body.Token,
 		passwordHash,
 		nil, nil,
 	).Scan(
