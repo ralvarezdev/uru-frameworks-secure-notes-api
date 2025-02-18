@@ -53,8 +53,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/ralvarezdev/go-cache v0.1.2 h1:OkFimEChOm3YXlBe4tOjeDnbqvPumJMNf8Xo4WAQp2c=
 github.com/ralvarezdev/go-cache v0.1.2/go.mod h1:uxdoDOgKOj0tQReWRA7rc1RtiFPhg8tfzVK6nJJ7QKo=
-github.com/ralvarezdev/go-crypto v0.6.0 h1:ZxwpCrIVeCIsiZyXJCh18+l386UHFUg6/yGmBKwyg0E=
-github.com/ralvarezdev/go-crypto v0.6.0/go.mod h1:Tt4L848z9T1hizZUgOvyoLdXId9Zu8lKx92YfTldemI=
+github.com/ralvarezdev/go-crypto v0.6.1 h1:FPZzmeOOmbx2mey5RKQOx52rMmDSUxDZ0qBxcjkaGdc=
+github.com/ralvarezdev/go-crypto v0.6.1/go.mod h1:Tt4L848z9T1hizZUgOvyoLdXId9Zu8lKx92YfTldemI=
 github.com/ralvarezdev/go-databases v0.5.6 h1:7RaLQ9lAJSX5QPArEwZYbz6fEAl+/xq+jwvighOGNsI=
 github.com/ralvarezdev/go-databases v0.5.6/go.mod h1:wNnYvx5JG6ajKLWW1r1s2Qarh5cwx5aiJ7FZqBx85Uk=
 github.com/ralvarezdev/go-flags v0.3.3 h1:1NpwdSD+uCMF5NP+szJmq/mXqNFZwrzKAfDNZOznDEQ=

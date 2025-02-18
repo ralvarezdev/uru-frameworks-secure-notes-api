@@ -7,7 +7,6 @@ import (
 	gonethttp "github.com/ralvarezdev/go-net/http"
 	gonethttpcookie "github.com/ralvarezdev/go-net/http/cookie"
 	gonethttpresponse "github.com/ralvarezdev/go-net/http/response"
-	"github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal"
 	internalpostgres "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres"
 	internalpostgresmodel "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/databases/postgres/model"
 	internaljwt "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt"
@@ -16,7 +15,6 @@ import (
 	internaljwtinfo "github.com/ralvarezdev/uru-frameworks-secure-notes-api/internal/jwt/info"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -60,14 +58,6 @@ var (
 	UserID = &gonethttpcookie.Attributes{
 		Name:     "user_id",
 		HTTPOnly: false,
-		Secure:   Secure,
-		Path:     "/",
-	}
-
-	// TwoFactorAuthentication is the cookies attributes for the 2FA cookie
-	TwoFactorAuthentication = &gonethttpcookie.Attributes{
-		Name:     "2fa",
-		HTTPOnly: true,
 		Secure:   Secure,
 		Path:     "/",
 	}
@@ -242,19 +232,6 @@ func SetUserIDCookie(w http.ResponseWriter, userID int64) {
 	)
 }
 
-// SetTwoFactorAuthenticationCookie sets the 2FA cookie
-func SetTwoFactorAuthenticationCookie(
-	w http.ResponseWriter,
-	twoFactorAuthMethods ...string,
-) {
-	gonethttpcookie.SetCookie(
-		w,
-		TwoFactorAuthentication,
-		strings.Join(twoFactorAuthMethods, ","),
-		time.Now().Add(internal.TwoFactorAuthenticationDuration),
-	)
-}
-
 // ClearCookies clears the user cookies
 func ClearCookies(w http.ResponseWriter) {
 	gonethttpcookie.DeleteCookies(
@@ -265,7 +242,6 @@ func ClearCookies(w http.ResponseWriter) {
 		UserID,
 		SyncTags,
 		SyncNotes,
-		TwoFactorAuthentication,
 	)
 }
 

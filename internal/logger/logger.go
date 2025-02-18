@@ -109,18 +109,18 @@ func (l *Logger) SignUp(id int64) {
 	)
 }
 
-// GenerateTOTPUrl logs the generate TOTP URL event
-func (l *Logger) GenerateTOTPUrl(id int64) {
+// Generate2FATOTPUrl logs the generate 2FA TOTP URL event
+func (l *Logger) Generate2FATOTPUrl(id int64) {
 	l.logger.Info(
-		"user generated totp url",
+		"user generated 2fa totp url",
 		fmt.Sprintf("user id: %d", id),
 	)
 }
 
-// VerifyTOTP logs the verify TOTP event
-func (l *Logger) VerifyTOTP(id int64) {
+// Verify2FATOTP logs the verify 2FA TOTP event
+func (l *Logger) Verify2FATOTP(id int64) {
 	l.logger.Info(
-		"user verified totp",
+		"user verified 2fa totp",
 		fmt.Sprintf("user id: %d", id),
 	)
 }
@@ -142,10 +142,10 @@ func (l *Logger) GetRefreshToken(id, refreshTokenID int64) {
 	)
 }
 
-// RevokeTOTP logs the revoke TOTP event
-func (l *Logger) RevokeTOTP(id int64) {
+// Revoke2FATOTP logs the revoke 2FA TOTP event
+func (l *Logger) Revoke2FATOTP(id int64) {
 	l.logger.Info(
-		"user revoked totp",
+		"user revoked 2fa totp",
 		fmt.Sprintf("user id: %d", id),
 	)
 }
@@ -520,5 +520,52 @@ func (l *Logger) SyncByLastSyncedAt(
 		fmt.Sprintf("user tags last synced at: %v", userTagsLastSyncedAt),
 		fmt.Sprintf("user notes last synced at: %v", userNotesLastSyncedAt),
 		fmt.Sprintf("refresh token id: %d", refreshTokenID),
+	)
+}
+
+// Sent2FAEmailCode logs that the 2FA email code was sent successfully
+func (l *Logger) Sent2FAEmailCode(email string) {
+	l.logger.Info(
+		"sent 2FA email code to: " + email,
+	)
+}
+
+// FailedToSend2FAEmailCode logs the failed to send 2FA email code event
+func (l *Logger) FailedToSend2FAEmailCode(email string, err error) {
+	l.logger.Error(
+		"failed to send 2FA email code to: "+email,
+		err,
+	)
+}
+
+// EnableUser2FA logs the enable user 2FA event
+func (l *Logger) EnableUser2FA(id int64) {
+	l.logger.Info(
+		"user enabled 2FA",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// DisableUser2FA logs the disable user 2FA event
+func (l *Logger) DisableUser2FA(id int64) {
+	l.logger.Info(
+		"user disabled 2FA",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// RegenerateUser2FARecoveryCodes logs the regenerate user 2FA recovery codes event
+func (l *Logger) RegenerateUser2FARecoveryCodes(id int64) {
+	l.logger.Info(
+		"user regenerated 2FA recovery codes",
+		fmt.Sprintf("user id: %d", id),
+	)
+}
+
+// SendUser2FAEmailCode logs the send user 2FA email code event
+func (l *Logger) SendUser2FAEmailCode(id int64) {
+	l.logger.Info(
+		"user requested 2FA email code",
+		fmt.Sprintf("user id: %d", id),
 	)
 }

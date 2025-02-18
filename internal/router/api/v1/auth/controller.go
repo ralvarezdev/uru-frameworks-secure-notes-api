@@ -257,26 +257,26 @@ func (c *controller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-// GenerateTOTPUrl generates a TOTP URL
-// @Summary Generate a TOTP URL
-// @Description Generates a TOTP URL
+// Generate2FATOTPUrl generates a 2FA TOTP URL
+// @Summary Generate a 2FA TOTP URL
+// @Description Generates a 2FA TOTP URL
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
 // @Security CookieAuth
-// @Success 201 {object} GenerateTOTPUrlResponseBody
+// @Success 201 {object} Generate2FATOTPUrlResponseBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/totp/generate [post]
-func (c *controller) GenerateTOTPUrl(
+// @Router /api/v1/auth/2fa/totp/generate [post]
+func (c *controller) Generate2FATOTPUrl(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	// Generate the TOTP URL
-	userID, responseBody := Service.GenerateTOTPUrl(r)
+	// Generate the 2FA TOTP URL
+	userID, responseBody := Service.Generate2FATOTPUrl(r)
 
-	// Log the successful TOTP URL generation
-	internallogger.Api.GenerateTOTPUrl(userID)
+	// Log the successful 2FA TOTP URL generation
+	internallogger.Api.Generate2FATOTPUrl(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -287,41 +287,41 @@ func (c *controller) GenerateTOTPUrl(
 	)
 }
 
-// VerifyTOTP verifies a TOTP code
-// @Summary Verify a TOTP code
-// @Description Verifies a TOTP code
+// Verify2FATOTP verifies a 2FA TOTP code
+// @Summary Verify a 2FA TOTP code
+// @Description Verifies a 2FA TOTP code
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
 // @Security CookieAuth
-// @Param request body VerifyTOTPRequest true "Verify TOTP Request"
-// @Success 200 {object} VerifyTOTPResponseBody
+// @Param request body Verify2FATOTPRequest true "Verify 2FA TOTP Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/totp/verify [post]
-func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
+// @Router /api/v1/auth/2fa/totp/verify [post]
+func (c *controller) Verify2FATOTP(w http.ResponseWriter, r *http.Request) {
 	// Get the body from the context
-	requestBody, _ := gonethttpctx.GetCtxBody(r).(*VerifyTOTPRequest)
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*Verify2FATOTPRequest)
 
-	// Verify the TOTP code
-	userID, responseBody := Service.VerifyTOTP(r, requestBody)
+	// Verify the 2FA TOTP code
+	userID := Service.Verify2FATOTP(r, requestBody)
 
-	// Log the successful TOTP verification
-	internallogger.Api.VerifyTOTP(userID)
+	// Log the successful 2FA TOTP verification
+	internallogger.Api.Verify2FATOTP(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewResponse(
-			responseBody,
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
 			http.StatusOK,
 		),
 	)
 }
 
-// RevokeTOTP revokes a user's TOTP
-// @Summary Revoke a user's TOTP
-// @Description Revokes a user's TOTP
+// Revoke2FATOTP revokes a user's 2FA TOTP
+// @Summary Revoke a user's 2FA TOTP
+// @Description Revokes a user's 2FA TOTP
 // @Tags api v1 auth
 // @Accept json
 // @Produce json
@@ -329,13 +329,13 @@ func (c *controller) VerifyTOTP(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
-// @Router /api/v1/auth/totp [delete]
-func (c *controller) RevokeTOTP(w http.ResponseWriter, r *http.Request) {
-	// Revoke the user's TOTP
-	userID := Service.RevokeTOTP(r)
+// @Router /api/v1/auth/2fa/totp [delete]
+func (c *controller) Revoke2FATOTP(w http.ResponseWriter, r *http.Request) {
+	// Revoke the user's 2FA TOTP
+	userID := Service.Revoke2FATOTP(r)
 
-	// Log the successful TOTP revocation
-	internallogger.Api.RevokeTOTP(userID)
+	// Log the successful 2FA TOTP revocation
+	internallogger.Api.Revoke2FATOTP(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
@@ -605,5 +605,144 @@ func (c *controller) VerifyPhoneNumber(
 ) {
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpstatusresponse.NewJSendNotImplemented(nil),
+	)
+}
+
+// EnableUser2FA enables 2FA for the authenticated user
+// @Summary Enable 2FA for the authenticated user
+// @Description Enables 2FA for the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param request body EnableUser2FARequest true "Enable User 2FA Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/2fa/enable [post]
+func (c *controller) EnableUser2FA(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Get the body from the context
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*EnableUser2FARequest)
+
+	// Enable 2FA for the user
+	userID, responseBody := Service.EnableUser2FA(r, requestBody)
+
+	// Log the successful 2FA enablement
+	internallogger.Api.EnableUser2FA(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewResponse(
+			responseBody,
+			http.StatusOK,
+		),
+	)
+}
+
+// DisableUser2FA disables 2FA for the authenticated user
+// @Summary Disable 2FA for the authenticated user
+// @Description Disables 2FA for the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param request body DisableUser2FARequest true "Disable User 2FA Request"
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/2fa/disable [post]
+func (c *controller) DisableUser2FA(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Get the body from the context
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*DisableUser2FARequest)
+
+	// Disable 2FA for the user
+	userID := Service.DisableUser2FA(r, requestBody)
+
+	// Log the successful 2FA disablement
+	internallogger.Api.DisableUser2FA(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusOK,
+		),
+	)
+}
+
+// RegenerateUser2FARecoveryCodes regenerates the 2FA recovery codes for the authenticated user
+// @Summary Regenerate 2FA recovery codes for the authenticated user
+// @Description Regenerates the 2FA recovery codes for the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Param request body RegenerateUser2FARecoveryCodesRequest true "Regenerate User 2FA Recovery Codes Request"
+// @Success 200 {object} RegenerateUser2FARecoveryCodesResponseBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/2fa/recovery-codes/regenerate [post]
+func (c *controller) RegenerateUser2FARecoveryCodes(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Get the body from the context
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*RegenerateUser2FARecoveryCodesRequest)
+
+	// Regenerate the 2FA recovery codes for the user
+	userID, responseBody := Service.RegenerateUser2FARecoveryCodes(
+		r,
+		requestBody,
+	)
+
+	// Log the successful 2FA recovery codes regeneration
+	internallogger.Api.RegenerateUser2FARecoveryCodes(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewResponse(
+			responseBody,
+			http.StatusOK,
+		),
+	)
+}
+
+// SendUser2FAEmailCode sends a 2FA email code to the authenticated user
+// @Summary Send 2FA email code to the authenticated user
+// @Description Sends a 2FA email code to the authenticated user
+// @Tags api v1 auth
+// @Accept json
+// @Produce json
+// @Security CookieAuth
+// @Success 200 {object} SendUser2FAEmailCodeResponseBody
+// @Failure 400 {object} gonethttpresponse.JSendFailBody
+// @Failure 401 {object} gonethttpresponse.JSendFailBody
+// @Failure 500 {object} gonethttpresponse.JSendErrorBody
+// @Router /api/v1/auth/2fa/email/send-code [post]
+func (c *controller) SendUser2FAEmailCode(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	// Send the 2FA email code
+	userID := Service.SendUser2FAEmailCode(r)
+
+	// Log the successful 2FA email code send
+	internallogger.Api.SendUser2FAEmailCode(userID)
+
+	// Handle the response
+	internalhandler.Handler.HandleResponse(
+		w, gonethttpresponse.NewResponse(
+			nil,
+			http.StatusOK,
+		),
 	)
 }

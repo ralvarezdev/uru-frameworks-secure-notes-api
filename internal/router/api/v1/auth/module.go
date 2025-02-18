@@ -83,21 +83,21 @@ var (
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
-				"POST /totp/generate",
-				Controller.GenerateTOTPUrl,
+				"POST /2fa/totp/generate",
+				Controller.Generate2FATOTPUrl,
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
-				"POST /totp/verify",
-				Controller.VerifyTOTP,
+				"POST /2fa/totp/verify",
+				Controller.Verify2FATOTP,
 				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(
-					&VerifyTOTPRequest{},
+					&Verify2FATOTPRequest{},
 				),
 			)
 			m.RegisterExactRoute(
-				"DELETE /totp",
-				Controller.RevokeTOTP,
+				"DELETE /2fa/totp",
+				Controller.Revoke2FATOTP,
 				internalmiddleware.AuthenticateAccessToken,
 			)
 			m.RegisterExactRoute(
@@ -176,6 +176,29 @@ var (
 				Controller.VerifyPhoneNumber,
 				internalmiddleware.AuthenticateAccessToken,
 				internalmiddleware.Validate(&VerifyPhoneNumberRequest{}),
+			)
+			m.RegisterExactRoute(
+				"POST /2fa/enable",
+				Controller.EnableUser2FA,
+				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Validate(&EnableUser2FARequest{}),
+			)
+			m.RegisterExactRoute(
+				"POST /2fa/disable",
+				Controller.DisableUser2FA,
+				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Validate(&DisableUser2FARequest{}),
+			)
+			m.RegisterExactRoute(
+				"POST /2fa/recovery-codes/regenerate",
+				Controller.RegenerateUser2FARecoveryCodes,
+				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Validate(&RegenerateUser2FARecoveryCodesRequest{}),
+			)
+			m.RegisterExactRoute(
+				"POST /2fa/email/send-code",
+				Controller.SendUser2FAEmailCode,
+				internalmiddleware.AuthenticateAccessToken,
 			)
 		},
 	}

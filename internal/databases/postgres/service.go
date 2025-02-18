@@ -87,7 +87,7 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateCreateUser2FARecoveryCodesProc,
 		internalpostgresmodel.CreateUseUser2FARecoveryCodeProc,
 		internalpostgresmodel.CreateRevokeUser2FARecoveryCodesProc,
-		internalpostgresmodel.CreateVerifyTOTPProc,
+		internalpostgresmodel.CreateVerify2FATOTPProc,
 		internalpostgresmodel.CreateVerifyEmailProc,
 		internalpostgresmodel.CreateIsUserEmailVerifiedProc,
 		internalpostgresmodel.CreateRevokeUserEmailProc,
@@ -132,5 +132,6 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateUseUser2FAEmailCodeProc,
 		internalpostgresmodel.CreateEnableUser2FAProc,
 		internalpostgresmodel.CreateDisableUser2FAProc,
+		internalpostgresmodel.CreateSendUser2FAEmailCodeProc,
 	)
 }

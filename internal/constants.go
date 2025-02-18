@@ -38,20 +38,17 @@ const (
 	// EnvMaximumAge is the environment for the maximum age
 	EnvMaximumAge = "URU_FRAMEWORKS_SECURE_NOTES_MAXIMUM_AGE"
 
-	// EnvTwoFactorAuthenticationDuration is the environment for the 2FA duration
-	EnvTwoFactorAuthenticationDuration = "URU_FRAMEWORKS_SECURE_NOTES_2FA_DURATION"
+	// EnvTwoFactorAuthenticationEmailCodeDuration is the environment for the 2FA email code duration
+	EnvTwoFactorAuthenticationEmailCodeDuration = "URU_FRAMEWORKS_SECURE_NOTES_2FA_EMAIL_CODE_DURATION"
 
-	// EnvTwoFactorAuthenticationEmailDuration is the environment for the 2FA email duration
-	EnvTwoFactorAuthenticationEmailDuration = "URU_FRAMEWORKS_SECURE_NOTES_2FA_EMAIL_DURATION"
+	// EnvTwoFactorAuthenticationEmailCodeLength is the environment for the 2FA email code length
+	EnvTwoFactorAuthenticationEmailCodeLength = "URU_FRAMEWORKS_SECURE_NOTES_2FA_EMAIL_CODE_LENGTH"
 
 	// EmailCodeType is the type of email code
 	EmailCodeType = "email-code"
 
 	// TOTPCodeType is the type of TOTP code
 	TOTPCodeType = "totp-code"
-
-	// RecoveryCodeType is the type of recovery code
-	RecoveryCodeType = "recovery-code"
 )
 
 var (
@@ -94,11 +91,11 @@ var (
 	// MaximumFailedAttemptsPeriodSeconds is the maximum failed attempts period in seconds
 	MaximumFailedAttemptsPeriodSeconds int64
 
-	// TwoFactorAuthenticationDuration is the 2FA duration
-	TwoFactorAuthenticationDuration time.Duration
+	// TwoFactorAuthenticationEmailCodeDuration is the 2FA email code duration
+	TwoFactorAuthenticationEmailCodeDuration time.Duration
 
-	// TwoFactorAuthenticationEmailDuration is the 2FA email duration
-	TwoFactorAuthenticationEmailDuration time.Duration
+	// TwoFactorAuthenticationEmailCodeLength is the 2FA email code length
+	TwoFactorAuthenticationEmailCodeLength int
 )
 
 var (
@@ -123,13 +120,14 @@ func Load() {
 
 	// Get the password-related counts and length, and age-related counts
 	for env, dest := range map[string]*int{
-		EnvMinimumPasswordLength:       &MinimumPasswordLength,
-		EnvMinimumPasswordSpecialCount: &MinimumPasswordSpecialCount,
-		EnvMinimumPasswordNumbersCount: &MinimumPasswordNumbersCount,
-		EnvMinimumPasswordCapsCount:    &MinimumPasswordCapsCount,
-		EnvMaximumFailedAttemptsCount:  &MaximumFailedAttemptsCount,
-		EnvMinimumAge:                  &MinimumAge,
-		EnvMaximumAge:                  &MaximumAge,
+		EnvMinimumPasswordLength:                  &MinimumPasswordLength,
+		EnvMinimumPasswordSpecialCount:            &MinimumPasswordSpecialCount,
+		EnvMinimumPasswordNumbersCount:            &MinimumPasswordNumbersCount,
+		EnvMinimumPasswordCapsCount:               &MinimumPasswordCapsCount,
+		EnvMaximumFailedAttemptsCount:             &MaximumFailedAttemptsCount,
+		EnvMinimumAge:                             &MinimumAge,
+		EnvMaximumAge:                             &MaximumAge,
+		EnvTwoFactorAuthenticationEmailCodeLength: &TwoFactorAuthenticationEmailCodeLength,
 	} {
 		if err := internalloader.Loader.LoadIntVariable(
 			env,
@@ -141,9 +139,8 @@ func Load() {
 
 	// Get the maximum failed attempts period duration and 2FA duration
 	for env, dest := range map[string]*time.Duration{
-		EnvMaximumFailedAttemptsPeriod:          &MaximumFailedAttemptsPeriod,
-		EnvTwoFactorAuthenticationDuration:      &TwoFactorAuthenticationDuration,
-		EnvTwoFactorAuthenticationEmailDuration: &TwoFactorAuthenticationEmailDuration,
+		EnvMaximumFailedAttemptsPeriod:              &MaximumFailedAttemptsPeriod,
+		EnvTwoFactorAuthenticationEmailCodeDuration: &TwoFactorAuthenticationEmailCodeDuration,
 	} {
 		if err := internalloader.Loader.LoadDurationVariable(
 			env,

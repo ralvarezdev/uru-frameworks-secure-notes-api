@@ -507,6 +507,7 @@ END;
 $$;
 `
 
+	// CreateGetLogInInformationFn is the query to create the function to get log in information
 	CreateGetLogInInformationFn = `
 CREATE OR REPLACE FUNCTION get_log_in_information(
 	in_user_username VARCHAR,

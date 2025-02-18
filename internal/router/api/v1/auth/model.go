@@ -17,42 +17,66 @@ type (
 
 	// LogInRequest is the request DTO to log in
 	LogInRequest struct {
-		Username                        string  `json:"username"`
-		Password                        string  `json:"password"`
-		TwoFactorAuthenticationCode     *string `json:"2fa_code,omitempty"`
-		TwoFactorAuthenticationCodeType *string `json:"2fa_code_type,omitempty"`
-	}
-
-	// SendTOTPEmailRequest is the request DTO to send TOTP email
-	SendTOTPEmailRequest struct {
 		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 
-	// GenerateTOTPUrlResponseData is the response data DTO to generate TOTP URL
-	GenerateTOTPUrlResponseData struct {
-		TOTPUrl string `json:"totp_url"`
+	// LogInResponseData is the response data DTO to log in
+	LogInResponseData struct {
+		TwoFactorAuthenticationMethods *[]string `json:"2fa_methods,omitempty"`
 	}
 
-	// GenerateTOTPUrlResponseBody is the response body DTO to generate TOTP URL
-	GenerateTOTPUrlResponseBody struct {
-		gonethttpresponse.BaseJSendSuccessBody
-		Data GenerateTOTPUrlResponseData `json:"data"`
+	// EnableUser2FARequest is the request DTO to enable user 2FA
+	EnableUser2FARequest struct {
+		Password string `json:"password"`
 	}
 
-	// VerifyTOTPRequest is the request DTO to verify TOTP
-	VerifyTOTPRequest struct {
-		TOTPCode string `json:"totp_code"`
-	}
-
-	// VerifyTOTPResponseData is the response data DTO to verify TOTP
-	VerifyTOTPResponseData struct {
+	// EnableUser2FAResponseData is the response data DTO to enable user 2FA
+	EnableUser2FAResponseData struct {
 		RecoveryCodes []string `json:"recovery_codes"`
 	}
 
-	// VerifyTOTPResponseBody is the response body DTO to verify TOTP
-	VerifyTOTPResponseBody struct {
+	// EnableUser2FAResponseBody is the response body DTO to enable user 2FA
+	EnableUser2FAResponseBody struct {
 		gonethttpresponse.BaseJSendSuccessBody
-		Data VerifyTOTPResponseData `json:"data"`
+		Data EnableUser2FAResponseData `json:"data"`
+	}
+
+	// DisableUser2FARequest is the request DTO to disable user 2FA
+	DisableUser2FARequest struct {
+		Password string `json:"password"`
+	}
+
+	// RegenerateUser2FARecoveryCodesRequest is the request DTO to regenerate user 2FA recovery codes
+	RegenerateUser2FARecoveryCodesRequest struct {
+		Password string `json:"password"`
+	}
+
+	// RegenerateUser2FARecoveryCodesResponseData is the response data DTO to regenerate user 2FA recovery codes
+	RegenerateUser2FARecoveryCodesResponseData struct {
+		RecoveryCodes []string `json:"recovery_codes"`
+	}
+
+	// RegenerateUser2FARecoveryCodesResponseBody is the response body DTO to regenerate user 2FA recovery codes
+	RegenerateUser2FARecoveryCodesResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data RegenerateUser2FARecoveryCodesResponseData `json:"data"`
+	}
+
+	// Generate2FATOTPUrlResponseData is the response data DTO to generate 2FA TOTP URL
+	Generate2FATOTPUrlResponseData struct {
+		TOTPUrl string `json:"totp_url"`
+	}
+
+	// Generate2FATOTPUrlResponseBody is the response body DTO to generate 2FA TOTP URL
+	Generate2FATOTPUrlResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data Generate2FATOTPUrlResponseData `json:"data"`
+	}
+
+	// Verify2FATOTPRequest is the request DTO to verify 2FA TOTP
+	Verify2FATOTPRequest struct {
+		TOTPCode string `json:"totp_code"`
 	}
 
 	// RevokeRefreshTokenRequest is the request DTO to revoke a refresh token

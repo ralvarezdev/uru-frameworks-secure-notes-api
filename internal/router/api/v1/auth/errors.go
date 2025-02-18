@@ -71,27 +71,33 @@ var (
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrGenerateTOTPUrlAlreadyVerified = gonethttpresponse.NewFailResponseError(
-		"totp",
-		"TOTP is already verified",
+	ErrGenerate2FATOTP2FAIsNotEnabled = gonethttpresponse.NewFailResponseError(
+		"2fa",
+		"2FA is not enabled",
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrVerifyTOTPNotGenerated = gonethttpresponse.NewFailResponseError(
+	ErrGenerate2FATOTPUrlAlreadyVerified = gonethttpresponse.NewFailResponseError(
 		"totp",
-		"user has not generated TOTP",
+		"2FA TOTP is already verified",
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrVerifyTOTPInvalidTOTPCode = gonethttpresponse.NewFailResponseError(
+	ErrVerify2FATOTPNotGenerated = gonethttpresponse.NewFailResponseError(
+		"totp",
+		"user has not generated 2FA TOTP",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrVerify2FATOTPInvalidTOTPCode = gonethttpresponse.NewFailResponseError(
 		"totp_code",
-		"invalid TOTP code",
+		"invalid 2FA TOTP code",
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrVerifyTOTPAlreadyVerified = gonethttpresponse.NewFailResponseError(
+	ErrVerify2FATOTPAlreadyVerified = gonethttpresponse.NewFailResponseError(
 		"totp",
-		"TOTP is already verified",
+		"2FA TOTP is already verified",
 		nil,
 		http.StatusBadRequest,
 	)
@@ -140,6 +146,48 @@ var (
 	ErrChangePasswordSamePassword = gonethttpresponse.NewFailResponseError(
 		"new_password",
 		"new password is the same as the old password",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrEnableUser2FAInvalidPassword = gonethttpresponse.NewFailResponseError(
+		"password",
+		"invalid password",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrEnableUser2FAEmailNotVerified = gonethttpresponse.NewFailResponseError(
+		"email",
+		"email is not verified",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrDisableUser2FAInvalidPassword = gonethttpresponse.NewFailResponseError(
+		"password",
+		"invalid password",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrDisableUser2FA2FAIsNotEnabled = gonethttpresponse.NewFailResponseError(
+		"2fa",
+		"2FA is not enabled",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrRegenerateUser2FARecoveryCodesInvalidPassword = gonethttpresponse.NewFailResponseError(
+		"password",
+		"invalid password",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrRegenerateUser2FARecoveryCodes2FAIsNotEnabled = gonethttpresponse.NewFailResponseError(
+		"2fa",
+		"2FA is not enabled",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrSendUser2FAEmailCode2FAIsNotEnabled = gonethttpresponse.NewFailResponseError(
+		"2fa",
+		"2FA is not enabled",
 		nil,
 		http.StatusBadRequest,
 	)

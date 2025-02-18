@@ -4,8 +4,8 @@ var (
 	// SignUpProc is the query to call the stored procedure to sign-up
 	SignUpProc = "CALL sign_up($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
 
-	// RevokeUserTOTPProc is the query to call the stored procedure to revoke user TOTP
-	RevokeUserTOTPProc = "CALL revoke_user_totp($1)"
+	// RevokeUser2FATOTPProc is the query to call the stored procedure to revoke user 2FA TOTP
+	RevokeUser2FATOTPProc = "CALL revoke_user_2fa_totp($1)"
 
 	// GenerateUserTokensProc is the query to call the stored procedure to generate user tokens
 	GenerateUserTokensProc = "CALL generate_user_tokens($1, $2, $3, $4, $5, $6, $7)"
@@ -25,14 +25,14 @@ var (
 	// RegisterFailedLogInAttemptProc is the query to call the stored procedure to register failed login attempt
 	RegisterFailedLogInAttemptProc = "CALL register_failed_log_in_attempt($1, $2, $3, $4)"
 
-	// GetUserTOTPProc is the query to call the stored procedure to get user TOTP
-	GetUserTOTPProc = "CALL get_user_totp($1, $2, $3, $4)"
+	// GetUser2FATOTPProc is the query to call the stored procedure to get user 2FA TOTP
+	GetUser2FATOTPProc = "CALL get_user_2fa_totp($1, $2, $3, $4)"
 
 	// GetUserEmailProc is the query to call the stored procedure to get user email
 	GetUserEmailProc = "CALL get_user_email($1, $2)"
 
-	// GenerateTOTPUrlProc is the query to call the stored procedure to generate TOTP URL
-	GenerateTOTPUrlProc = "CALL generate_totp_url($1, $2, $3, $4, $5, $6, $7)"
+	// Generate2FATOTPUrlProc is the query to call the stored procedure to generate 2FA TOTP URL
+	Generate2FATOTPUrlProc = "CALL generate_2fa_totp_url($1, $2, $3, $4, $5, $6, $7)"
 
 	// IsRefreshTokenValidProc is the query to call the stored procedure to check if the refresh token is valid
 	IsRefreshTokenValidProc = "CALL is_refresh_token_valid($1, $2, $3, $4)"
@@ -40,11 +40,14 @@ var (
 	// IsAccessTokenValidProc is the query to call the stored procedure to check if the access token is valid
 	IsAccessTokenValidProc = "CALL is_access_token_valid($1, $2, $3, $4)"
 
-	// RevokeUserTOTPRecoveryCodeProc is the query to call the stored procedure to revoke user TOTP recovery code
-	RevokeUserTOTPRecoveryCodeProc = "CALL revoke_user_totp_recovery_code($1, $2)"
+	// RevokeUser2FARecoveryCodesProc is the query to call the stored procedure to revoke user 2FA recovery codes
+	RevokeUser2FARecoveryCodesProc = "CALL revoke_user_2fa_recovery_codes($1)"
 
-	// VerifyTOTPProc is the query to call the stored procedure to verify TOTP
-	VerifyTOTPProc = "CALL verify_totp($1, $2)"
+	// UseUser2FARecoveryCodeProc is the query to call the stored procedure to use user 2FA recovery code
+	UseUser2FARecoveryCodeProc = "CALL use_user_2fa_recovery_code($1, $2, $3)"
+
+	// Verify2FATOTPProc is the query to call the stored procedure to verify 2FA TOTP
+	Verify2FATOTPProc = "CALL verify_2fa_totp($1)"
 
 	// SendEmailVerificationTokenProc is the query to call the stored procedure to send email verification token
 	SendEmailVerificationTokenProc = "CALL send_email_verification_token($1, $2, $3)"
@@ -112,8 +115,8 @@ var (
 	// IsUserPhoneNumberVerifiedProc is the query to call the stored procedure to check if the user phone number is verified
 	IsUserPhoneNumberVerifiedProc = "CALL is_user_phone_number_verified($1, $2)"
 
-	// HasUserTOTPEnabledProc is the query to call the stored procedure to check if the user has TOTP enabled
-	HasUserTOTPEnabledProc = "CALL has_user_totp_enabled($1, $2)"
+	// HasUser2FAEnabledProc is the query to call the stored procedure to check if the user has 2FA enabled
+	HasUser2FAEnabledProc = "CALL has_user_2fa_enabled($1, $2)"
 
 	// GetMyProfileProc is the query to call the stored procedure to get my profile
 	GetMyProfileProc = "CALL get_my_profile($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
@@ -157,8 +160,8 @@ var (
 	// ValidateUserTagsIDProc is the query to call the stored procedure to validate user tags ID
 	ValidateUserTagsIDProc = "CALL validate_user_tags_id($1, $2, $3)"
 
-	// CreateUserTOTPRecoveryCodesProc is the query to call the stored procedure to create user TOTP recovery codes
-	CreateUserTOTPRecoveryCodesProc = "CALL create_user_totp_recovery_codes($1, $2)"
+	// CreateUser2FARecoveryCodesProc is the query to call the stored procedure to create user 2FA recovery codes
+	CreateUser2FARecoveryCodesProc = "CALL create_user_2fa_recovery_codes($1, $2, $3)"
 
 	// DeleteUserNoteProc is the query to call the stored procedure to delete user note
 	DeleteUserNoteProc = "CALL delete_user_note($1, $2)"
@@ -185,5 +188,8 @@ var (
 	EnableUser2FAProc = "CALL enable_user_2fa($1, $2, $3)"
 
 	// DisableUser2FAProc is the query to call the stored procedure to disable user 2FA
-	DisableUser2FAProc = "CALL disable_user_2fa($1)"
+	DisableUser2FAProc = "CALL disable_user_2fa($1, $2)"
+
+	// SendUser2FAEmailCodeProc is the query to call the stored procedure to send user 2FA email code
+	SendUser2FAEmailCodeProc = "CALL send_user_2fa_email_code($1, $2, $3, $4, $5, $6, $7)"
 )

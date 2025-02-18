@@ -81,6 +81,27 @@ This link will expire in %s.
 If you did not request to reset your password, you can ignore this email.
 
 %s`
+
+	// Send2FAEmailCodeSubject is the subject for the 2FA email code
+	Send2FAEmailCodeSubject = "Your 2FA email code"
+
+	// Send2FAEmailCodeHTML is the HTML content for the 2FA email code
+	Send2FAEmailCodeHTML = `<p>Your 2FA email code is:</p>
+
+<p>This code will expire in %s.</p>
+
+<p>If you did not request a 2FA email code, you can ignore this email.</p>
+
+%s`
+
+	// Send2FAEmailCodeText is the text content for the 2FA email code
+	Send2FAEmailCodeText = `Your 2FA email code is: %s
+
+This code will expire in %s.
+
+If you did not request a 2FA email code, you can ignore this email.
+
+%s`
 )
 
 // NewMessage creates a new mail message with the default from
@@ -217,4 +238,38 @@ func SendResetPasswordEmail(
 		return
 	}
 	internallogger.Api.SentResetPasswordEmail(email)
+}
+
+// Send2FAEmailCode sends an email with the 2FA code
+func Send2FAEmailCode(
+	fullName string,
+	email string,
+	code string,
+) {
+	// Create a new mail message
+	mail := NewSingleRecipientMessage(fullName, email)
+	mail.SetSubject(Send2FAEmailCodeSubject)
+	mail.SetHTML(
+		fmt.Sprintf(
+			Send2FAEmailCodeHTML,
+			internal.TwoFactorAuthenticationEmailCodeDuration,
+			FooterHTML,
+		),
+	)
+	mail.SetText(
+		fmt.Sprintf(
+			Send2FAEmailCodeText,
+			code,
+			internal.TwoFactorAuthenticationEmailCodeDuration,
+			FooterText,
+		),
+	)
+
+	// Send the email
+	_, err := Client.Email.Send(context.Background(), mail)
+	if err != nil {
+		internallogger.Api.FailedToSend2FAEmailCode(email, err)
+		return
+	}
+	internallogger.Api.Sent2FAEmailCode(email)
 }
