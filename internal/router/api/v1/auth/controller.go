@@ -62,17 +62,14 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID, responseBody := Service.LogIn(w, r, requestBody)
+	userID, response := Service.LogIn(w, r, requestBody)
 
 	// Log the successful login
 	internallogger.Api.LogIn(userID)
 
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
-		w, gonethttpresponse.NewJSendSuccessResponse(
-			responseBody,
-			http.StatusCreated,
-		),
+		w, response,
 	)
 }
 

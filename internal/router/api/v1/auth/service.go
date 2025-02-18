@@ -338,7 +338,7 @@ func (s *service) LogIn(
 	w http.ResponseWriter,
 	r *http.Request,
 	body *LogInRequest,
-) (int64, *LogInResponseBody) {
+) (int64, gonethttpresponse.Response) {
 	// Check if the request body is nil
 	if body == nil {
 		panic(gonethttp.ErrNilRequestBody)
@@ -422,12 +422,16 @@ func (s *service) LogIn(
 			if hasUser2FATOTPEnabled.Valid && hasUser2FATOTPEnabled.Bool {
 				methods = append(methods, internal.TOTPCode2FAMethod)
 			}
-			return userID.Int64, &LogInResponseBody{
-				BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
-				Data: LogInResponseData{
-					TwoFactorAuthenticationMethods: &methods,
+			return userID.Int64, gonethttpresponse.NewJSendFailResponse(
+				&LogInResponseBody{
+					BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+					Data: LogInResponseData{
+						TwoFactorAuthenticationMethods: &methods,
+					},
 				},
-			}
+				nil,
+				http.StatusBadRequest,
+			)
 		}
 		if body.TwoFactorAuthenticationCode == nil {
 			panic(ErrLogInRequired2FACode)
@@ -542,12 +546,15 @@ func (s *service) LogIn(
 	internalcookie.SetUserIDCookie(w, userID.Int64)
 
 	if userRecoveryCodes != nil {
-		return userID.Int64, &LogInResponseBody{
-			BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
-			Data: LogInResponseData{
-				TwoFactorAuthenticationRecoveryCodes: userRecoveryCodes,
+		return userID.Int64, gonethttpresponse.NewJSendSuccessResponse(
+			&LogInResponseBody{
+				BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+				Data: LogInResponseData{
+					TwoFactorAuthenticationRecoveryCodes: userRecoveryCodes,
+				},
 			},
-		}
+			http.StatusCreated,
+		)
 	}
 	return userID.Int64, nil
 }
