@@ -147,19 +147,29 @@ definitions:
       phone_number:
         type: string
     type: object
+  internal_router_api_v1_auth.DisableUser2FARequest:
+    properties:
+      password:
+        type: string
+    type: object
+  internal_router_api_v1_auth.EnableUser2FARequest:
+    properties:
+      password:
+        type: string
+    type: object
   internal_router_api_v1_auth.ForgotPasswordRequest:
     properties:
       email:
         type: string
     type: object
-  internal_router_api_v1_auth.GenerateTOTPUrlResponseBody:
+  internal_router_api_v1_auth.Generate2FATOTPUrlResponseBody:
     properties:
       data:
-        $ref: '#/definitions/internal_router_api_v1_auth.GenerateTOTPUrlResponseData'
+        $ref: '#/definitions/internal_router_api_v1_auth.Generate2FATOTPUrlResponseData'
       status:
         type: string
     type: object
-  internal_router_api_v1_auth.GenerateTOTPUrlResponseData:
+  internal_router_api_v1_auth.Generate2FATOTPUrlResponseData:
     properties:
       totp_url:
         type: string
@@ -199,12 +209,49 @@ definitions:
     properties:
       2fa_code:
         type: string
-      2fa_code_type:
+      2fa_method:
         type: string
       password:
         type: string
       username:
         type: string
+    type: object
+  internal_router_api_v1_auth.LogInResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_auth.LogInResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_auth.LogInResponseData:
+    properties:
+      2fa_methods:
+        items:
+          type: string
+        type: array
+      2fa_recovery_codes:
+        items:
+          type: string
+        type: array
+    type: object
+  internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesRequest:
+    properties:
+      password:
+        type: string
+    type: object
+  internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseBody:
+    properties:
+      data:
+        $ref: '#/definitions/internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseData'
+      status:
+        type: string
+    type: object
+  internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseData:
+    properties:
+      recovery_codes:
+        items:
+          type: string
+        type: array
     type: object
   internal_router_api_v1_auth.ResetPasswordRequest:
     properties:
@@ -231,6 +278,11 @@ definitions:
       username:
         type: string
     type: object
+  internal_router_api_v1_auth.Verify2FATOTPRequest:
+    properties:
+      totp_code:
+        type: string
+    type: object
   internal_router_api_v1_auth.VerifyEmailRequest:
     properties:
       token:
@@ -240,25 +292,6 @@ definitions:
     properties:
       token:
         type: string
-    type: object
-  internal_router_api_v1_auth.VerifyTOTPRequest:
-    properties:
-      totp_code:
-        type: string
-    type: object
-  internal_router_api_v1_auth.VerifyTOTPResponseBody:
-    properties:
-      data:
-        $ref: '#/definitions/internal_router_api_v1_auth.VerifyTOTPResponseData'
-      status:
-        type: string
-    type: object
-  internal_router_api_v1_auth.VerifyTOTPResponseData:
-    properties:
-      recovery_codes:
-        items:
-          type: string
-        type: array
     type: object
   internal_router_api_v1_note.CreateUserNoteRequest:
     properties:
@@ -567,6 +600,229 @@ info:
   title: Secure Notes REST API
   version: "1.0"
 paths:
+  /api/v1/auth/2fa/disable:
+    post:
+      consumes:
+      - application/json
+      description: Disables 2FA for the authenticated user
+      parameters:
+      - description: Disable User 2FA Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.DisableUser2FARequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Disable 2FA for the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/2fa/email/send-code:
+    post:
+      consumes:
+      - application/json
+      description: Sends a 2FA email code to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Send 2FA email code to the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/2fa/enable:
+    post:
+      consumes:
+      - application/json
+      description: Enables 2FA for the authenticated user
+      parameters:
+      - description: Enable User 2FA Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.EnableUser2FARequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Enable 2FA for the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/2fa/recovery-codes/regenerate:
+    post:
+      consumes:
+      - application/json
+      description: Regenerates the 2FA recovery codes for the authenticated user
+      parameters:
+      - description: Regenerate User 2FA Recovery Codes Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Regenerate 2FA recovery codes for the authenticated user
+      tags:
+      - api v1 auth
+  /api/v1/auth/2fa/totp:
+    delete:
+      consumes:
+      - application/json
+      description: Revokes a user's 2FA TOTP
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Revoke a user's 2FA TOTP
+      tags:
+      - api v1 auth
+  /api/v1/auth/2fa/totp/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generates a 2FA TOTP URL
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_router_api_v1_auth.Generate2FATOTPUrlResponseBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Generate a 2FA TOTP URL
+      tags:
+      - api v1 auth
+  /api/v1/auth/2fa/totp/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verifies a 2FA TOTP code
+      parameters:
+      - description: Verify 2FA TOTP Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.Verify2FATOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.JSendSuccessBody'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.JSendFailBody'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.JSendErrorBody'
+      security:
+      - CookieAuth: []
+      summary: Verify a 2FA TOTP code
+      tags:
+      - api v1 auth
   /api/v1/auth/email:
     put:
       consumes:
@@ -682,7 +938,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/response.JSendSuccessBody'
+            $ref: '#/definitions/internal_router_api_v1_auth.LogInResponseBody'
         "400":
           description: Bad Request
           schema:
@@ -1096,92 +1352,6 @@ paths:
           schema:
             $ref: '#/definitions/response.JSendErrorBody'
       summary: Sign up a new user
-      tags:
-      - api v1 auth
-  /api/v1/auth/totp:
-    delete:
-      consumes:
-      - application/json
-      description: Revokes a user's TOTP
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/response.JSendSuccessBody'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.JSendFailBody'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.JSendErrorBody'
-      security:
-      - CookieAuth: []
-      summary: Revoke a user's TOTP
-      tags:
-      - api v1 auth
-  /api/v1/auth/totp/generate:
-    post:
-      consumes:
-      - application/json
-      description: Generates a TOTP URL
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/internal_router_api_v1_auth.GenerateTOTPUrlResponseBody'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.JSendFailBody'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.JSendErrorBody'
-      security:
-      - CookieAuth: []
-      summary: Generate a TOTP URL
-      tags:
-      - api v1 auth
-  /api/v1/auth/totp/verify:
-    post:
-      consumes:
-      - application/json
-      description: Verifies a TOTP code
-      parameters:
-      - description: Verify TOTP Request
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_router_api_v1_auth.VerifyTOTPRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/internal_router_api_v1_auth.VerifyTOTPResponseBody'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.JSendFailBody'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.JSendFailBody'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.JSendErrorBody'
-      security:
-      - CookieAuth: []
-      summary: Verify a TOTP code
       tags:
       - api v1 auth
   /api/v1/note:

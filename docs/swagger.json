@@ -12,6 +12,360 @@
     },
     "basePath": "/",
     "paths": {
+        "/api/v1/auth/2fa/disable": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Disables 2FA for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Disable 2FA for the authenticated user",
+                "parameters": [
+                    {
+                        "description": "Disable User 2FA Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.DisableUser2FARequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendSuccessBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/email/send-code": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Sends a 2FA email code to the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Send 2FA email code to the authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendSuccessBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/enable": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Enables 2FA for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Enable 2FA for the authenticated user",
+                "parameters": [
+                    {
+                        "description": "Enable User 2FA Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.EnableUser2FARequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendSuccessBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/recovery-codes/regenerate": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Regenerates the 2FA recovery codes for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Regenerate 2FA recovery codes for the authenticated user",
+                "parameters": [
+                    {
+                        "description": "Regenerate User 2FA Recovery Codes Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/totp": {
+            "delete": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Revokes a user's 2FA TOTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Revoke a user's 2FA TOTP",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendSuccessBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/totp/generate": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Generates a 2FA TOTP URL",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Generate a 2FA TOTP URL",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.Generate2FATOTPUrlResponseBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/2fa/totp/verify": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Verifies a 2FA TOTP code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "api v1 auth"
+                ],
+                "summary": "Verify a 2FA TOTP code",
+                "parameters": [
+                    {
+                        "description": "Verify 2FA TOTP Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.Verify2FATOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendSuccessBody"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendFailBody"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.JSendErrorBody"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/email": {
             "put": {
                 "security": [
@@ -194,7 +548,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/response.JSendSuccessBody"
+                            "$ref": "#/definitions/internal_router_api_v1_auth.LogInResponseBody"
                         }
                     },
                     "400": {
@@ -838,143 +1192,6 @@
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendFailBody"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendErrorBody"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/totp": {
-            "delete": {
-                "security": [
-                    {
-                        "CookieAuth": []
-                    }
-                ],
-                "description": "Revokes a user's TOTP",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "api v1 auth"
-                ],
-                "summary": "Revoke a user's TOTP",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendSuccessBody"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendFailBody"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendErrorBody"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/totp/generate": {
-            "post": {
-                "security": [
-                    {
-                        "CookieAuth": []
-                    }
-                ],
-                "description": "Generates a TOTP URL",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "api v1 auth"
-                ],
-                "summary": "Generate a TOTP URL",
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/internal_router_api_v1_auth.GenerateTOTPUrlResponseBody"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendFailBody"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendErrorBody"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/auth/totp/verify": {
-            "post": {
-                "security": [
-                    {
-                        "CookieAuth": []
-                    }
-                ],
-                "description": "Verifies a TOTP code",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "api v1 auth"
-                ],
-                "summary": "Verify a TOTP code",
-                "parameters": [
-                    {
-                        "description": "Verify TOTP Request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_router_api_v1_auth.VerifyTOTPRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_router_api_v1_auth.VerifyTOTPResponseBody"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.JSendFailBody"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.JSendFailBody"
                         }
@@ -2784,6 +3001,22 @@
                 }
             }
         },
+        "internal_router_api_v1_auth.DisableUser2FARequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.EnableUser2FARequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_router_api_v1_auth.ForgotPasswordRequest": {
             "type": "object",
             "properties": {
@@ -2792,18 +3025,18 @@
                 }
             }
         },
-        "internal_router_api_v1_auth.GenerateTOTPUrlResponseBody": {
+        "internal_router_api_v1_auth.Generate2FATOTPUrlResponseBody": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/internal_router_api_v1_auth.GenerateTOTPUrlResponseData"
+                    "$ref": "#/definitions/internal_router_api_v1_auth.Generate2FATOTPUrlResponseData"
                 },
                 "status": {
                     "type": "string"
                 }
             }
         },
-        "internal_router_api_v1_auth.GenerateTOTPUrlResponseData": {
+        "internal_router_api_v1_auth.Generate2FATOTPUrlResponseData": {
             "type": "object",
             "properties": {
                 "totp_url": {
@@ -2866,7 +3099,7 @@
                 "2fa_code": {
                     "type": "string"
                 },
-                "2fa_code_type": {
+                "2fa_method": {
                     "type": "string"
                 },
                 "password": {
@@ -2874,6 +3107,64 @@
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.LogInResponseBody": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_router_api_v1_auth.LogInResponseData"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.LogInResponseData": {
+            "type": "object",
+            "properties": {
+                "2fa_methods": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "2fa_recovery_codes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseBody": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseData"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.RegenerateUser2FARecoveryCodesResponseData": {
+            "type": "object",
+            "properties": {
+                "recovery_codes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -2916,6 +3207,14 @@
                 }
             }
         },
+        "internal_router_api_v1_auth.Verify2FATOTPRequest": {
+            "type": "object",
+            "properties": {
+                "totp_code": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_router_api_v1_auth.VerifyEmailRequest": {
             "type": "object",
             "properties": {
@@ -2929,36 +3228,6 @@
             "properties": {
                 "token": {
                     "type": "string"
-                }
-            }
-        },
-        "internal_router_api_v1_auth.VerifyTOTPRequest": {
-            "type": "object",
-            "properties": {
-                "totp_code": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_router_api_v1_auth.VerifyTOTPResponseBody": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/internal_router_api_v1_auth.VerifyTOTPResponseData"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_router_api_v1_auth.VerifyTOTPResponseData": {
-            "type": "object",
-            "properties": {
-                "recovery_codes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },

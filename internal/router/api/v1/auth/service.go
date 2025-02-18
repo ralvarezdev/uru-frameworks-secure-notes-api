@@ -477,8 +477,8 @@ func (s *service) LogIn(
 			var userTOTPID sql.NullInt64
 			var userTOTPSecret sql.NullString
 			var userTOTPVerifiedAt sql.NullTime
-			if err := internalpostgres.PoolService.QueryRow(
-				&internalpostgresmodel.GetUserTOTPProc,
+			if err = internalpostgres.PoolService.QueryRow(
+				&internalpostgresmodel.GetUser2FATOTPProc,
 				userID,
 				nil, nil, nil,
 			).Scan(

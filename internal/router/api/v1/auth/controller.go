@@ -723,7 +723,7 @@ func (c *controller) RegenerateUser2FARecoveryCodes(
 // @Accept json
 // @Produce json
 // @Security CookieAuth
-// @Success 200 {object} SendUser2FAEmailCodeResponseBody
+// @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
