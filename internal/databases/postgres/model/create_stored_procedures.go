@@ -529,16 +529,21 @@ $$;
 CREATE OR REPLACE PROCEDURE use_user_2fa_recovery_code(
 	IN in_user_id BIGINT,
 	IN in_user_2fa_recovery_code VARCHAR,
+	OUT out_user_2fa_recovery_code_is_valid BOOLEAN,
 	OUT out_user_2fa_recovery_code_left INT
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+	out_user_2fa_recovery_code_id BIGINT;
 BEGIN
-	-- Update the user_2fa_recovery_codes table
-	UPDATE
+	-- Select if the user 2FA recovery code is valid
+	SELECT
+		user_2fa_recovery_codes.id
+	INTO
+		out_user_2fa_recovery_code_id
+	FROM
 		user_2fa_recovery_codes
-	SET
-		used_at = NOW()
 	WHERE
 		user_2fa_recovery_codes.user_id = in_user_id
 	AND
@@ -548,19 +553,33 @@ BEGIN
 	AND
 		user_2fa_recovery_codes.used_at IS NULL;
 
-	-- Select the count of the user_2fa_recovery_codes table
-	SELECT
-		COUNT(*)
-	INTO
-		out_user_2fa_recovery_code_left
-	FROM
-		user_2fa_recovery_codes
-	WHERE
-		user_2fa_recovery_codes.user_id = in_user_id
-	AND
-		user_2fa_recovery_codes.revoked_at IS NULL
-	AND
-		user_2fa_recovery_codes.used_at IS NULL;
+	IF out_user_2fa_recovery_code_id IS NULL THEN
+		out_user_2fa_recovery_code_is_valid = FALSE;
+	ELSE
+		out_user_2fa_recovery_code_is_valid = TRUE;
+
+		-- Update the user_2fa_recovery_codes table
+		UPDATE
+			user_2fa_recovery_codes
+		SET
+			used_at = NOW()
+		WHERE
+			user_2fa_recovery_codes.id = out_user_2fa_recovery_code_id;
+	
+		-- Select the count of the user_2fa_recovery_codes table
+		SELECT
+			COUNT(*)
+		INTO
+			out_user_2fa_recovery_code_left
+		FROM
+			user_2fa_recovery_codes
+		WHERE
+			user_2fa_recovery_codes.user_id = in_user_id
+		AND
+			user_2fa_recovery_codes.revoked_at IS NULL
+		AND
+			user_2fa_recovery_codes.used_at IS NULL;
+	END IF;
 END;
 $$;
 `
@@ -1364,7 +1383,7 @@ BEGIN
 	-- Check if the user phone number is verified
 	CALL is_user_phone_number_verified(in_user_id, out_user_phone_number_is_verified);
 
-	-- Check if the user has TOTP enabled
+	-- Check if the user has 2FA enabled
 	CALL has_user_2fa_enabled(in_user_id, out_user_has_2fa_enabled);
 END;
 $$;
@@ -2025,16 +2044,21 @@ $$;
 	CreateUseUser2FAEmailCodeProc = `
 CREATE OR REPLACE PROCEDURE use_user_2fa_email_code(
 	IN in_user_id BIGINT,
-	IN in_user_2fa_email_code VARCHAR
+	IN in_user_2fa_email_code VARCHAR,
+	OUT out_user_2fa_email_code_is_valid BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
+DECLARE
+	out_user_2fa_email_code_id BIGINT;
 BEGIN
-	-- Update the user_2fa_email_codes table
-	UPDATE
+	-- Check if the user 2FA email code is valid
+	SELECT
+		user_2fa_email_codes.id
+	INTO
+		out_user_2fa_email_code_id
+	FROM
 		user_2fa_email_codes
-	SET
-		used_at = NOW()
 	WHERE
 		user_2fa_email_codes.user_id = in_user_id
 	AND
@@ -2045,6 +2069,20 @@ BEGIN
 		user_2fa_email_codes.revoked_at IS NULL
 	AND
 		user_2fa_email_codes.used_at IS NULL;
+
+	IF out_user_2fa_email_code_id IS NULL THEN
+		out_user_2fa_email_code_is_valid = FALSE;
+	ELSE
+		out_user_2fa_email_code_is_valid = TRUE;
+
+		-- Update the user_2fa_email_codes table
+		UPDATE
+			user_2fa_email_codes
+		SET
+			used_at = NOW()
+		WHERE
+			user_2fa_email_codes.id = out_user_2fa_email_code_id;
+	END IF;
 END;
 $$;
 `
@@ -2054,7 +2092,8 @@ $$;
 CREATE OR REPLACE PROCEDURE enable_2fa(
 	IN in_user_id BIGINT,
 	IN in_user_2fa_recovery_codes VARCHAR[],
-	OUT out_is_user_email_verified BOOLEAN
+	OUT out_is_user_email_verified BOOLEAN,
+	OUT out_has_user_2fa_enabled BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
@@ -2063,16 +2102,21 @@ BEGIN
 	CALL is_user_email_verified(in_user_id, out_is_user_email_verified);
 
 	IF out_is_user_email_verified THEN
-		-- Create the user 2FA recovery codes
-		CALL create_user_2fa_recovery_codes(in_user_id, in_user_2fa_recovery_codes);
-	
-		-- Insert into user_2fa table
-		INSERT INTO user_2fa (
-			user_id
-		)
-		VALUES (
-			in_user_id
-		);
+		-- Check if the user has 2FA enabled
+		CALL has_user_2fa_enabled(in_user_id, out_has_user_2fa_enabled);
+
+		IF NOT out_has_user_2fa_enabled THEN
+			-- Create the user 2FA recovery codes
+			CALL create_user_2fa_recovery_codes(in_user_id, in_user_2fa_recovery_codes);
+		
+			-- Insert into user_2fa table
+			INSERT INTO user_2fa (
+				user_id
+			)
+			VALUES (
+				in_user_id
+			);
+		END IF;
 	END IF;
 END;	
 $$;
@@ -2158,6 +2202,49 @@ BEGIN
 		-- Create the user 2FA email code
 		CALL create_user_2fa_email_code(in_user_id, in_user_2fa_email_code, in_user_2fa_email_code_expires_at);
 	END IF;
+END;
+$$;
+`
+
+	// CreateHasUser2FATOTPEnabledProc is the query to create the stored procedure to check if the user has 2FA TOTP enabled
+	CreateHasUser2FATOTPEnabledProc = `
+CREATE OR REPLACE PROCEDURE has_user_2fa_totp_enabled(
+	IN in_user_id BIGINT,
+	OUT out_has_user_2fa_totp_enabled BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user is on the user_2fa_totp table
+	SELECT
+		user_2fa_totp.id IS NOT NULL
+	INTO
+		out_has_user_2fa_totp_enabled
+	FROM
+		user_2fa_totp
+	WHERE
+		user_2fa_totp.user_id = in_user_id
+	AND
+		user_2fa_totp.revoked_at IS NULL;
+END;	
+$$;
+`
+
+	// CreateGetUser2FAMethodsProc is the query to create the stored procedure to get user 2FA methods
+	CreateGetUser2FAMethodsProc = `
+CREATE OR REPLACE PROCEDURE get_user_2fa_methods(
+	IN in_user_id BIGINT,
+	OUT out_has_user_2fa_enabled BOOLEAN,
+	OUT out_has_user_2fa_totp_enabled BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Check if the user has 2FA enabled
+	CALL has_user_2fa_enabled(in_user_id, out_has_user_2fa_enabled);
+
+	-- Check if the user has 2FA TOTP enabled
+	CALL has_user_2fa_totp_enabled(in_user_id, out_has_user_2fa_totp_enabled);
 END;
 $$;
 `

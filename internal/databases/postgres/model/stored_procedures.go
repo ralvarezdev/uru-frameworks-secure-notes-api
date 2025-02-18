@@ -44,7 +44,7 @@ var (
 	RevokeUser2FARecoveryCodesProc = "CALL revoke_user_2fa_recovery_codes($1)"
 
 	// UseUser2FARecoveryCodeProc is the query to call the stored procedure to use user 2FA recovery code
-	UseUser2FARecoveryCodeProc = "CALL use_user_2fa_recovery_code($1, $2, $3)"
+	UseUser2FARecoveryCodeProc = "CALL use_user_2fa_recovery_code($1, $2, $3, $4)"
 
 	// Verify2FATOTPProc is the query to call the stored procedure to verify 2FA TOTP
 	Verify2FATOTPProc = "CALL verify_2fa_totp($1)"
@@ -182,14 +182,20 @@ var (
 	CreateUser2FAEmailCodeProc = "CALL create_user_2fa_email_code($1, $2)"
 
 	// UseUser2FAEmailCodeProc is the query to call the stored procedure to use user 2FA email code
-	UseUser2FAEmailCodeProc = "CALL use_user_2fa_email_code($1, $2)"
+	UseUser2FAEmailCodeProc = "CALL use_user_2fa_email_code($1, $2, $3)"
 
 	// EnableUser2FAProc is the query to call the stored procedure to enable user 2FA
-	EnableUser2FAProc = "CALL enable_user_2fa($1, $2, $3)"
+	EnableUser2FAProc = "CALL enable_user_2fa($1, $2, $3, $4)"
 
 	// DisableUser2FAProc is the query to call the stored procedure to disable user 2FA
 	DisableUser2FAProc = "CALL disable_user_2fa($1, $2)"
 
 	// SendUser2FAEmailCodeProc is the query to call the stored procedure to send user 2FA email code
 	SendUser2FAEmailCodeProc = "CALL send_user_2fa_email_code($1, $2, $3, $4, $5, $6, $7)"
+
+	// HasUser2FATOTPEnabledProc is the query to call the stored procedure to check if the user has 2FA TOTP enabled
+	HasUser2FATOTPEnabledProc = "CALL has_user_2fa_totp_enabled($1, $2)"
+
+	// GetUser2FAMethodsProc is the query to call the stored procedure to get user 2FA methods
+	GetUser2FAMethodsProc = "CALL get_user_2fa_methods($1, $2, $3)"
 )

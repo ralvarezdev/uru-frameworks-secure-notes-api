@@ -38,38 +38,35 @@ var (
 		nil,
 		http.StatusUnauthorized,
 	)
-	ErrLogInInvalidTOTPCode = gonethttpresponse.NewFailResponseError(
-		"2fa_code",
-		"invalid TOTP code",
-		nil,
-		http.StatusUnauthorized,
-	)
-	ErrLogInInvalidTOTPRecoveryCode = gonethttpresponse.NewFailResponseError(
-		"2fa_code",
-		"invalid TOTP recovery code",
-		nil,
-		http.StatusUnauthorized,
-	)
 	ErrLogInRequired2FACode = gonethttpresponse.NewFailResponseError(
 		"2fa_code",
 		fmt.Sprintf(govalidatormappervalidations.ErrRequiredField, "2fa_code"),
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrLogInRequired2FACodeType = gonethttpresponse.NewFailResponseError(
-		"2fa_code_type",
-		fmt.Sprintf(
-			govalidatormappervalidations.ErrRequiredField,
-			"2fa_code_type",
-		),
+	ErrLogInInvalid2FAMethod = gonethttpresponse.NewFailResponseError(
+		"2fa_method",
+		"invalid 2FA method",
 		nil,
 		http.StatusBadRequest,
 	)
-	ErrLogInInvalid2FACodeType = gonethttpresponse.NewFailResponseError(
-		"2fa_code_type",
-		"invalid 2FA code type",
+	ErrLogInInvalid2FARecoveryCode = gonethttpresponse.NewFailResponseError(
+		"2fa_code",
+		"invalid 2FA recovery code",
 		nil,
-		http.StatusBadRequest,
+		http.StatusUnauthorized,
+	)
+	ErrLogInInvalid2FATOTPCode = gonethttpresponse.NewFailResponseError(
+		"2fa_code",
+		"invalid 2FA TOTP code",
+		nil,
+		http.StatusUnauthorized,
+	)
+	ErrLogInInvalid2FAEmailCode = gonethttpresponse.NewFailResponseError(
+		"2fa_code",
+		"invalid 2FA email code",
+		nil,
+		http.StatusUnauthorized,
 	)
 	ErrGenerate2FATOTP2FAIsNotEnabled = gonethttpresponse.NewFailResponseError(
 		"2fa",
@@ -158,6 +155,12 @@ var (
 	ErrEnableUser2FAEmailNotVerified = gonethttpresponse.NewFailResponseError(
 		"email",
 		"email is not verified",
+		nil,
+		http.StatusBadRequest,
+	)
+	ErrorEnableUser2FA2FAIsAlreadyEnabled = gonethttpresponse.NewFailResponseError(
+		"2fa",
+		"2FA is already enabled",
 		nil,
 		http.StatusBadRequest,
 	)

@@ -44,11 +44,14 @@ const (
 	// EnvTwoFactorAuthenticationEmailCodeLength is the environment for the 2FA email code length
 	EnvTwoFactorAuthenticationEmailCodeLength = "URU_FRAMEWORKS_SECURE_NOTES_2FA_EMAIL_CODE_LENGTH"
 
-	// EmailCodeType is the type of email code
-	EmailCodeType = "email-code"
+	// EmailCode2FAMethod is the 2FA email code method
+	EmailCode2FAMethod = "email-code"
 
-	// TOTPCodeType is the type of TOTP code
-	TOTPCodeType = "totp-code"
+	// TOTPCode2FAMethod is the 2FA TOTP code method
+	TOTPCode2FAMethod = "totp-code"
+
+	// RecoveryCode2FAMethod is the 2FA recovery code method
+	RecoveryCode2FAMethod = "recovery-code"
 )
 
 var (
@@ -96,6 +99,13 @@ var (
 
 	// TwoFactorAuthenticationEmailCodeLength is the 2FA email code length
 	TwoFactorAuthenticationEmailCodeLength int
+
+	// Valid2FAMethods are the valid 2FA methods
+	Valid2FAMethods = []string{
+		EmailCode2FAMethod,
+		TOTPCode2FAMethod,
+		RecoveryCode2FAMethod,
+	}
 )
 
 var (

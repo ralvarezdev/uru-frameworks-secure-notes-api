@@ -17,13 +17,22 @@ type (
 
 	// LogInRequest is the request DTO to log in
 	LogInRequest struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
+		Username                      string  `json:"username"`
+		Password                      string  `json:"password"`
+		TwoFactorAuthenticationMethod *string `json:"2fa_method,omitempty"`
+		TwoFactorAuthenticationCode   *string `json:"2fa_code,omitempty"`
 	}
 
 	// LogInResponseData is the response data DTO to log in
 	LogInResponseData struct {
-		TwoFactorAuthenticationMethods *[]string `json:"2fa_methods,omitempty"`
+		TwoFactorAuthenticationMethods       *[]string `json:"2fa_methods,omitempty"`
+		TwoFactorAuthenticationRecoveryCodes *[]string `json:"2fa_recovery_codes,omitempty"`
+	}
+
+	// LogInResponseBody is the response body DTO to log in
+	LogInResponseBody struct {
+		gonethttpresponse.BaseJSendSuccessBody
+		Data LogInResponseData `json:"data"`
 	}
 
 	// EnableUser2FARequest is the request DTO to enable user 2FA

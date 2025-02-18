@@ -133,5 +133,7 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateEnableUser2FAProc,
 		internalpostgresmodel.CreateDisableUser2FAProc,
 		internalpostgresmodel.CreateSendUser2FAEmailCodeProc,
+		internalpostgresmodel.CreateHasUser2FATOTPEnabledProc,
+		internalpostgresmodel.CreateGetUser2FAMethodsProc,
 	)
 }

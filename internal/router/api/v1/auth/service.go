@@ -135,22 +135,61 @@ func (s *service) Validate2FATOTPCode(
 // Validate2FARecoveryCode validates a 2FA recovery code
 func (s *service) Validate2FARecoveryCode(
 	userID int64,
-	totpID int64,
-	totpRecoveryCode string,
+	user2FARecoveryCode string,
 	ipAddress string,
-) bool {
+) (int32, bool) {
 	// Revoke the 2FA recovery code
-	result, err := internalpostgres.PoolService.Exec(
+	var user2FARecoveryCodeIsValid sql.NullBool
+	var userRecoveryCodesLeft sql.NullInt32
+	if err := internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.UseUser2FARecoveryCodeProc,
-		totpID,
-		totpRecoveryCode,
-	)
-	if err != nil {
+		userID,
+		user2FARecoveryCode,
+		nil,
+		nil,
+	).Scan(
+		&user2FARecoveryCodeIsValid,
+		&userRecoveryCodesLeft,
+	); err != nil {
 		panic(err)
 	}
 
-	// Check if the 2FA recovery code was revoked
-	if result.RowsAffected() > 0 {
+	// Check if the 2FA recovery code is valid
+	if user2FARecoveryCodeIsValid.Valid && user2FARecoveryCodeIsValid.Bool {
+		return userRecoveryCodesLeft.Int32, true
+	}
+
+	// Register the failed login attempt
+	s.RegisterFailedLoginAttempt(
+		userID,
+		ipAddress,
+		false,
+		true,
+	)
+	return 0, false
+}
+
+// Validate2FAEmailCode validates a 2FA email code
+func (s *service) Validate2FAEmailCode(
+	userID int64,
+	user2FAEmailCode string,
+	ipAddress string,
+) bool {
+	// Use the 2FA email code
+	var user2FAEmailCodeIsValid sql.NullBool
+	if err := internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.UseUser2FAEmailCodeProc,
+		userID,
+		user2FAEmailCode,
+		nil,
+	).Scan(
+		&user2FAEmailCodeIsValid,
+	); err != nil {
+		panic(err)
+	}
+
+	// Check if the 2FA email code is valid
+	if user2FAEmailCodeIsValid.Valid && user2FAEmailCodeIsValid.Bool {
 		return true
 	}
 
@@ -162,6 +201,35 @@ func (s *service) Validate2FARecoveryCode(
 		true,
 	)
 	return false
+}
+
+// GenerateUser2FARecoveryCodes generates the user 2FA recovery codes
+func (s *service) GenerateUser2FARecoveryCodes(
+	userID int64,
+) (*[]string, bool) {
+	// Generate the 2FA recovery codes
+	user2FARecoveryCodes, err := gocryptorandomutf8.GenerateRecoveryCodes(
+		internaltotp.RecoveryCodesCount,
+		internaltotp.RecoveryCodesLength,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// Call the regenerate 2FA recovery codes stored procedure
+	var hasUser2FAEnabled sql.NullBool
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.CreateUser2FARecoveryCodesProc,
+		userID,
+		user2FARecoveryCodes,
+		nil,
+	).Scan(
+		&hasUser2FAEnabled,
+	); err != nil {
+		panic(err)
+	}
+
+	return user2FARecoveryCodes, hasUser2FAEnabled.Valid && hasUser2FAEnabled.Bool
 }
 
 // GenerateEmailVerificationToken generates an email verification token
@@ -270,7 +338,7 @@ func (s *service) LogIn(
 	w http.ResponseWriter,
 	r *http.Request,
 	body *LogInRequest,
-) int64 {
+) (int64, *LogInResponseBody) {
 	// Check if the request body is nil
 	if body == nil {
 		panic(gonethttp.ErrNilRequestBody)
@@ -329,34 +397,99 @@ func (s *service) LogIn(
 		panic(ErrLogInInvalidPassword)
 	}
 
-	// Get the user TOTP ID and secret by the user ID if it is active
-	var userTOTPID sql.NullInt64
-	var userTOTPSecret sql.NullString
-	var userTOTPVerifiedAt sql.NullTime
-	if err := internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.GetUserTOTPProc,
+	// Get which 2FA methods are enabled
+	var hasUser2FAEnabled, hasUser2FATOTPEnabled sql.NullBool
+	if err = internalpostgres.PoolService.QueryRow(
+		&internalpostgresmodel.GetUser2FAMethodsProc,
 		userID,
-		nil, nil, nil,
+		nil, nil,
 	).Scan(
-		&userTOTPID,
-		&userTOTPSecret,
-		&userTOTPVerifiedAt,
+		&hasUser2FAEnabled,
+		&hasUser2FATOTPEnabled,
 	); err != nil {
 		panic(err)
 	}
 
-	// Check if the user TOTP ID is not nil and the TOTP is verified
-	if userTOTPID.Int64 != 0 && userTOTPVerifiedAt.Valid {
+	// Check if the user has 2FA enabled
+	var userRecoveryCodes *[]string
+	if hasUser2FAEnabled.Valid && hasUser2FAEnabled.Bool {
 		// Check if the 2FA code-related fields are nil
+		if body.TwoFactorAuthenticationMethod == nil {
+			methods := []string{
+				internal.EmailCode2FAMethod,
+				internal.RecoveryCode2FAMethod,
+			}
+			if hasUser2FATOTPEnabled.Valid && hasUser2FATOTPEnabled.Bool {
+				methods = append(methods, internal.TOTPCode2FAMethod)
+			}
+			return userID.Int64, &LogInResponseBody{
+				BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+				Data: LogInResponseData{
+					TwoFactorAuthenticationMethods: &methods,
+				},
+			}
+		}
 		if body.TwoFactorAuthenticationCode == nil {
 			panic(ErrLogInRequired2FACode)
 		}
-		if body.TwoFactorAuthenticationCodeType == nil {
-			panic(ErrLogInRequired2FACodeType)
+
+		// Check if the 2FA method is invalid
+		for _, valid2FAMethod := range internal.Valid2FAMethods {
+			if *body.TwoFactorAuthenticationMethod == valid2FAMethod {
+				break
+			}
+			if valid2FAMethod == internal.Valid2FAMethods[len(internal.Valid2FAMethods)-1] {
+				panic(ErrLogInInvalid2FAMethod)
+			}
 		}
 
-		// Validate the TOTP code
-		if *body.TwoFactorAuthenticationCodeType == TOTPCodeType {
+		// Check if the 2FA method is enabled
+		if *body.TwoFactorAuthenticationMethod == internal.EmailCode2FAMethod {
+			if !s.Validate2FAEmailCode(
+				userID.Int64,
+				*body.TwoFactorAuthenticationCode,
+				clientIP,
+			) {
+				panic(ErrLogInInvalid2FAEmailCode)
+			}
+		} else if *body.TwoFactorAuthenticationMethod == internal.RecoveryCode2FAMethod {
+			userRecoveryCodesLeft, ok := s.Validate2FARecoveryCode(
+				userID.Int64,
+				*body.TwoFactorAuthenticationCode,
+				clientIP,
+			)
+			if !ok {
+				panic(ErrLogInInvalid2FARecoveryCode)
+			}
+
+			// Generate new recovery codes
+			if userRecoveryCodesLeft <= 0 {
+				userRecoveryCodes, _ = s.GenerateUser2FARecoveryCodes(
+					userID.Int64,
+				)
+			}
+		} else if *body.TwoFactorAuthenticationMethod == internal.TOTPCode2FAMethod {
+			if !hasUser2FATOTPEnabled.Valid || !hasUser2FATOTPEnabled.Bool {
+				panic(ErrLogInInvalid2FAMethod)
+			}
+
+			// Get the user TOTP ID and secret by the user ID if it is active
+			var userTOTPID sql.NullInt64
+			var userTOTPSecret sql.NullString
+			var userTOTPVerifiedAt sql.NullTime
+			if err := internalpostgres.PoolService.QueryRow(
+				&internalpostgresmodel.GetUserTOTPProc,
+				userID,
+				nil, nil, nil,
+			).Scan(
+				&userTOTPID,
+				&userTOTPSecret,
+				&userTOTPVerifiedAt,
+			); err != nil {
+				panic(err)
+			}
+
+			// Validate the TOTP code
 			if !s.Validate2FATOTPCode(
 				userID.Int64,
 				userTOTPSecret.String,
@@ -364,20 +497,8 @@ func (s *service) LogIn(
 				clientIP,
 				currentTime,
 			) {
-				panic(ErrLogInInvalidTOTPCode)
+				panic(ErrLogInInvalid2FATOTPCode)
 			}
-		} else if *body.TwoFactorAuthenticationCodeType == TOTPRecoveryCodeType {
-			// Validate the TOTP recovery code
-			if !s.ValidateTOTPRecoveryCode(
-				userID.Int64,
-				userTOTPID.Int64,
-				*body.TwoFactorAuthenticationCode,
-				clientIP,
-			) {
-				panic(ErrLogInInvalidTOTPRecoveryCode)
-			}
-		} else {
-			panic(ErrLogInInvalid2FACodeType)
 		}
 	}
 
@@ -419,7 +540,16 @@ func (s *service) LogIn(
 	internalcookie.SetSaltCookie(w, userSalt.String)
 	internalcookie.SetEncryptedKeyCookie(w, userEncryptedKey.String)
 	internalcookie.SetUserIDCookie(w, userID.Int64)
-	return userID.Int64
+
+	if userRecoveryCodes != nil {
+		return userID.Int64, &LogInResponseBody{
+			BaseJSendSuccessBody: *gonethttpresponse.NewBaseJSendSuccessBody(),
+			Data: LogInResponseData{
+				TwoFactorAuthenticationRecoveryCodes: userRecoveryCodes,
+			},
+		}
+	}
+	return userID.Int64, nil
 }
 
 // RevokeRefreshToken revokes a user refresh token
@@ -1038,7 +1168,7 @@ func (s *service) EnableUser2FA(
 	}
 
 	// Call the enable 2FA stored procedure
-	var isUserEmailVerified sql.NullBool
+	var isUserEmailVerified, hasUser2FAEnabled sql.NullBool
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.EnableUser2FAProc,
 		userID,
@@ -1046,6 +1176,7 @@ func (s *service) EnableUser2FA(
 		nil,
 	).Scan(
 		&isUserEmailVerified,
+		&hasUser2FAEnabled,
 	); err != nil {
 		panic(err)
 	}
@@ -1053,6 +1184,11 @@ func (s *service) EnableUser2FA(
 	// Check if the user email is not verified
 	if !isUserEmailVerified.Valid || !isUserEmailVerified.Bool {
 		panic(ErrEnableUser2FAEmailNotVerified)
+	}
+
+	// Check if the user has 2FA enabled
+	if hasUser2FAEnabled.Valid && hasUser2FAEnabled.Bool {
+		panic(ErrorEnableUser2FA2FAIsAlreadyEnabled)
 	}
 
 	return userID, &EnableUser2FAResponseBody{
@@ -1126,29 +1262,10 @@ func (s *service) RegenerateUser2FARecoveryCodes(
 	}
 
 	// Generate the 2FA recovery codes
-	user2FARecoveryCodes, err := gocryptorandomutf8.GenerateRecoveryCodes(
-		internaltotp.RecoveryCodesCount,
-		internaltotp.RecoveryCodesLength,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	// Call the regenerate 2FA recovery codes stored procedure
-	var hasUser2FAEnabled sql.NullBool
-	if err = internalpostgres.PoolService.QueryRow(
-		&internalpostgresmodel.CreateUser2FARecoveryCodesProc,
-		userID,
-		user2FARecoveryCodes,
-		nil,
-	).Scan(
-		&hasUser2FAEnabled,
-	); err != nil {
-		panic(err)
-	}
+	user2FARecoveryCodes, hasUser2FAEnabled := s.GenerateUser2FARecoveryCodes(userID)
 
 	// Check if the user has 2FA enabled
-	if !hasUser2FAEnabled.Valid || !hasUser2FAEnabled.Bool {
+	if !hasUser2FAEnabled {
 		panic(ErrRegenerateUser2FARecoveryCodes2FAIsNotEnabled)
 	}
 

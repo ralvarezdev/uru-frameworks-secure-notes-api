@@ -64,3 +64,5 @@ DROP PROCEDURE IF EXISTS use_user_2fa_email_code;
 DROP PROCEDURE IF EXISTS enable_user_2fa;
 DROP PROCEDURE IF EXISTS disable_user_2fa;
 DROP PROCEDURE IF EXISTS send_user_2fa_email_code;
+DROP PROCEDURE IF EXISTS has_user_2fa_totp_enabled;
+DROP PROCEDURE IF EXISTS get_user_2fa_methods;

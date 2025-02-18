@@ -52,7 +52,7 @@ func (c *controller) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param request body LogInRequest true "Log In Request"
-// @Success 201 {object} gonethttpresponse.JSendSuccessBody
+// @Success 201 {object} LogInResponseBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
 // @Failure 500 {object} gonethttpresponse.JSendErrorBody
@@ -62,7 +62,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := gonethttpctx.GetCtxBody(r).(*LogInRequest)
 
 	// Log in the user
-	userID := Service.LogIn(w, r, requestBody)
+	userID, responseBody := Service.LogIn(w, r, requestBody)
 
 	// Log the successful login
 	internallogger.Api.LogIn(userID)
@@ -70,7 +70,7 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	// Handle the response
 	internalhandler.Handler.HandleResponse(
 		w, gonethttpresponse.NewJSendSuccessResponse(
-			nil,
+			responseBody,
 			http.StatusCreated,
 		),
 	)
