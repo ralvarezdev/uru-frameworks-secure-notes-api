@@ -198,7 +198,7 @@ var (
 			m.RegisterExactRoute(
 				"POST /2fa/email/send-code",
 				Controller.SendUser2FAEmailCode,
-				internalmiddleware.AuthenticateAccessToken,
+				internalmiddleware.Validate(&SendUser2FAEmailCodeRequest{}),
 			)
 		},
 	}

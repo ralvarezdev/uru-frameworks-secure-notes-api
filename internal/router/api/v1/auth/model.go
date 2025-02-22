@@ -156,4 +156,10 @@ type (
 	VerifyEmailRequest struct {
 		Token string `json:"token"`
 	}
+
+	// SendUser2FAEmailCodeRequest is the request DTO to send user 2FA email code
+	SendUser2FAEmailCodeRequest struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 )

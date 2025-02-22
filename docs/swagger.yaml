@@ -265,6 +265,13 @@ definitions:
       refresh_token_id:
         type: integer
     type: object
+  internal_router_api_v1_auth.SendUser2FAEmailCodeRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   internal_router_api_v1_auth.SignUpRequest:
     properties:
       email:
@@ -641,6 +648,13 @@ paths:
       consumes:
       - application/json
       description: Sends a 2FA email code to the authenticated user
+      parameters:
+      - description: Send User 2FA Email Code Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_router_api_v1_auth.SendUser2FAEmailCodeRequest'
       produces:
       - application/json
       responses:

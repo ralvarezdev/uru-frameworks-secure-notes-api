@@ -2161,41 +2161,51 @@ $$;
 	// CreateSendUser2FAEmailCodeProc is the query to create the stored procedure to send user 2FA email code
 	CreateSendUser2FAEmailCodeProc = `
 CREATE OR REPLACE PROCEDURE send_user_2fa_email_code(
-	IN in_user_id BIGINT,
+	IN in_user_username VARCHAR,
 	IN in_user_2fa_email_code VARCHAR,
 	IN in_user_2fa_email_code_expires_at TIMESTAMP,
-	OUT has_user_2fa_enabled BOOLEAN,
+	OUT out_user_id BIGINT,	
 	OUT out_user_first_name VARCHAR,
 	OUT out_user_last_name VARCHAR,
-	OUT out_user_email VARCHAR
+	OUT out_user_password_hash VARCHAR,
+	OUT out_user_email VARCHAR,
+	OUT has_user_2fa_enabled BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
+	-- Select the user first name, last name, and email by user ID
+	SELECT
+		users.id,
+		users.first_name,
+		users.last_name,
+		user_password_hashes.password_hash,
+		user_emails.email
+	INTO	
+		out_user_id,
+		out_user_first_name,
+		out_user_last_name,
+		out_user_password_hash,
+		out_user_email
+	FROM	
+		users
+	INNER JOIN	
+		user_emails ON users.id = user_emails.user_id
+	INNER JOIN
+		user_password_hashes ON users.id = user_password_hashes.user_id
+	INNER JOIN
+		user_usernames ON users.id = user_usernames.user_id
+	WHERE
+		user_usernames.username = in_user_username
+	AND
+		users.deleted_at IS NULL
+	AND	
+		user_emails.revoked_at IS NULL;
+
 	-- Check if the user has 2FA enabled
 	CALL has_user_2fa_enabled(in_user_id, has_user_2fa_enabled);
 
 	IF has_user_2fa_enabled THEN
-		-- Select the user first name, last name, and email by user ID
-		SELECT
-			users.first_name,
-			users.last_name,
-			user_emails.email
-		INTO	
-			out_user_first_name,
-			out_user_last_name,
-			out_user_email
-		FROM	
-			users
-		INNER JOIN	
-			user_emails ON users.id = user_emails.user_id
-		WHERE
-			users.id = in_user_id
-		AND
-			users.deleted_at IS NULL
-		AND	
-			user_emails.revoked_at IS NULL;
-
 		-- Revoke the user 2FA email code
 		CALL revoke_user_2fa_email_code(in_user_id);
 

@@ -68,8 +68,16 @@ func (c *controller) LogIn(w http.ResponseWriter, r *http.Request) {
 	internallogger.Api.LogIn(userID)
 
 	// Handle the response
+	if response != nil {
+		internalhandler.Handler.HandleResponse(
+			w, response,
+		)
+	}
 	internalhandler.Handler.HandleResponse(
-		w, response,
+		w, gonethttpresponse.NewJSendSuccessResponse(
+			nil,
+			http.StatusCreated,
+		),
 	)
 }
 
@@ -720,6 +728,7 @@ func (c *controller) RegenerateUser2FARecoveryCodes(
 // @Accept json
 // @Produce json
 // @Security CookieAuth
+// @Param request body SendUser2FAEmailCodeRequest true "Send User 2FA Email Code Request"
 // @Success 200 {object} gonethttpresponse.JSendSuccessBody
 // @Failure 400 {object} gonethttpresponse.JSendFailBody
 // @Failure 401 {object} gonethttpresponse.JSendFailBody
@@ -729,8 +738,11 @@ func (c *controller) SendUser2FAEmailCode(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	// Get the body from the context
+	requestBody, _ := gonethttpctx.GetCtxBody(r).(*SendUser2FAEmailCodeRequest)
+
 	// Send the 2FA email code
-	userID := Service.SendUser2FAEmailCode(r)
+	userID := Service.SendUser2FAEmailCode(r, requestBody)
 
 	// Log the successful 2FA email code send
 	internallogger.Api.SendUser2FAEmailCode(userID)

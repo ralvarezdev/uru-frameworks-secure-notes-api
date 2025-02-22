@@ -194,4 +194,16 @@ var (
 		nil,
 		http.StatusBadRequest,
 	)
+	ErrSendUser2FAEmailCodeInvalidUsername = gonethttpresponse.NewFailResponseError(
+		"username",
+		"user not found by username",
+		nil,
+		http.StatusUnauthorized,
+	)
+	ErrSendUser2FAEmailCodeInvalidPassword = gonethttpresponse.NewFailResponseError(
+		"password",
+		"invalid password",
+		nil,
+		http.StatusBadRequest,
+	)
 )

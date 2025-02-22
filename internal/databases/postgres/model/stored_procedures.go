@@ -191,7 +191,7 @@ var (
 	DisableUser2FAProc = "CALL disable_user_2fa($1, $2)"
 
 	// SendUser2FAEmailCodeProc is the query to call the stored procedure to send user 2FA email code
-	SendUser2FAEmailCodeProc = "CALL send_user_2fa_email_code($1, $2, $3, $4, $5, $6, $7)"
+	SendUser2FAEmailCodeProc = "CALL send_user_2fa_email_code($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 
 	// HasUser2FATOTPEnabledProc is the query to call the stored procedure to check if the user has 2FA TOTP enabled
 	HasUser2FATOTPEnabledProc = "CALL has_user_2fa_totp_enabled($1, $2)"

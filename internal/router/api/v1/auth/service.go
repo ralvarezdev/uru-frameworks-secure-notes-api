@@ -543,7 +543,6 @@ func (s *service) LogIn(
 	// Set the user salt, encrypted key and user ID cookies
 	internalcookie.SetSaltCookie(w, userSalt.String)
 	internalcookie.SetEncryptedKeyCookie(w, userEncryptedKey.String)
-	internalcookie.SetUserIDCookie(w, userID.Int64)
 
 	if userRecoveryCodes != nil {
 		return userID.Int64, gonethttpresponse.NewJSendSuccessResponse(
@@ -1287,11 +1286,11 @@ func (s *service) RegenerateUser2FARecoveryCodes(
 // SendUser2FAEmailCode sends a user 2FA email code
 func (s *service) SendUser2FAEmailCode(
 	r *http.Request,
+	body *SendUser2FAEmailCodeRequest,
 ) int64 {
-	// Get the user ID from the request
-	userID, err := internaljwtclaims.GetSubject(r)
-	if err != nil {
-		panic(err)
+	// Check if the request body is nil
+	if body == nil {
+		panic(gonethttp.ErrNilRequestBody)
 	}
 
 	// Generate the 2FA email code
@@ -1301,27 +1300,40 @@ func (s *service) SendUser2FAEmailCode(
 	}
 
 	// Call the send 2FA email code stored procedure
+	var userID sql.NullInt64
 	var hasUser2FAEnabled sql.NullBool
-	var userFirstName, userLastName, userEmail sql.NullString
+	var userFirstName, userLastName, userPasswordHash, userEmail sql.NullString
 	if err = internalpostgres.PoolService.QueryRow(
 		&internalpostgresmodel.SendUser2FAEmailCodeProc,
-		userID,
+		body.Username,
 		user2FAEmailCode,
 		internal.TwoFactorAuthenticationEmailCodeDuration,
 		nil,
-		nil, nil, nil,
+		nil, nil, nil, nil, nil, nil,
 	).Scan(
-		&hasUser2FAEnabled,
+		&userID,
 		&userFirstName,
 		&userLastName,
+		&userPasswordHash,
 		&userEmail,
+		&hasUser2FAEnabled,
 	); err != nil {
 		panic(err)
+	}
+
+	// Check if the user exists
+	if !userID.Valid {
+		panic(ErrSendUser2FAEmailCodeInvalidUsername)
 	}
 
 	// Check if the user has 2FA enabled
 	if !hasUser2FAEnabled.Valid || !hasUser2FAEnabled.Bool {
 		panic(ErrSendUser2FAEmailCode2FAIsNotEnabled)
+	}
+
+	// Validate the user password
+	if !s.ValidatePassword(userID.Int64, body.Password) {
+		panic(ErrSendUser2FAEmailCodeInvalidPassword)
 	}
 
 	// Send 2FA email code
@@ -1331,5 +1343,5 @@ func (s *service) SendUser2FAEmailCode(
 		user2FAEmailCode,
 	)
 
-	return userID
+	return userID.Int64
 }

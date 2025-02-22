@@ -94,6 +94,17 @@ const docTemplate = `{
                     "api v1 auth"
                 ],
                 "summary": "Send 2FA email code to the authenticated user",
+                "parameters": [
+                    {
+                        "description": "Send User 2FA Email Code Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_router_api_v1_auth.SendUser2FAEmailCodeRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -3191,6 +3202,17 @@ const docTemplate = `{
             "properties": {
                 "refresh_token_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "internal_router_api_v1_auth.SendUser2FAEmailCodeRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
