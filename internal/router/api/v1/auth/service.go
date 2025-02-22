@@ -274,12 +274,12 @@ func (s *service) SignUp(body *SignUpRequest) int64 {
 
 	// Generate a random key for the AES-256 encryption
 	key := make([]byte, internalaes.KeySize)
-	if _, err := io.ReadFull(rand.Reader, key); err != nil {
+	if _, err = io.ReadFull(rand.Reader, key); err != nil {
 		panic(err)
 	}
 
-	// Encrypt the key with the derived key
-	encryptedKey, err := gocryptoaes.Encrypt(key, derivedKey)
+	// Encrypt the key with the derived key with AES-256 Counter Mode
+	encryptedKey, err := gocryptoaes.EncryptCTR(key, derivedKey)
 	if err != nil {
 		panic(err)
 	}

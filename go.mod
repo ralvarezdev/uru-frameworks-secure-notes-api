@@ -8,7 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/joho/godotenv v1.5.1
 	github.com/mailersend/mailersend-go v1.5.1
-	github.com/ralvarezdev/go-crypto v0.6.1
+	github.com/ralvarezdev/go-crypto v0.6.3
 	github.com/ralvarezdev/go-databases v0.5.6
 	github.com/ralvarezdev/go-flags v0.3.3
 	github.com/ralvarezdev/go-jwt v0.4.10
