@@ -977,6 +977,12 @@ BEGIN
 
 		-- Revoke the user tokens
 		CALL revoke_user_tokens(out_user_id);
+
+		-- Delete the user notes
+		CALL delete_user_notes_by_user_id(out_user_id);
+
+		-- Delete the user tags
+		CALL delete_user_tags_by_user_id(out_user_id);
 	END IF;
 END;
 $$;
@@ -1137,53 +1143,11 @@ BEGIN
 	AND
 		users.deleted_at IS NULL;
 
-	-- Update the user_tags table
-	UPDATE
-		user_tags	
-	SET
-		deleted_at = NOW()
-	WHERE
-		user_tags.user_id = in_user_id
-	AND
-		user_tags.deleted_at IS NULL;
+	-- Delete the user notes
+	CALL delete_user_notes_by_user_id(in_user_id);
 
-	-- Update the user_note_tags table
-	UPDATE
-		user_note_tags
-	SET
-		deleted_at = NOW()
-	FROM
-		user_notes
-	WHERE
-		user_note_tags.note_id = user_notes.id
-	AND
-		user_notes.user_id = in_user_id
-	AND
-		user_note_tags.deleted_at IS NULL;
-	
-	-- Update the user_note_versions table
-	UPDATE
-		user_note_versions
-	SET
-		deleted_at = NOW()
-	FROM
-		user_notes
-	WHERE
-		user_note_versions.note_id = user_notes.id
-	AND
-		user_notes.user_id = in_user_id
-	AND
-		user_note_versions.deleted_at IS NULL;
-
-	-- Update the user_notes table
-	UPDATE
-		user_notes
-	SET
-		deleted_at = NOW()
-	WHERE
-		user_notes.user_id = in_user_id
-	AND
-		user_notes.deleted_at IS NULL;
+	-- Delete the user tags
+	CALL delete_user_tags_by_user_id(in_user_id);
 END;
 $$;
 `
@@ -1489,6 +1453,27 @@ END;
 $$;
 `
 
+	// CreateDeleteUserTagsByUserIDProc is the query to create the stored procedure to delete user tags by user ID
+	CreateDeleteUserTagsByUserIDProc = `
+CREATE OR REPLACE PROCEDURE delete_user_tags_by_user_id(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_tags table
+	UPDATE
+		user_tags
+	SET
+		deleted_at = NOW()
+	WHERE
+		user_tags.user_id = in_user_id
+	AND
+		user_tags.deleted_at IS NULL;
+END;	
+$$;
+`
+
 	// CreateUpdateUserNotePinProc is the query to create the stored procedure to update user note pin
 	CreateUpdateUserNotePinProc = `
 CREATE OR REPLACE PROCEDURE update_user_note_pin(
@@ -1681,6 +1666,34 @@ BEGIN
 END;
 $$;
 `
+	// CreateDeleteUserNoteVersionsByNoteIDProc is the query to create the stored procedure to delete user note versions by note ID
+	CreateDeleteUserNoteVersionsByNoteIDProc = `
+CREATE OR REPLACE PROCEDURE delete_user_note_versions_by_note_id(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_note_versions table
+	UPDATE
+		user_note_versions
+	SET
+		encrypted_content = NULL,
+		deleted_at = NOW()	
+	FROM
+		user_notes
+	WHERE
+		user_note_versions.note_id = user_notes.id	
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_notes.id = in_user_note_id
+	AND
+		user_note_versions.deleted_at IS NULL;
+END;
+$$;
+`
 
 	// CreateValidateUserTagsIDProc is the query to create the stored procedure to validate user tags ID
 	CreateValidateUserTagsIDProc = `
@@ -1739,6 +1752,34 @@ BEGIN
 			out_valid_user_note_tag_id
 		);
 	END LOOP;
+END;
+$$;
+`
+
+	// CreateDeleteUserNoteTagsByNoteIDProc is the query to create the stored procedure to delete user note tags by note ID
+	CreateDeleteUserNoteTagsByNoteIDProc = `
+CREATE OR REPLACE PROCEDURE delete_user_note_tags_by_note_id(
+	IN in_user_id BIGINT,
+	IN in_user_note_id BIGINT
+)	
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Update the user_note_tags table
+	UPDATE
+		user_note_tags
+	SET
+		deleted_at = NOW()
+	FROM
+		user_notes 
+	WHERE
+		user_note_tags.note_id = user_notes.id
+	AND
+		user_notes.id = in_user_note_id
+	AND
+		user_notes.user_id = in_user_id
+	AND
+		user_note_tags.deleted_at IS NULL;
 END;
 $$;
 `
@@ -1877,39 +1918,43 @@ BEGIN
 	AND
 		user_notes.deleted_at IS NULL;
 
-	-- Update the user_note_versions table
-	UPDATE
-		user_note_versions
-	SET
-		encrypted_content = NULL,
-		deleted_at = NOW()
-	FROM
-		user_notes 
-	WHERE
-		user_note_versions.note_id = user_notes.id
-	AND
-		user_notes.id = in_user_note_id
-	AND
-		user_notes.user_id = in_user_id
-	AND
-		user_note_versions.deleted_at IS NULL;
+	-- Delete the user note versions
+	call delete_user_note_versions_by_note_id(in_user_id, in_user_note_id);
 
-	-- Update the user_note_tags table
-	UPDATE
-		user_note_tags
-	SET
-		assigned_at = NULL,
-		deleted_at = NOW()
+	-- Delete the user note tags
+	CALL delete_user_note_tags_by_note_id(in_user_id, in_user_note_id);
+END;
+$$;
+`
+
+	// CreateDeleteUserNotesByUserIDProc is the query to create the stored procedure to delete user notes by user ID
+	CreateDeleteUserNotesByUserIDProc = `
+CREATE OR REPLACE PROCEDURE delete_user_notes_by_user_id(
+	IN in_user_id BIGINT
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	out_undeleted_user_notes_id BIGINT[];
+	out_undeleted_user_note_id BIGINT;
+BEGIN
+	-- Get undeleted user notes
+	SELECT
+		user_notes.id
+	INTO
+		out_undeleted_user_notes_id
 	FROM
-		user_notes 
+		user_notes
 	WHERE
-		user_note_tags.note_id = user_notes.id
-	AND
-		user_notes.id = in_user_note_id
-	AND
 		user_notes.user_id = in_user_id
 	AND
-		user_note_tags.deleted_at IS NULL;
+		user_notes.deleted_at IS NULL;
+
+	-- Delete the user notes
+	FOREACH out_undeleted_user_note_id IN ARRAY out_undeleted_user_notes_id
+	LOOP
+		CALL delete_user_note(note_id);
+	END LOOP;
 END;
 $$;
 `

@@ -225,7 +225,7 @@ func GetSaltCookie(r *http.Request) (*string, error) {
 	// Get the salt cookie
 	cookie, err := r.Cookie(Salt.Name)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	return &cookie.Value, nil
 }

@@ -201,4 +201,16 @@ var (
 
 	// GetUserIDByResetPasswordTokenProc is the query to call the stored procedure to get user ID by reset password token
 	GetUserIDByResetPasswordTokenProc = "CALL get_user_id_by_reset_password_token($1, $2)"
+
+	// DeleteUserNoteVersionsByNoteIDProc is the query to call the stored procedure to delete user note versions by note ID
+	DeleteUserNoteVersionsByNoteIDProc = "CALL delete_user_note_versions_by_note_id($1, $2)"
+
+	// DeleteUserNoteTagsByNoteIDProc is the query to call the stored procedure to delete user note tags by note ID
+	DeleteUserNoteTagsByNoteIDProc = "CALL delete_user_note_tags_by_note_id($1, $2)"
+
+	// DeleteUserTagsByUserIDProc is the query to call the stored procedure to delete user tags by user ID
+	DeleteUserTagsByUserIDProc = "CALL delete_user_tags_by_user_id($1)"
+
+	// DeleteUserNotesByUserIDProc is the query to call the stored procedure to delete user notes by user ID
+	DeleteUserNotesByUserIDProc = "CALL delete_user_notes_by_user_id($1)"
 )

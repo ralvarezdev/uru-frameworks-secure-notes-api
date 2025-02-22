@@ -66,3 +66,8 @@ DROP PROCEDURE IF EXISTS disable_user_2fa;
 DROP PROCEDURE IF EXISTS send_user_2fa_email_code;
 DROP PROCEDURE IF EXISTS has_user_2fa_totp_enabled;
 DROP PROCEDURE IF EXISTS get_user_2fa_methods;
+DROP PROCEDURE IF EXISTS get_user_id_by_reset_password_token;
+DROP PROCEDURE IF EXISTS delete_user_note_versions_by_note_id;
+DROP PROCEDURE IF EXISTS delete_user_note_tags_by_note_id;
+DROP PROCEDURE IF EXISTS delete_user_tags_by_user_id;
+DROP PROCEDURE IF EXISTS delete_user_notes_by_user_id;
