@@ -62,6 +62,14 @@ var (
 		Path:     "/",
 	}
 
+	// UserPasswordHash is the cookies attributes for the user password hash cookie
+	UserPasswordHash = &gonethttpcookie.Attributes{
+		Name:     "user_password_hash",
+		HTTPOnly: false,
+		Secure:   Secure,
+		Path:     "/",
+	}
+
 	// SyncNotes is the cookies attributes for the sync notes cookie
 	SyncNotes = &gonethttpcookie.Attributes{
 		Name:     "sync_notes",
@@ -212,6 +220,26 @@ func SetSyncTagsCookie(w http.ResponseWriter, lastSyncedAt time.Time) {
 	)
 }
 
+// GetSaltCookie gets the salt cookie
+func GetSaltCookie(r *http.Request) (*string, error) {
+	// Get the salt cookie
+	cookie, err := r.Cookie(Salt.Name)
+	if err != nil {
+		return "", err
+	}
+	return &cookie.Value, nil
+}
+
+// GetEncryptedKeyCookie gets the encrypted key cookie
+func GetEncryptedKeyCookie(r *http.Request) (*string, error) {
+	// Get the encrypted key cookie
+	cookie, err := r.Cookie(EncryptedKey.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &cookie.Value, nil
+}
+
 // GetSyncNotesCookie gets the sync notes cookie
 func GetSyncNotesCookie(r *http.Request) (*time.Time, error) {
 	return gonethttpcookie.GetTimestampCookie(r, SyncNotes)
@@ -232,6 +260,16 @@ func SetUserIDCookie(w http.ResponseWriter, userID int64) {
 	)
 }
 
+// SetUserPasswordHashCookie sets the user password hash cookie
+func SetUserPasswordHashCookie(w http.ResponseWriter, userPasswordHash string) {
+	gonethttpcookie.SetCookie(
+		w,
+		UserPasswordHash,
+		userPasswordHash,
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
 // ClearCookies clears the user cookies
 func ClearCookies(w http.ResponseWriter) {
 	gonethttpcookie.DeleteCookies(
@@ -240,6 +278,7 @@ func ClearCookies(w http.ResponseWriter) {
 		Salt,
 		EncryptedKey,
 		UserID,
+		UserPasswordHash,
 		SyncTags,
 		SyncNotes,
 	)

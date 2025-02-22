@@ -913,13 +913,11 @@ END;
 $$;
 `
 
-	// CreateResetPasswordProc is the query to create the stored procedure to reset password
-	CreateResetPasswordProc = `
-CREATE OR REPLACE PROCEDURE reset_password(
+	// CreateGetUserIDByResetPasswordTokenProc is the query to create the stored procedure to get user ID by reset password token
+	CreateGetUserIDByResetPasswordTokenProc = `
+CREATE OR REPLACE PROCEDURE get_user_id_by_reset_password_token(
 	IN in_user_reset_password_token VARCHAR,
-	IN in_new_user_password_hash VARCHAR,
-	OUT out_user_id BIGINT,
-	OUT out_invalid_token BOOLEAN
+	OUT out_user_id BIGINT
 )
 LANGUAGE plpgsql
 AS $$
@@ -937,6 +935,23 @@ BEGIN
 		user_reset_passwords.expires_at > NOW()
 	AND
 		user_reset_passwords.revoked_at IS NULL;
+END;
+$$;
+`
+
+	// CreateResetPasswordProc is the query to create the stored procedure to reset password
+	CreateResetPasswordProc = `
+CREATE OR REPLACE PROCEDURE reset_password(
+	IN in_user_reset_password_token VARCHAR,
+	IN in_new_user_password_hash VARCHAR,
+	OUT out_user_id BIGINT,
+	OUT out_invalid_token BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	-- Get the user ID by reset password token
+	CALL get_user_id_by_reset_password_token(in_user_reset_password_token, out_user_id);
 
 	-- Check if the user ID exists
 	IF out_user_id IS NULL THEN
@@ -996,7 +1011,7 @@ $$;
 CREATE OR REPLACE PROCEDURE change_password(
 	IN in_user_id BIGINT,
 	IN in_new_user_password_hash VARCHAR,
-	IN in_user_refresh_token_id BIGINT
+	IN in_new_user_encrypted_key TEXT
 )
 LANGUAGE plpgsql
 AS $$
@@ -1013,6 +1028,16 @@ BEGIN
 		in_user_id,
 		in_new_user_password_hash
 	);
+
+	-- Update the users table
+	UPDATE
+		users
+	SET
+		encrypted_key = in_new_user_encrypted_key
+	WHERE
+		users.id = in_user_id
+	AND
+		users.deleted_at IS NULL;
 END;
 $$;
 `

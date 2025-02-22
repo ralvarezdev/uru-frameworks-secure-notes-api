@@ -93,6 +93,7 @@ func (s *Service) Migrate() error {
 		internalpostgresmodel.CreateRevokeUserEmailProc,
 		internalpostgresmodel.CreateChangeEmailProc,
 		internalpostgresmodel.CreateForgotPasswordProc,
+		internalpostgresmodel.CreateGetUserIDByResetPasswordTokenProc,
 		internalpostgresmodel.CreateRevokeUserResetPasswordTokenProc,
 		internalpostgresmodel.CreateResetPasswordProc,
 		internalpostgresmodel.CreateRevokeUserPasswordHashProc,

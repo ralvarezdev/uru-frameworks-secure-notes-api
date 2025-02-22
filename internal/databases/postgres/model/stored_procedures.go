@@ -80,7 +80,7 @@ var (
 	RevokeUserPasswordHashProc = "CALL revoke_user_password_hash($1)"
 
 	// ResetPasswordProc is the query to call the stored procedure to reset password
-	ResetPasswordProc = "CALL reset_password($1, $2, $3, $4)"
+	ResetPasswordProc = "CALL reset_password($1, $2, $3, $4, $5)"
 
 	// ChangePasswordProc is the query to call the stored procedure to change password
 	ChangePasswordProc = "CALL change_password($1, $2, $3)"
@@ -198,4 +198,7 @@ var (
 
 	// GetUser2FAMethodsProc is the query to call the stored procedure to get user 2FA methods
 	GetUser2FAMethodsProc = "CALL get_user_2fa_methods($1, $2, $3)"
+
+	// GetUserIDByResetPasswordTokenProc is the query to call the stored procedure to get user ID by reset password token
+	GetUserIDByResetPasswordTokenProc = "CALL get_user_id_by_reset_password_token($1, $2)"
 )

@@ -54,6 +54,19 @@ func (s *service) RegisterFailedLoginAttempt(
 	}
 }
 
+// DeriveKey derives a key
+func (s *service) DeriveKey(
+	password, salt string,
+) []byte {
+	return gocryptopbdkf2.DeriveKey(
+		password,
+		[]byte(salt),
+		internalpbkdf2.Iterations,
+		internalpbkdf2.KeyLength,
+		sha256.New,
+	)
+}
+
 // ComparePassword compares a password with its hash
 func (s *service) ComparePassword(
 	userID int64,
@@ -264,12 +277,9 @@ func (s *service) SignUp(body *SignUpRequest) int64 {
 	}
 
 	// Derive the password with the salt
-	derivedKey := gocryptopbdkf2.DeriveKey(
+	derivedKey := s.DeriveKey(
 		body.Password,
-		[]byte(salt),
-		internalpbkdf2.Iterations,
-		internalpbkdf2.KeyLength,
-		sha256.New,
+		salt,
 	)
 
 	// Generate a random key for the AES-256 encryption
@@ -544,6 +554,7 @@ func (s *service) LogIn(
 	internalcookie.SetSaltCookie(w, userSalt.String)
 	internalcookie.SetEncryptedKeyCookie(w, userEncryptedKey.String)
 	internalcookie.SetUserIDCookie(w, userID.Int64)
+	internalcookie.SetUserPasswordHashCookie(w, userPasswordHash.String)
 
 	if userRecoveryCodes != nil {
 		return userID.Int64, gonethttpresponse.NewJSendSuccessResponse(
@@ -1135,10 +1146,47 @@ func (s *service) ChangePassword(
 		panic(err)
 	}
 
+	// Get the user encrypted key
+	userEncryptedKey, err := internalcookie.GetEncryptedKeyCookie(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the user salt
+	userSalt, err := internalcookie.GetSaltCookie(r)
+	if err != nil {
+		panic(err)
+	}
+
+	// Derive the key with the old password and salt
+	oldDerivedKey := s.DeriveKey(
+		body.OldPassword,
+		*userSalt,
+	)
+
+	// Decrypt the key with the derived key
+	key, err := gocryptoaes.DecryptCTR(userEncryptedKey, oldDerivedKey)
+	if err != nil {
+		panic(err)
+	}
+
+	// Generate the new derived key
+	newDerivedKey := s.DeriveKey(
+		body.NewPassword,
+		*userSalt,
+	)
+
+	// Encrypt the key with the new derived key
+	newEncryptedKey, err := gocryptoaes.EncryptCTR([]byte(*key), newDerivedKey)
+	if err != nil {
+		panic(err)
+	}
+
 	// Run the SQL stored procedure to change the user password
 	if _, err = internalpostgres.PoolService.Exec(
 		&internalpostgresmodel.ChangePasswordProc,
 		userID,
+		newEncryptedKey,
 		newPasswordHash,
 	); err != nil {
 		panic(err)
