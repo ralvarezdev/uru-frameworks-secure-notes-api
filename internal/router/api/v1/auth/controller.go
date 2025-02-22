@@ -721,9 +721,9 @@ func (c *controller) RegenerateUser2FARecoveryCodes(
 	)
 }
 
-// SendUser2FAEmailCode sends a 2FA email code to the authenticated user
-// @Summary Send 2FA email code to the authenticated user
-// @Description Sends a 2FA email code to the authenticated user
+// SendUser2FAEmailCode sends a 2FA email code
+// @Summary Send 2FA email code
+// @Description Sends a 2FA email code
 // @Tags api v1 auth
 // @Accept json
 // @Produce json

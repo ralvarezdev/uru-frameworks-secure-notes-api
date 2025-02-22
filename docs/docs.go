@@ -83,7 +83,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Sends a 2FA email code to the authenticated user",
+                "description": "Sends a 2FA email code",
                 "consumes": [
                     "application/json"
                 ],
@@ -93,7 +93,7 @@ const docTemplate = `{
                 "tags": [
                     "api v1 auth"
                 ],
-                "summary": "Send 2FA email code to the authenticated user",
+                "summary": "Send 2FA email code",
                 "parameters": [
                     {
                         "description": "Send User 2FA Email Code Request",

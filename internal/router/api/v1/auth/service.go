@@ -543,6 +543,7 @@ func (s *service) LogIn(
 	// Set the user salt, encrypted key and user ID cookies
 	internalcookie.SetSaltCookie(w, userSalt.String)
 	internalcookie.SetEncryptedKeyCookie(w, userEncryptedKey.String)
+	internalcookie.SetUserIDCookie(w, userID.Int64)
 
 	if userRecoveryCodes != nil {
 		return userID.Int64, gonethttpresponse.NewJSendSuccessResponse(

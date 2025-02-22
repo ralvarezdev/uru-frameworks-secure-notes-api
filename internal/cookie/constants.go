@@ -54,6 +54,14 @@ var (
 		Path:     "/",
 	}
 
+	// UserID is the cookies attributes for the user ID cookie
+	UserID = &gonethttpcookie.Attributes{
+		Name:     "user_id",
+		HTTPOnly: false,
+		Secure:   Secure,
+		Path:     "/",
+	}
+
 	// SyncNotes is the cookies attributes for the sync notes cookie
 	SyncNotes = &gonethttpcookie.Attributes{
 		Name:     "sync_notes",
@@ -214,6 +222,16 @@ func GetSyncTagsCookie(r *http.Request) (*time.Time, error) {
 	return gonethttpcookie.GetTimestampCookie(r, SyncTags)
 }
 
+// SetUserIDCookie sets the user ID cookie
+func SetUserIDCookie(w http.ResponseWriter, userID int64) {
+	gonethttpcookie.SetCookie(
+		w,
+		UserID,
+		strconv.FormatInt(userID, 10),
+		time.Now().Add(internaljwt.Durations[gojwttoken.RefreshToken]),
+	)
+}
+
 // ClearCookies clears the user cookies
 func ClearCookies(w http.ResponseWriter) {
 	gonethttpcookie.DeleteCookies(
@@ -221,6 +239,7 @@ func ClearCookies(w http.ResponseWriter) {
 		AccessToken,
 		Salt,
 		EncryptedKey,
+		UserID,
 		SyncTags,
 		SyncNotes,
 	)
