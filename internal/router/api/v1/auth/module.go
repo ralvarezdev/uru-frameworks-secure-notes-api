@@ -36,6 +36,11 @@ var (
 							internal.PasswordOptions,
 							validations,
 						)
+						internalvalidator.Service.Username(
+							"username",
+							body.Username,
+							validations,
+						)
 					},
 				),
 			)

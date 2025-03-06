@@ -73,8 +73,8 @@ github.com/ralvarezdev/go-security-headers v0.1.1 h1:tuZ66YhmOb4JJluhJCwo63i4fvZ
 github.com/ralvarezdev/go-security-headers v0.1.1/go.mod h1:DXhZZGyaIAL2Z3WtRr+wQU7wtp2FR1MukoNpdNwfdU0=
 github.com/ralvarezdev/go-strings v0.1.10 h1:MA08sf5Mpk/Ah6EECP2dmQ1lUlBF/IHYz6dJUzHcq+Y=
 github.com/ralvarezdev/go-strings v0.1.10/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
-github.com/ralvarezdev/go-validator v0.5.30 h1:FwH6magdK3yauYkD0Gkslwh8EM0frAW0npR8xxfLW+A=
-github.com/ralvarezdev/go-validator v0.5.30/go.mod h1:pXRv4WtUXuVmtZvzqGNLBTRYV0x6T8RPsyJ1XeOflto=
+github.com/ralvarezdev/go-validator v0.5.32 h1:7eE4XGS6spHb9HERwgxp2RjgzpwVQQsE8rbd/ubj3os=
+github.com/ralvarezdev/go-validator v0.5.32/go.mod h1:pXRv4WtUXuVmtZvzqGNLBTRYV0x6T8RPsyJ1XeOflto=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
 github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

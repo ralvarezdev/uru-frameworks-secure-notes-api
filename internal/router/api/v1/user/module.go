@@ -48,7 +48,19 @@ var (
 			m.RegisterExactRoute(
 				"PUT /username",
 				Controller.ChangeUsername,
-				internalmiddleware.Validate(&ChangeUsernameRequest{}),
+				internalmiddleware.Validate(
+					&ChangeUsernameRequest{},
+					func(
+						body *ChangeUsernameRequest,
+						validations *govalidatormappervalidation.StructValidations,
+					) {
+						internalvalidator.Service.Username(
+							"username",
+							body.Username,
+							validations,
+						)
+					},
+				),
 			)
 			m.RegisterExactRoute(
 				"DELETE /",
